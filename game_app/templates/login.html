@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1 style="width: 100%">{% block title %} Login {% endblock %}</h1>
+<form method="post">
+    <p>
+        <label for="form.email">Email</label>
+        <input type="email" name="form.email" placeholder="Email">
+        </input>
+    </p>
+
+    <p>
+        <label for="form.password">Password</label>
+        <input type="text" name="form.password" placeholder="Password">
+        </input>
+    </p>
+
+    <p>
+        <button type="login">Login</button>
+    </p>
+</form>
+
+{% for message in get_flashed_messages() %}
+<p style="color: red;">Error : {{ message }}</p>
+{% endfor %}
+
+{% endblock %}
