@@ -1,4 +1,5 @@
 import os
+import uuid
 from flask import Flask, render_template, url_for, redirect, request, flash
 
 from flask_settings import Config
@@ -8,6 +9,7 @@ from flask_login import LoginManager, login_user, current_user, logout_user
 from database import db_session, init_db
 from models import User, Role
 from forms import RegistrationForm, LoginForm
+
 
 app = Flask(__name__, instance_relative_config=False)
 app.config.from_object('flask_settings.Config')
@@ -38,24 +40,32 @@ def user(user_id):
 def register():
     form = RegistrationForm()
     if form.validate_on_submit():
-        user = User(firstname=form.firstname.data,
-                    lastname=form.lastname.data,
-                    email=form.email.data,
-                    nick=form.nick.data,
-                    )
-        user.set_password(form.password1.data)
-        db_session.add(user)
-        db_session.commit()
-        return redirect(url_for('login'))
-    return render_template('register.html', register_form=form)
+        existing_user = User.query.filter_by(email=form.email.data).first()
+        if existing_user is None:
+            user = User(firstname=form.firstname.data,
+                        lastname=form.lastname.data,
+                        email=form.email.data,
+                        nick=form.nick.data,
+                        )
+            user.set_password(form.password1.data)
+            if user.fs_uniquifier is None:
+                user.fs_uniquifier = uuid.uuid4().hex
+            db_session.add(user)
+            db_session.commit()
+            return redirect(url_for('login'))
+        flash('A user already exist with thatt email address.')
+    return render_template('register.html', form=form)
 
 
 @app.route('/login/', methods=['POST', 'GET'])
 def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
-        if user is not None and user.check_password(form.password1.data):
+        if user and user.check_password(password=form.password1.data):
             login_user(user)
 
             flash('Loged in successfully.')
@@ -63,7 +73,7 @@ def login():
             next = request.args.get('next')
             return redirect(next or url_for('index'))
         flash('Invalid login or password!')
-    return render_template('login.html', login_form=form)
+    return render_template('login.html', form=form)
 
 
 @app.route('/logout/')
@@ -123,6 +133,11 @@ def delete(user_id):
     db_session.commit()
 
     return redirect(url_for('index'))
+
+
+@app.errorhandler(404)
+def page_not_found(error_description):
+    return render_template('404.html', error_description=error_description)
 
 
 if __name__ == '__main__':

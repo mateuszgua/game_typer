@@ -1,18 +1,49 @@
 {% extends 'base.html' %}
 
 {% block content %}
+{% for message in get_flashed_messages() %}
+<div class="alert alert-warning">
+    <button type="button" class="close" data-dismiss="alert">
+        x
+    </button>
+    {{ message }}
+</div>
+{% endfor %}
 <h1 style="width: 100%">{% block title %} Login {% endblock %}</h1>
-<form method="POST" action="">
-    <div class="login_form">
-        {{ login_form.hidden_tag() }}
-        {{ login_form.email(placeholder = "Email") }}
-        {{ login_form.password1(placeholder = "Password") }}
-        {{ login_form.submit() }}
+<form method="POST" action="/login/">
+    {{ form.csrf_token }}
+
+    <fieldset class="email">
+        {{ form.email.label }}
+        {{ form.email(placeholder='youremail@example.com') }}
+        {% if form.email.errors %}
+        <ul class="errors">
+            {% for error in form.email.errors %}
+            <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    </fieldset>
+
+    <fieldset class="password1">
+        {{ form.password1.label }}
+        {{ form.password1 }}
+        {% if form.email.errors %}
+        <ul class="errors">
+            {% for error in form.password1.errors %}
+            <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    </fieldset>
+
+    <div class="submit-button">
+        {{ form.submit }}
+    </div>
+
+    <div class="login-signup">
+        <span>Don't have an account?</span>
+        <a href="{{ url_for('register') }}">Sign up.</a>
     </div>
 </form>
-
-{% for message in get_flashed_messages() %}
-<p style="color: red;">Error : {{ message }}</p>
-{% endfor %}
-
 {% endblock %}

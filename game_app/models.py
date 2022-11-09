@@ -27,7 +27,7 @@ class User(Base, UserMixin):
     id = Column(Integer, primary_key=True)
     firstname = Column(String(100), nullable=False)
     lastname = Column(String(100), nullable=False)
-    password_hash = Column(String(100), nullable=False)
+    password_hash = Column(String(200), nullable=False)
     nick = Column(String(100), unique=True)
     email = Column(String(100), nullable=False, unique=True)
     active = Column(Boolean())
@@ -38,7 +38,7 @@ class User(Base, UserMixin):
                          backref=backref('users', lazy='dynamic'))
 
     def set_password(self, password):
-        self.password_hash = generate_password_hash(password)
+        self.password_hash = generate_password_hash(password, method='sha256')
 
     def check_password(self, password):
-        return check_password_hash(self.password, password)
+        return check_password_hash(self.password_hash, password)
