@@ -2,22 +2,13 @@
 
 {% block content %}
 <h1 style="width: 100%">{% block title %} Login {% endblock %}</h1>
-<form method="post">
-    <p>
-        <label for="form.email">Email</label>
-        <input type="email" name="form.email" placeholder="Email">
-        </input>
-    </p>
-
-    <p>
-        <label for="form.password">Password</label>
-        <input type="text" name="form.password" placeholder="Password">
-        </input>
-    </p>
-
-    <p>
-        <button type="login">Login</button>
-    </p>
+<form method="POST" action="">
+    <div class="login_form">
+        {{ login_form.hidden_tag() }}
+        {{ login_form.email(placeholder = "Email") }}
+        {{ login_form.password1(placeholder = "Password") }}
+        {{ login_form.submit() }}
+    </div>
 </form>
 
 {% for message in get_flashed_messages() %}

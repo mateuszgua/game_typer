@@ -3,44 +3,46 @@
 {% block content %}
 <h1 style="width: 100%">{% block title %} Create account {% endblock %}</h1>
 <form method="post">
-    <p>
-        <label for="form.firstname">First Name</label>
-        <input type="text" name="form.firstname" placeholder="First name">
-        </input>
-    </p>
+    <div class="form">
+        <p>
+            <label for="form.firstname">First Name</label>
+            <input type="text" name="form.firstname" placeholder="First name">
+            </input>
+        </p>
 
-    <p>
-        <label for="form.lastname">Last Name</label>
-        <input type="text" name="form.lastname" placeholder="Last name">
-        </input>
-    </p>
+        <p>
+            <label for="form.lastname">Last Name</label>
+            <input type="text" name="form.lastname" placeholder="Last name">
+            </input>
+        </p>
 
-    <p>
-        <label for="form.password1">Password</label>
-        <input type="text" name="form.password1" placeholder="Password">
-        </input>
-    </p>
+        <p>
+            <label for="form.password1">Password</label>
+            <input type="text" name="form.password1" placeholder="Password">
+            </input>
+        </p>
 
-    <p>
-        <label for="form.password2">Confirm Password</label>
-        <input type="text" name="form.password2" placeholder="Confirm Password">
-        </input>
-    </p>
+        <p>
+            <label for="form.password2">Confirm Password</label>
+            <input type="text" name="form.password2" placeholder="Confirm Password">
+            </input>
+        </p>
 
-    <p>
-        <label for="form.email">Email</label>
-        <input type="email" name="form.email" placeholder="Email">
-        </input>
-    </p>
+        <p>
+            <label for="form.email">Email</label>
+            <input type="email" name="form.email" placeholder="Email">
+            </input>
+        </p>
 
-    <p>
-        <label for="form.nick">Nick</label>
-        <input type="text" name="form.nick" placeholder="Nick">
-        </input>
-    </p>
+        <p>
+            <label for="form.nick">Nick</label>
+            <input type="text" name="form.nick" placeholder="Nick">
+            </input>
+        </p>
 
-    <p>
-        <button type="register">Reister</button>
-    </p>
+        <p>
+            <button type="register">Reister</button>
+        </p>
+    </div>
 </form>
 {% endblock %}

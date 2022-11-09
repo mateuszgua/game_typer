@@ -47,7 +47,7 @@ def register():
         db_session.add(user)
         db_session.commit()
         return redirect(url_for('login'))
-    return render_template('register.html', form=form)
+    return render_template('register.html', register_form=form)
 
 
 @app.route('/login/', methods=['POST', 'GET'])
@@ -63,7 +63,7 @@ def login():
             next = request.args.get('next')
             return redirect(next or url_for('index'))
         flash('Invalid login or password!')
-    return render_template('login.html', form=form)
+    return render_template('login.html', login_form=form)
 
 
 @app.route('/logout/')
