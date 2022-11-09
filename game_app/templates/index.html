@@ -1,13 +1,27 @@
-<html lang="en">
+{% extends 'base.html' %}
 
-<head>
-    <meta charset="UTF-8">
-    <title>Main Page</title>
-</head>
-
-<body>
-    <h1>Welcome!</h1>
-    <p>Flask Page</p>
-</body>
-
-</html>
+{% block content %}
+<h1 class="title">{% block title %} Users {% endblock %}</h1>
+<div class="content">
+    {% for user in users %}
+    <div class="user">
+        <p><b>#{{ user.id }}</b></p>
+        <b>
+            <p class="name">
+                <a href="{{ url_for('user', user_id=user.id)}}">
+                    {{ user.firstname }} {{ user.lastname }}
+                </a>
+            </p>
+        </b>
+        <p>{{ user.email }}</p>
+        <p>{{ user.nick }}</p>
+        <p>Joined: {{ user.created_at }}</p>
+        <a href="{{ url_for('edit', user_id=user.id) }}">Edit</a>
+        <hr>
+        <form method="POST" action="{{ url_for('delete', user_id=user.id) }}">
+            <input type="submit" value="Delete User" onclick="return confirm('Are you want to delte this entry?')">
+        </form>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
