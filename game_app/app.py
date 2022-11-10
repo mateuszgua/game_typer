@@ -8,6 +8,7 @@ from flask_login import LoginManager, login_user, current_user, logout_user
 
 from flask_bootstrap import Bootstrap5
 
+from . import login_manager
 
 from database import db_session, init_db
 from models import User, Role
@@ -21,6 +22,7 @@ user_datastore = SQLAlchemySessionUserDatastore(db_session, User, Role)
 app.security = Security(app, user_datastore)
 
 bootstrap = Bootstrap5(app)
+login_manager = LoginManager()
 
 
 @app.route('/home')
@@ -80,6 +82,19 @@ def login():
             return redirect(next or url_for('index'))
         flash('Invalid login or password!')
     return render_template('login.html', form=form)
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    if user_id is not None:
+        return User.query.get(user_id)
+    return None
+
+
+@login_manager.unauthorized_handler
+def unauthorized():
+    flash('You must be logged in to view that page.')
+    return redirect(url_for('login'))
 
 
 @app.route('/logout')
