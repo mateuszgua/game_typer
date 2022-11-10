@@ -10,20 +10,19 @@ from database import db_session, init_db
 from models import User, Role
 from forms import RegistrationForm, LoginForm
 
+from flask_bootstrap import Bootstrap5
+
 
 app = Flask(__name__, instance_relative_config=False)
 app.config.from_object('flask_settings.Config')
-#app.config['SQLALCHEMY_DATABASE_URI'] = url
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SECURITY_PASSWORD_SALT'] = os.environ.get(
-    "SECURITY_PASSWORD_SALT", '146585145368132386173505678016728509634')
-#db = SQLAlchemy(app)
 
 user_datastore = SQLAlchemySessionUserDatastore(db_session, User, Role)
 app.security = Security(app, user_datastore)
 
+bootstrap = Bootstrap5(app)
 
-@app.route('/home/')
+
+@app.route('/home')
 # @auth_required()
 def index():
     users = User.query.all()
@@ -36,7 +35,7 @@ def user(user_id):
     return render_template('user.html', user=user)
 
 
-@app.route('/register/', methods=('GET', 'POST'))
+@app.route('/register', methods=('GET', 'POST'))
 def register():
     form = RegistrationForm()
     if form.validate_on_submit():
@@ -57,32 +56,28 @@ def register():
     return render_template('register.html', form=form)
 
 
-@app.route('/login/', methods=['POST', 'GET'])
+@app.route('/login/', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
-
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
         if user and user.check_password(password=form.password1.data):
             login_user(user)
-
-            flash('Loged in successfully.')
-
             next = request.args.get('next')
             return redirect(next or url_for('index'))
         flash('Invalid login or password!')
     return render_template('login.html', form=form)
 
 
-@app.route('/logout/')
+@app.route('/logout')
 def logout():
     logout_user()
     return redirect(url_for('index'))
 
 
-@app.route('/create/', methods=('GET', 'POST'))
+@app.route('/create', methods=('GET', 'POST'))
 def create():
     if request.method == 'POST':
         firstname = request.form['firstname']
@@ -101,7 +96,7 @@ def create():
     return render_template('create.html')
 
 
-@app.route('/<int:user_id>/edit/', methods=('GET', 'POST'))
+@app.route('/<int:user_id>/edit', methods=('GET', 'POST'))
 def edit(user_id):
     user = User.query.get_or_404(user_id)
 
@@ -126,7 +121,7 @@ def edit(user_id):
     return render_template('edit.html', user=user)
 
 
-@app.post('/<int:user_id>/delete/')
+@app.post('/<int:user_id>/delete')
 def delete(user_id):
     user = User.query.get_or_404(user_id)
     db_session.delete(user)
