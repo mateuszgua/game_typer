@@ -7,15 +7,22 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                {% if current_user.is_anonymous %}
+                {% if current_user.is_authenticated %}
                 <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="{{ url_for('login') }}">Login</a>
+                    <a class="nav-link active" aria-current="page" href="{{ url_for('admin') }}">Admin</a>
                 </li>
-                {% else %}
+                {% if current_user.id == 1 %}
                 <li class="nav-item">
                     <a class="nav-link active" aria-current="page" href="{{ url_for('logout') }}">Logout</a>
                 </li>
                 {% endif %}
+
+                {% else %}
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="{{ url_for('login') }}">Login</a>
+                </li>
+                {% endif %}
+
                 <li class="nav-item">
                     <a class="nav-link active" aria-current="page" href="{{ url_for('register') }}">Register</a>
                 </li>

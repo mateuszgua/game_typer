@@ -6,11 +6,12 @@ from flask_settings import Config
 from flask_security import Security, hash_password, SQLAlchemySessionUserDatastore
 from flask_login import LoginManager, login_user, current_user, logout_user
 
+from flask_bootstrap import Bootstrap5
+
+
 from database import db_session, init_db
 from models import User, Role
 from forms import RegistrationForm, LoginForm
-
-from flask_bootstrap import Bootstrap5
 
 
 app = Flask(__name__, instance_relative_config=False)
@@ -23,10 +24,20 @@ bootstrap = Bootstrap5(app)
 
 
 @app.route('/home')
-# @auth_required()
 def index():
     users = User.query.all()
     return render_template('index.html', users=users)
+
+
+@app.route('/admin')
+# @login_required
+def admin():
+    id = current_user.id
+    if id == 2:
+        return render_template('admin.html')
+    else:
+        flash("Sorry you must be the Admin access the Admin Page.")
+        return redirect(url_for('index'))
 
 
 @app.route('/<int:user_id>/')
