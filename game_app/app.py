@@ -43,7 +43,6 @@ def admin():
 
 
 @app.route('/user/<int:user_id>')
-@auth_required
 def user(user_id):
     user = User.query.filter_by(id=user_id).first()
     return render_template('user.html', user=user)
@@ -73,7 +72,7 @@ def register():
 @app.route('/login/', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for('user', user_id=2))
+        return redirect(url_for('user', user_id=user.id))
 
     form = LoginForm()
     if form.validate_on_submit():
@@ -81,11 +80,8 @@ def login():
         if user:
             if user.check_password(password=form.password1.data):
                 login_user(user, remember=form.remember.data)
-
-                flash("Login Succesfull!!")
-
                 next = request.args.get('next')
-                return redirect(next or (url_for('user', user_id=2)))
+                return redirect(next or (url_for('user', user_id=user.id)))
             flash("Wrong Password - Try Again!")
         else:
             flash("That User Doesn't Exist! Try Again...")
@@ -100,7 +96,7 @@ def load_user(user_id):
 @login_manager.unauthorized_handler
 def unauthorized():
     flash('You must be logged in to view that page.')
-    return render_template(url_for('login'))
+    return redirect(url_for('login'))
 
 
 @app.route('/logout')
@@ -131,7 +127,7 @@ def create():
 
 @app.route('/<int:user_id>/edit', methods=('GET', 'POST'))
 def edit(user_id):
-    user = User.query.get_or_404(user_id)
+    user = User.query.filter_by(id=user_id).first()
 
     if request.method == 'POST':
         firstname = request.form['firstname']
@@ -156,7 +152,7 @@ def edit(user_id):
 
 @app.post('/<int:user_id>/delete')
 def delete(user_id):
-    user = User.query.get_or_404(user_id)
+    user = User.query.filter_by(id=user_id).first()
     db_session.delete(user)
     db_session.commit()
 
