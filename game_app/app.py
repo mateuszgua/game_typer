@@ -3,7 +3,7 @@ from models import User, Role
 from database import db_session, init_db
 import os
 import uuid
-from flask import Flask, render_template, url_for, redirect, request, flash
+from flask import Flask, render_template, url_for, redirect, request, flash, session
 
 from flask_settings import Config
 from flask_security import Security, hash_password, SQLAlchemySessionUserDatastore, auth_required
@@ -23,6 +23,12 @@ bootstrap = Bootstrap5(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+    # return User.query.get(user_id)
 
 
 @app.route('/home')
@@ -45,6 +51,9 @@ def admin():
 @app.route('/user/<int:user_id>')
 def user(user_id):
     user = User.query.filter_by(id=user_id).first()
+    # To delete
+    print(f"To jest user: %s", current_user.is_authenticated)
+
     return render_template('user.html', user=user)
 
 
@@ -74,23 +83,20 @@ def login():
     if current_user.is_authenticated:
         return redirect(url_for('user', user_id=user.id))
 
+    session.pop('id', None)
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
         if user:
             if user.check_password(password=form.password1.data):
                 login_user(user, remember=form.remember.data)
+                session['id'] = user.id
                 next = request.args.get('next')
                 return redirect(next or (url_for('user', user_id=user.id)))
             flash("Wrong Password - Try Again!")
         else:
             flash("That User Doesn't Exist! Try Again...")
     return render_template('login.html', form=form)
-
-
-@login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))
 
 
 @login_manager.unauthorized_handler
@@ -102,6 +108,7 @@ def unauthorized():
 @app.route('/logout')
 @login_required
 def logout():
+    session.pop('id', None)
     logout_user()
     return redirect(url_for('index'))
 
@@ -110,6 +117,10 @@ def logout():
 def edit(user_id):
     form = RegistrationForm()
     user = User.query.filter_by(id=user_id).first()
+
+    # To delete
+    print(f"To jest user: %s", current_user.is_authenticated)
+    print(f"To jest user: %s", session.get('id'))
 
     if request.method == 'POST':
         firstname = request.form['firstname']
