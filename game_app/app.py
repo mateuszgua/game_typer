@@ -106,27 +106,9 @@ def logout():
     return redirect(url_for('index'))
 
 
-@app.route('/create', methods=('GET', 'POST'))
-def create():
-    if request.method == 'POST':
-        firstname = request.form['firstname']
-        lastname = request.form['lastname']
-        password = request.form['password']
-        email = request.form['email']
-        nick = request.form['nick']
-        user = User(firstname=firstname,
-                    lastname=lastname,
-                    password=password,
-                    email=email,
-                    nick=nick)
-        db_session.add(user)
-        db_session.commit()
-
-    return render_template('create.html')
-
-
-@app.route('/<int:user_id>/edit', methods=('GET', 'POST'))
+@app.route('/edit/<int:user_id>', methods=('GET', 'POST'))
 def edit(user_id):
+    form = RegistrationForm()
     user = User.query.filter_by(id=user_id).first()
 
     if request.method == 'POST':
@@ -136,27 +118,41 @@ def edit(user_id):
         email = request.form['email']
         nick = request.form['nick']
 
-        user.firstname = firstname
-        user.lastname = lastname
-        user.password = password
-        user.email = email
-        user.nick = nick
+        try:
+            user.firstname = firstname
+            user.lastname = lastname
+            user.password = password
+            user.email = email
+            user.nick = nick
 
-        db_session.add(user)
-        db_session.commit()
+            db_session.commit()
+            flash("User updated successfully!")
+            return render_template('edit.html', form=form, user=user, id=user_id)
+        except:
+            flash("Error! There was a problem edit user... try again.")
+            return render_template('edit.html', form=form, user=user, id=user_id)
+    else:
+        return render_template('edit.html', form=form, user=user, id=user_id)
 
-        return redirect(url_for('index'))
 
-    return render_template('edit.html', user=user)
-
-
-@app.post('/<int:user_id>/delete')
+@app.post('/delete/<int:user_id>')
 def delete(user_id):
-    user = User.query.filter_by(id=user_id).first()
-    db_session.delete(user)
-    db_session.commit()
+    if user_id == current_user.id:
+        user = User.query.filter_by(id=user_id).first()
+        form = RegistrationForm()
 
-    return redirect(url_for('index'))
+        try:
+            db_session.delete(user)
+            db_session.commit()
+            flash("User deleted successfully!")
+            return render_template('register.html', form=form)
+
+        except:
+            flash("Whoops! There was a problem deleting user, try again...")
+
+    else:
+        flash("Sorry, you can't delete that user!")
+        return redirect(url_for('index'))
 
 
 @app.errorhandler(404)
