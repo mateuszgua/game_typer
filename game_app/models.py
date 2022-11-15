@@ -9,6 +9,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import current_user
 
 from flask_admin.contrib.sqla import ModelView
+from flask_admin import AdminIndexView
 
 
 class RolesUsers(Base):
@@ -48,10 +49,34 @@ class User(Base, UserMixin):
         return check_password_hash(self.password_hash, password)
 
 
-class AdminView(ModelView):
+class AdminMixin:
     def is_accessible(self):
+        # return current_user.has_role('admin')
         return current_user.is_authenticated
 
     def _handle_view(self, name, **kwargs):
         if not self.is_accessible():
             return redirect(url_for('login', next=request.url))
+
+
+class AdminView(AdminMixin, ModelView):
+    pass
+
+
+class HomeAdminView(AdminMixin, AdminIndexView):
+    pass
+
+
+class BaseModelView(ModelView):
+    def on_model_change(self, form, model, is_created):
+        if is_created:
+            model.generate_slug()
+        return super().on_model_change(form, model, is_created)
+
+
+class RoleAdminView(AdminMixin, BaseModelView):
+    pass
+
+
+class UserAdminView(AdminMixin, BaseModelView):
+    pass

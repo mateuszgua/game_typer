@@ -1,5 +1,5 @@
 from forms import RegistrationForm, LoginForm
-from models import User, Role, AdminView, RoleMixin
+from models import User, Role, AdminView, RoleMixin, UserAdminView, RoleAdminView
 from database import db_session, init_db
 
 import os
@@ -23,8 +23,20 @@ app.config.from_object('flask_settings.Config')
 #admin = Admin(app)
 admin = Admin(app, name='Admin', template_mode='bootstrap3')
 
-admin.add_view(AdminView(User, db_session))
-admin.add_view(AdminView(Role, db_session))
+
+class CustomView(ModelView):
+    list_template = 'list.html'
+    create_template = 'create.html'
+    edit_template = 'edit.html'
+
+
+class UserAdmin(CustomView):
+    column_searchable_list = ('name',)
+    column_filters = ('name', 'email')
+
+
+admin.add_view(UserAdminView(User, db_session))
+admin.add_view(RoleAdminView(Role, db_session))
 #admin.add_view(SecureModelView(RoleMixin, db_session))
 
 user_datastore = SQLAlchemySessionUserDatastore(db_session, User, Role)
