@@ -1,6 +1,7 @@
 from forms import RegistrationForm, LoginForm
-from models import User, Role
+from models import User, Role, AdminView, RoleMixin
 from database import db_session, init_db
+
 import os
 import uuid
 from flask import Flask, render_template, url_for, redirect, request, flash, session
@@ -8,6 +9,9 @@ from flask import Flask, render_template, url_for, redirect, request, flash, ses
 from flask_settings import Config
 from flask_security import Security, hash_password, SQLAlchemySessionUserDatastore, auth_required
 from flask_login import LoginManager, login_user, current_user, logout_user, login_required
+from flask_admin import Admin
+from flask_admin.contrib.sqla import ModelView
+from flask_admin import helpers as admin_helpers
 
 from flask_bootstrap import Bootstrap5
 
@@ -15,8 +19,27 @@ from flask_bootstrap import Bootstrap5
 app = Flask(__name__, instance_relative_config=False)
 app.config.from_object('flask_settings.Config')
 
+#app.config['FLASK_ADMIN_SWATCH'] = 'cerulean'
+#admin = Admin(app)
+admin = Admin(app, name='Admin', template_mode='bootstrap3')
+
+admin.add_view(AdminView(User, db_session))
+admin.add_view(AdminView(Role, db_session))
+#admin.add_view(SecureModelView(RoleMixin, db_session))
+
 user_datastore = SQLAlchemySessionUserDatastore(db_session, User, Role)
 app.security = Security(app, user_datastore)
+
+#
+# @app.security.context_processor
+# def security_context_processor():
+# return dict(
+# admin_base_template=admin.base_template,
+# admin_view=admin.index_view,
+# get_url=url_for,
+# h=admin_helpers
+# )
+#
 
 bootstrap = Bootstrap5(app)
 
@@ -28,24 +51,12 @@ login_manager.login_view = 'login'
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
-    # return User.query.get(user_id)
 
 
 @app.route('/home')
 def index():
     users = User.query.all()
     return render_template('index.html', users=users, current_user=current_user)
-
-
-@app.route('/admin')
-@login_required
-def admin():
-    id = current_user.id
-    if id == 2:
-        return render_template('admin.html')
-    else:
-        flash("Sorry you must be the Admin access the Admin Page.")
-        return redirect(url_for('index'))
 
 
 @app.route('/user/<int:user_id>')
@@ -109,6 +120,7 @@ def unauthorized():
 @login_required
 def logout():
     session.pop('id', None)
+    session.clear()
     logout_user()
     return redirect(url_for('index'))
 

@@ -3,8 +3,12 @@ from database import Base
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy import Boolean, DateTime, Column, Integer, String, ForeignKey, UnicodeText
+from flask import redirect, url_for, request
 from flask_security import UserMixin, RoleMixin
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import current_user
+
+from flask_admin.contrib.sqla import ModelView
 
 
 class RolesUsers(Base):
@@ -42,3 +46,12 @@ class User(Base, UserMixin):
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+
+
+class AdminView(ModelView):
+    def is_accessible(self):
+        return current_user.is_authenticated
+
+    def _handle_view(self, name, **kwargs):
+        if not self.is_accessible():
+            return redirect(url_for('login', next=request.url))
