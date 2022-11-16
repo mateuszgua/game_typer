@@ -1,5 +1,5 @@
 from forms import RegistrationForm, LoginForm
-from models import User, Role, AdminView, RoleMixin, UserAdminView, RoleAdminView
+from models import User, Role, AdminView, RoleMixin, UserAdminView, RoleAdminView, HomeAdminView
 from database import db_session, init_db
 
 import os
@@ -21,7 +21,9 @@ app.config.from_object('flask_settings.Config')
 
 #app.config['FLASK_ADMIN_SWATCH'] = 'cerulean'
 #admin = Admin(app)
-admin = Admin(app, name='Admin', template_mode='bootstrap3')
+# admin = Admin(app, name='Admin', template_mode='bootstrap3')
+admin = Admin(app, 'FlaskApp', url='/home',
+              index_view=HomeAdminView(name='Home'))
 
 
 class CustomView(ModelView):
