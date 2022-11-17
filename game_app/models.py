@@ -2,7 +2,7 @@ from database import Base
 
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship, backref
-from sqlalchemy import Boolean, DateTime, Column, Integer, String, ForeignKey, UnicodeText
+from sqlalchemy import Boolean, DateTime, Column, Integer, String, ForeignKey, UnicodeText, LargeBinary
 from flask import redirect, url_for, request
 from flask_security import UserMixin, RoleMixin
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -97,7 +97,15 @@ class Team(Base):
     goal_lost = Column(Integer, nullable=False)
     goal_balance = Column(Integer, nullable=False)
     points = Column(Integer, nullable=False)
+    group = Column(String(100), nullable=False)
     play_off = Column(Integer, nullable=False)
 
     def __repr__(self) -> str:
         return self.name
+
+
+class UploadFile(Base):
+    __tablename__ = 'file'
+    id = Column(Integer, primary_key=True)
+    filename = Column(String(100))
+    data = Column(LargeBinary)

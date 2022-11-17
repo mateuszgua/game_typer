@@ -2,104 +2,40 @@
 
 {% block content %}
 
-<table class="table">
+<h1 class="title">{% block title %} World Cup 2022 {% endblock %}</h1>
+<table id="data" class="table table-striped">
     <thead class="table-dark">
         <tr>
-            <th scope="col">Lp.</th>
-            <th scope="col">Flag</th>
+            <th scope="col">No.</th>
+            <th scope="col">Img</th>
             <th scope="col">Team</th>
-            <th scope="col">RM</th>
+            <th scope="col">MP</th>
             <th scope="col">W</th>
-            <th scope="col">R</th>
-            <th scope="col">P</th>
-            <th scope="col">BZ</th>
-            <th scope="col">BS</th>
-            <th scope="col">RB</th>
-            <th scope="col">Pkt</th>
+            <th scope="col">D</th>
+            <th scope="col">L</th>
+            <th scope="col">GF</th>
+            <th scope="col">GA</th>
+            <th scope="col">GD</th>
+            <th scope="col">Pts</th>
         </tr>
     </thead>
     <tbody>
+        {% for team in teams %}
         <tr>
-            <th scope="row">1</th>
-            <td>Flag</td>
-            <td>Katar</td>
-            <td>0</td>
-            <td>0</td>
-            <td>0</td>
-            <td>0</td>
-            <td>0</td>
-            <td>0</td>
-            <td>0</td>
-            <td>0</td>
+            <th scope="row">{{ team.id }}</th>
+            <td>FlagPhoto</td>
+            <td>{{ team.name }}</td>
+            <td>{{ team.games_played }}</td>
+            <td>{{ team.wins }}</td>
+            <td>{{ team.draws }}</td>
+            <td>{{ team.lost }}</td>
+            <td>{{ team.goal_scored }}</td>
+            <td>{{ team.goal_lost }}</td>
+            <td>{{ team.goal_balance }}</td>
+            <td>{{ team.points }}</td>
         </tr>
-
-        <tr>
-            <th scope="row">2</th>
-            <td>Flag</td>
-            <td>Ekwador</td>
-            <td>0</td>
-            <td>0</td>
-            <td>0</td>
-            <td>0</td>
-            <td>0</td>
-            <td>0</td>
-            <td>0</td>
-            <td>0</td>
-        </tr>
-
-        <tr>
-            <th scope="row">3</th>
-            <td>Flag</td>
-            <td>Senegal</td>
-            <td>0</td>
-            <td>0</td>
-            <td>0</td>
-            <td>0</td>
-            <td>0</td>
-            <td>0</td>
-            <td>0</td>
-            <td>0</td>
-        </tr>
-
-        <tr>
-            <th scope="row">4</th>
-            <td>Flag</td>
-            <td>Holandia</td>
-            <td>0</td>
-            <td>0</td>
-            <td>0</td>
-            <td>0</td>
-            <td>0</td>
-            <td>0</td>
-            <td>0</td>
-            <td>0</td>
-        </tr>
+        {% endfor %}
     </tbody>
 </table>
 
-
-<h1 class="title">{% block title %} Users {% endblock %}</h1>
-<div class="content">
-    {% for user in users %}
-    <div class="user">
-        <p><b>#{{ user.id }}</b></p>
-        <b>
-            <p class="name">
-                <a href="{{ url_for('user', user_id=user.id)}}">
-                    {{ user.firstname }} {{ user.lastname }}
-                </a>
-            </p>
-        </b>
-        <p>{{ user.email }}</p>
-        <p>{{ user.nick }}</p>
-        <p>{{ user.password1 }}</p>
-        <p>Joined: {{ user.created_at }}</p>
-        <a href="{{ url_for('edit', user_id=user.id) }}">Edit</a>
-        <hr>
-        <form method="POST" action="{{ url_for('delete', user_id=user.id) }}">
-            <input type="submit" value="Delete User" onclick="return confirm('Are you want to delte this entry?')">
-        </form>
-    </div>
-    {% endfor %}
-</div>
 {% endblock %}

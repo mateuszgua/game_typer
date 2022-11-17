@@ -1,5 +1,5 @@
 from forms import RegistrationForm, LoginForm, EditUserForm
-from models import User, Role, UserAdminView, RoleAdminView, HomeAdminView
+from models import User, Role, Team, UserAdminView, RoleAdminView, HomeAdminView, UploadFile
 from database import db_session, init_db
 
 import uuid
@@ -40,8 +40,8 @@ def load_user(user_id):
 
 @app.route('/home')
 def home():
-    users = User.query.all()
-    return render_template('home.html', users=users, current_user=current_user)
+    teams = Team.query.all()
+    return render_template('home.html', teams=teams, current_user=current_user)
 
 
 @app.route('/user/<int:user_id>')
@@ -170,6 +170,44 @@ def delete(user_id):
     else:
         flash("Sorry, you can't delete that user!")
         return redirect(url_for('home'))
+
+
+@app.route('/admin/loadfile', methods=['GET', 'POST'])
+def loadfile():
+    if request.method == 'POST':
+        file = request.files['file']
+
+        upload = UploadFile(filename=file.filename, data=file.read())
+        db_session.add(upload)
+        db_session.commit()
+
+        return f"Uploaded: {file.filename}"
+    return render_template('loadfile.html')
+
+
+@app.route('/admin/processjson', methods=['POST'])
+def processjson():
+
+    if request.is_json:
+        data = request.get_json()
+
+        team = Team(name=data.get("name"),
+                    games_played=0,
+                    wins=0,
+                    draws=0,
+                    lost=0,
+                    goal_scored=0,
+                    goal_lost=0,
+                    goal_balance=0,
+                    points=0,
+                    group=data.get("group"),
+                    play_off=0,
+                    )
+        db_session.add(team)
+        db_session.commit()
+        flash('Data added successfully!')
+        return redirect(url_for('home'))
+    return render_template('jsonadd.html')
 
 
 @app.errorhandler(404)
