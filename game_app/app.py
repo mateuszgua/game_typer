@@ -39,7 +39,7 @@ def load_user(user_id):
 
 
 @app.route('/home')
-def index():
+def home():
     users = User.query.all()
     return render_template('home.html', users=users, current_user=current_user)
 
@@ -169,7 +169,7 @@ def delete(user_id):
 
     else:
         flash("Sorry, you can't delete that user!")
-        return redirect(url_for('index'))
+        return redirect(url_for('home'))
 
 
 @app.errorhandler(404)
