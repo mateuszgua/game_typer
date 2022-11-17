@@ -83,3 +83,21 @@ class RoleAdminView(AdminMixin, BaseModelView):
 
 class UserAdminView(AdminMixin, BaseModelView):
     pass
+
+
+class Team(Base):
+    __tablename__ = 'team'
+    id = Column(Integer, primary_key=True)
+    name = Column(String(100), nullable=False, unique=True)
+    games_played = Column(Integer, nullable=False)
+    wins = Column(Integer, unique=True)
+    draws = Column(Integer, nullable=False)
+    lost = Column(Integer, nullable=False)
+    goal_scored = Column(Integer, nullable=False)
+    goal_lost = Column(Integer, nullable=False)
+    goal_balance = Column(Integer, nullable=False)
+    points = Column(Integer, nullable=False)
+    play_off = Column(Integer, nullable=False)
+
+    def __repr__(self) -> str:
+        return self.name

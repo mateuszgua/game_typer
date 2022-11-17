@@ -1,6 +1,83 @@
 {% extends 'base.html' %}
 
 {% block content %}
+
+<table class="table">
+    <thead class="table-dark">
+        <tr>
+            <th scope="col">Lp.</th>
+            <th scope="col">Flag</th>
+            <th scope="col">Team</th>
+            <th scope="col">RM</th>
+            <th scope="col">W</th>
+            <th scope="col">R</th>
+            <th scope="col">P</th>
+            <th scope="col">BZ</th>
+            <th scope="col">BS</th>
+            <th scope="col">RB</th>
+            <th scope="col">Pkt</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <th scope="row">1</th>
+            <td>Flag</td>
+            <td>Katar</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+
+        <tr>
+            <th scope="row">2</th>
+            <td>Flag</td>
+            <td>Ekwador</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+
+        <tr>
+            <th scope="row">3</th>
+            <td>Flag</td>
+            <td>Senegal</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+
+        <tr>
+            <th scope="row">4</th>
+            <td>Flag</td>
+            <td>Holandia</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+    </tbody>
+</table>
+
+
 <h1 class="title">{% block title %} Users {% endblock %}</h1>
 <div class="content">
     {% for user in users %}
