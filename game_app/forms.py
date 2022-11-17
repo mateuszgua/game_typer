@@ -19,3 +19,13 @@ class LoginForm(FlaskForm):
     password1 = PasswordField('Password', validators=[DataRequired()])
     remember = BooleanField('Remember Me')
     submit = SubmitField('Login')
+
+
+class EditUserForm(FlaskForm):
+    firstname = StringField('Firstname', validators=[DataRequired()])
+    lastname = StringField('Lastname', validators=[DataRequired()])
+    password1 = PasswordField('Password')
+    password2 = PasswordField('Confirm Password', validators=[
+                              DataRequired(), EqualTo('password1')])
+    nick = StringField('Nick', validators=[DataRequired()])
+    submit = SubmitField('Change')

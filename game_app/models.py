@@ -42,6 +42,9 @@ class User(Base, UserMixin):
     roles = relationship('Role', secondary='roles_users',
                          backref=backref('users', lazy='dynamic'))
 
+    def __repr__(self) -> str:
+        return f"'{self.id}')"
+
     def set_password(self, password):
         self.password_hash = generate_password_hash(password, method='sha512')
 

@@ -1,17 +1,14 @@
-from forms import RegistrationForm, LoginForm
-from models import User, Role, AdminView, RoleMixin, UserAdminView, RoleAdminView, HomeAdminView
+from forms import RegistrationForm, LoginForm, EditUserForm
+from models import User, Role, UserAdminView, RoleAdminView, HomeAdminView
 from database import db_session, init_db
 
-import os
 import uuid
 from flask import Flask, render_template, url_for, redirect, request, flash, session
 
 from flask_settings import Config
-from flask_security import Security, hash_password, SQLAlchemySessionUserDatastore, auth_required
+from flask_security import Security, hash_password, SQLAlchemySessionUserDatastore
 from flask_login import LoginManager, login_user, current_user, logout_user, login_required
 from flask_admin import Admin
-from flask_admin.contrib.sqla import ModelView
-from flask_admin import helpers as admin_helpers
 
 from flask_bootstrap import Bootstrap5
 
@@ -19,41 +16,15 @@ from flask_bootstrap import Bootstrap5
 app = Flask(__name__, instance_relative_config=False)
 app.config.from_object('flask_settings.Config')
 
-#app.config['FLASK_ADMIN_SWATCH'] = 'cerulean'
-#admin = Admin(app)
-# admin = Admin(app, name='Admin', template_mode='bootstrap3')
 admin = Admin(app, 'FlaskApp', url='/home',
               index_view=HomeAdminView(name='Home'))
 
 
-class CustomView(ModelView):
-    list_template = 'list.html'
-    create_template = 'create.html'
-    edit_template = 'edit.html'
-
-
-class UserAdmin(CustomView):
-    column_searchable_list = ('name',)
-    column_filters = ('name', 'email')
-
-
 admin.add_view(UserAdminView(User, db_session))
 admin.add_view(RoleAdminView(Role, db_session))
-#admin.add_view(SecureModelView(RoleMixin, db_session))
 
 user_datastore = SQLAlchemySessionUserDatastore(db_session, User, Role)
 app.security = Security(app, user_datastore)
-
-#
-# @app.security.context_processor
-# def security_context_processor():
-# return dict(
-# admin_base_template=admin.base_template,
-# admin_view=admin.index_view,
-# get_url=url_for,
-# h=admin_helpers
-# )
-#
 
 bootstrap = Bootstrap5(app)
 
@@ -70,14 +41,19 @@ def load_user(user_id):
 @app.route('/home')
 def index():
     users = User.query.all()
-    return render_template('index.html', users=users, current_user=current_user)
+    return render_template('home.html', users=users, current_user=current_user)
 
 
 @app.route('/user/<int:user_id>')
 def user(user_id):
     user = User.query.filter_by(id=user_id).first()
-    # To delete
+    # delete
+    user_id1 = User.query.get(int(user_id))
+    print(user_id1)
     print(f"To jest user: %s", current_user.is_authenticated)
+    print(f"To jest user: %s", session.get('id'))
+    print(user_id)
+    print(current_user.get_id())
 
     return render_template('user.html', user=user)
 
@@ -108,14 +84,12 @@ def login():
     if current_user.is_authenticated:
         return redirect(url_for('user', user_id=user.id))
 
-    session.pop('id', None)
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
         if user:
             if user.check_password(password=form.password1.data):
                 login_user(user, remember=form.remember.data)
-                session['id'] = user.id
                 next = request.args.get('next')
                 return redirect(next or (url_for('user', user_id=user.id)))
             flash("Wrong Password - Try Again!")
@@ -130,23 +104,25 @@ def unauthorized():
     return redirect(url_for('login'))
 
 
-@app.route('/logout')
+@app.route('/logout', methods=('GET', 'POST'))
 @login_required
 def logout():
-    session.pop('id', None)
     session.clear()
     logout_user()
-    return redirect(url_for('index'))
+    flash("You have been logged out!")
+    return redirect(url_for('login', next=request.url))
 
 
 @app.route('/edit/<int:user_id>', methods=('GET', 'POST'))
 def edit(user_id):
-    form = RegistrationForm()
+    form = EditUserForm()
     user = User.query.filter_by(id=user_id).first()
 
     # To delete
     print(f"To jest user: %s", current_user.is_authenticated)
     print(f"To jest user: %s", session.get('id'))
+    print(user_id)
+    print(current_user.get_id())
 
     if request.method == 'POST':
         firstname = request.form['firstname']
@@ -174,7 +150,11 @@ def edit(user_id):
 
 @app.post('/delete/<int:user_id>')
 def delete(user_id):
-    if user_id == current_user.id:
+    # delete
+    print(user_id)
+    print(current_user.get_id())
+
+    if user_id == current_user.get_id():
         user = User.query.filter_by(id=user_id).first()
         form = RegistrationForm()
 
