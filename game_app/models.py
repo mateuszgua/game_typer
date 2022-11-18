@@ -54,7 +54,6 @@ class User(database.Base, UserMixin):
 
 class AdminMixin:
     def is_accessible(self):
-        # return current_user.has_role('admin')
         return current_user.is_authenticated
 
     def _handle_view(self, name, **kwargs):
@@ -108,4 +107,6 @@ class UploadFile(database.Base):
     __tablename__ = 'file'
     id = Column(Integer, primary_key=True)
     filename = Column(String(100))
+    created_at = Column(DateTime(timezone=True),
+                        server_default=func.now(), nullable=False)
     data = Column(LargeBinary)

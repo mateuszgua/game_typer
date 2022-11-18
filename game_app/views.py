@@ -1,6 +1,6 @@
 from game_app import app, login_manager, admin
 from game_app.forms import RegistrationForm, LoginForm, EditUserForm
-from game_app.models import User, Role, Team, UserAdminView, RoleAdminView, HomeAdminView, UploadFile
+from game_app.models import User, Role, Team, UserAdminView, RoleAdminView, UploadFile
 from game_app.database import db_session
 from game_app.config import Config
 
@@ -174,8 +174,20 @@ def upload_file():
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             file.save(os.path.join(config.UPLOAD_FOLDER, filename))
+            upload = UploadFile(filename=file.filename, data=file.read())
+            db_session.add(upload)
+            db_session.commit()
             flash(f"Uploaded: {file.filename}")
     return render_template('loadfile.html')
+
+
+@app.route('/admin/select_file', methods=['GET', 'POST'])
+def select_file():
+    files = UploadFile.query.all()
+    if request.method == 'POST':
+        print(request.form.get('mycheckbox'))
+        return 'Done'
+    return render_template('selectfile.html', files=files)
 
 
 @ app.route('/admin/processjson', methods=['POST'])
@@ -207,17 +219,3 @@ def processjson():
 @ app.errorhandler(404)
 def page_not_found(error_description):
     return render_template('404.html', error_description=error_description)
-
-
-# if __name__ == '__main__':
-    # config = Config()
-    # with app.app_context():
-    # init_db()
-    # if not app.security.datastore.find_user(email="test@me.com"):
-    # app.security.datastore.create_user(
-    # firstname='Jan',
-    # lastname='Kowalski',
-    # email="test@me.com",
-    # password_hash=hash_password("password_hash"))
-    # db_session.commit()
-    # app.run(host=config.HOST, port=config.PORT, debug=config.DEBUG)

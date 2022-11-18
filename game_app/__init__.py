@@ -1,7 +1,5 @@
 from game_app import models, database, config
 
-# from database import db_session
-
 import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy

@@ -1,0 +1,23 @@
+{% extends 'layouts/base.html' %}
+
+{% block content %}
+
+<h1 class="title">{% block title %} Select file {% endblock %}</h1>
+<body>
+    <form method="POST" action="/admin/select_file">
+        <div class="list-group">
+            {% for file in files %}
+                <label class="list-group-item">
+                    <input class="form-check-input me-1" type="checkbox" name="mycheckbox" value={{ file.id }}>
+                    <p>Name: {{ file.filename }}</p>
+                    <p>Date added: {{ file.created_at }}</p>
+                </label>
+            {% endfor %}
+          </div>
+          <input type="submit" class="btn btn-success" value="Load">
+        
+    </form>
+</body>
+{% endblock %}
+
+
