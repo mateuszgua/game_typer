@@ -6,7 +6,7 @@ from game_app.config import Config
 
 import os
 import uuid
-from flask import render_template, url_for, redirect, request, flash, session
+from flask import render_template, url_for, redirect, request, flash, session, json
 from flask_login import login_user, current_user, logout_user, login_required
 
 from werkzeug.utils import secure_filename
@@ -185,34 +185,34 @@ def upload_file():
 def select_file():
     files = UploadFile.query.all()
     if request.method == 'POST':
-        print(request.form.get('mycheckbox'))
-        return 'Done'
+        if request.form.get('mycheckbox') != None:
+            file_idx = request.form.get('mycheckbox')
+            processjson(file_idx)
+            flash(f"Load successfully!")
+        else:
+            flash(f"Please chose one.")
     return render_template('selectfile.html', files=files)
 
 
-@ app.route('/admin/processjson', methods=['POST'])
-def processjson():
-
-    if request.is_json:
-        data = request.get_json()
-
-        team = Team(name=data.get("name"),
-                    games_played=0,
-                    wins=0,
-                    draws=0,
-                    lost=0,
-                    goal_scored=0,
-                    goal_lost=0,
-                    goal_balance=0,
-                    points=0,
-                    group=data.get("group"),
-                    play_off=0,
-                    )
-        db_session.add(team)
-        db_session.commit()
-        flash('Data added successfully!')
-        return redirect(url_for('home'))
-    return render_template('jsonadd.html')
+def processjson(file_idx):
+    file = UploadFile.query.filter_by(id=file_idx).first()
+    SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
+    json_url = os.path.join(SITE_ROOT, "static/files", file.filename)
+    data = json.load(open(json_url))
+    team = Team(name=data['team']['name'],
+                   games_played=0,
+                   wins=0,
+                   draws=0,
+                   lost=0,
+                   goal_scored=0,
+                   goal_lost=0,
+                   goal_balance=0,
+                   points=0,
+                   group=data['team']['group'],
+                   play_off=0,
+                   )
+    db_session.add(team)
+    db_session.commit()
 
 
 # Errors

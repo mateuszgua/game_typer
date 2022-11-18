@@ -20,6 +20,7 @@
     </symbol>
 </svg>
 
+<h2 class="title">{% block title %} World Cup 2022 {% endblock %}</h2>
 <div class="alert alert-warning d-flex align-items-center" role="alert">
     <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Warning:">
         <use xlink:href="#exclamation-triangle-fill" />
@@ -41,12 +42,10 @@
         <hr>
 
         <form method="POST" enctype="multipart/form-data" action="{{ url_for('upload_file') }}">
-
             <input type="file" name="file">
             <input type="submit" class="btn btn-success" value="Upload">
 
         </form>
-
     </div>
 
 </body>
