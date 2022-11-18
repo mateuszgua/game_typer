@@ -2,6 +2,7 @@ from forms import RegistrationForm, LoginForm, EditUserForm
 from models import User, Role, Team, UserAdminView, RoleAdminView, HomeAdminView, UploadFile
 from database import db_session, init_db
 
+import os
 import uuid
 from flask import Flask, render_template, url_for, redirect, request, flash, session
 
@@ -12,7 +13,9 @@ from flask_admin import Admin
 
 from flask_bootstrap import Bootstrap5
 
+from werkzeug.utils import secure_filename
 
+config = Config()
 app = Flask(__name__, instance_relative_config=False)
 app.config.from_object('flask_settings.Config')
 
@@ -172,20 +175,40 @@ def delete(user_id):
         return redirect(url_for('home'))
 
 
-@app.route('/admin/loadfile', methods=['GET', 'POST'])
-def loadfile():
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in config.ALLOWED_EXTENSIONS
+
+
+@app.route('/admin/upload_file', methods=['GET', 'POST'])
+def upload_file():
     if request.method == 'POST':
+        if 'file' not in request.files:
+            flash("No file part")
+            return redirect(request.url)
         file = request.files['file']
-
-        upload = UploadFile(filename=file.filename, data=file.read())
-        db_session.add(upload)
-        db_session.commit()
-
-        return f"Uploaded: {file.filename}"
+        if file.filename == '':
+            flash("No selected file")
+            return redirect(request.url)
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(config.UPLOAD_FOLDER, filename))
+            return f"Uploaded: {file.filename}"
     return render_template('loadfile.html')
 
+# @app.route('/admin/loadfile', methods=['GET', 'POST'])
+# def loadfile():
+    # if request.method == 'POST':
+    # file = request.files['file']
+#
+    # upload = UploadFile(filename=file.filename, data=file.read())
+    # db_session.add(upload)
+    # db_session.commit()
+#
+    # return f"Uploaded: {file.filename}"
+    # return render_template('loadfile.html')
 
-@app.route('/admin/processjson', methods=['POST'])
+
+@ app.route('/admin/processjson', methods=['POST'])
 def processjson():
 
     if request.is_json:
@@ -210,7 +233,7 @@ def processjson():
     return render_template('jsonadd.html')
 
 
-@app.errorhandler(404)
+@ app.errorhandler(404)
 def page_not_found(error_description):
     return render_template('404.html', error_description=error_description)
 

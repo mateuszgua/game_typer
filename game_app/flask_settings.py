@@ -13,6 +13,8 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     STATIC_FOLDER = 'static'
+    UPLOAD_FOLDER = 'game_app/static/files'
+    ALLOWED_EXTENSIONS = {'txt', 'png', 'jpg', 'json'}
     TEMPLATES_FOLDER = 'templates'
     HOST = 'localhost'
     PORT = 9000
