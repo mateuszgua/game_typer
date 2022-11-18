@@ -1,4 +1,4 @@
-from database import Base
+from game_app import database
 
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship, backref
@@ -12,14 +12,14 @@ from flask_admin.contrib.sqla import ModelView
 from flask_admin import AdminIndexView
 
 
-class RolesUsers(Base):
+class RolesUsers(database.Base):
     __tablename__ = 'roles_users'
     id = Column(Integer(), primary_key=True)
     user_id = Column('user_id', Integer(), ForeignKey('user.id'))
     role_id = Column('role_id', Integer(), ForeignKey('role.id'))
 
 
-class Role(Base, RoleMixin):
+class Role(database.Base, RoleMixin):
     __tablename__ = 'role'
     id = Column(Integer(), primary_key=True)
     name = Column(String(80), unique=True)
@@ -27,7 +27,7 @@ class Role(Base, RoleMixin):
     permissions = Column(UnicodeText)
 
 
-class User(Base, UserMixin):
+class User(database.Base, UserMixin):
     __tablename__ = 'user'
     id = Column(Integer, primary_key=True)
     firstname = Column(String(100), nullable=False)
@@ -43,7 +43,7 @@ class User(Base, UserMixin):
                          backref=backref('users', lazy='dynamic'))
 
     def __repr__(self) -> str:
-        return f"'{self.id}')"
+        return str(self.id)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password, method='sha512')
@@ -85,7 +85,7 @@ class UserAdminView(AdminMixin, BaseModelView):
     pass
 
 
-class Team(Base):
+class Team(database.Base):
     __tablename__ = 'team'
     id = Column(Integer, primary_key=True)
     name = Column(String(100), nullable=False, unique=True)
@@ -104,7 +104,7 @@ class Team(Base):
         return self.name
 
 
-class UploadFile(Base):
+class UploadFile(database.Base):
     __tablename__ = 'file'
     id = Column(Integer, primary_key=True)
     filename = Column(String(100))

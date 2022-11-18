@@ -1,44 +1,32 @@
-from forms import RegistrationForm, LoginForm, EditUserForm
-from models import User, Role, Team, UserAdminView, RoleAdminView, HomeAdminView, UploadFile
-from database import db_session, init_db
+from game_app import app, login_manager, admin
+from game_app.forms import RegistrationForm, LoginForm, EditUserForm
+from game_app.models import User, Role, Team, UserAdminView, RoleAdminView, HomeAdminView, UploadFile
+from game_app.database import db_session
+from game_app.config import Config
 
 import os
 import uuid
-from flask import Flask, render_template, url_for, redirect, request, flash, session
-
-from flask_settings import Config
-from flask_security import Security, hash_password, SQLAlchemySessionUserDatastore
-from flask_login import LoginManager, login_user, current_user, logout_user, login_required
-from flask_admin import Admin
-
-from flask_bootstrap import Bootstrap5
+from flask import render_template, url_for, redirect, request, flash, session
+from flask_login import login_user, current_user, logout_user, login_required
 
 from werkzeug.utils import secure_filename
 
+
 config = Config()
-app = Flask(__name__, instance_relative_config=False)
-app.config.from_object('flask_settings.Config')
-
-admin = Admin(app, 'FlaskApp', url='/home',
-              index_view=HomeAdminView(name='Home'))
-
 
 admin.add_view(UserAdminView(User, db_session))
 admin.add_view(RoleAdminView(Role, db_session))
-
-user_datastore = SQLAlchemySessionUserDatastore(db_session, User, Role)
-app.security = Security(app, user_datastore)
-
-bootstrap = Bootstrap5(app)
-
-login_manager = LoginManager()
-login_manager.init_app(app)
-login_manager.login_view = 'login'
 
 
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
+
+@login_manager.unauthorized_handler
+def unauthorized():
+    flash('You must be logged in to view that page.')
+    return redirect(url_for('login'))
 
 
 @app.route('/home')
@@ -99,12 +87,6 @@ def login():
         else:
             flash("That User Doesn't Exist! Try Again...")
     return render_template('login.html', form=form)
-
-
-@login_manager.unauthorized_handler
-def unauthorized():
-    flash('You must be logged in to view that page.')
-    return redirect(url_for('login'))
 
 
 @app.route('/logout', methods=('GET', 'POST'))
@@ -221,20 +203,21 @@ def processjson():
     return render_template('jsonadd.html')
 
 
+# Errors
 @ app.errorhandler(404)
 def page_not_found(error_description):
     return render_template('404.html', error_description=error_description)
 
 
-if __name__ == '__main__':
-    config = Config()
-    with app.app_context():
-        init_db()
-        if not app.security.datastore.find_user(email="test@me.com"):
-            app.security.datastore.create_user(
-                firstname='Jan',
-                lastname='Kowalski',
-                email="test@me.com",
-                password_hash=hash_password("password_hash"))
-        db_session.commit()
-    app.run(host=config.HOST, port=config.PORT, debug=config.DEBUG)
+# if __name__ == '__main__':
+    # config = Config()
+    # with app.app_context():
+    # init_db()
+    # if not app.security.datastore.find_user(email="test@me.com"):
+    # app.security.datastore.create_user(
+    # firstname='Jan',
+    # lastname='Kowalski',
+    # email="test@me.com",
+    # password_hash=hash_password("password_hash"))
+    # db_session.commit()
+    # app.run(host=config.HOST, port=config.PORT, debug=config.DEBUG)
