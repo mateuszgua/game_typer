@@ -192,20 +192,8 @@ def upload_file():
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             file.save(os.path.join(config.UPLOAD_FOLDER, filename))
-            return f"Uploaded: {file.filename}"
+            flash(f"Uploaded: {file.filename}")
     return render_template('loadfile.html')
-
-# @app.route('/admin/loadfile', methods=['GET', 'POST'])
-# def loadfile():
-    # if request.method == 'POST':
-    # file = request.files['file']
-#
-    # upload = UploadFile(filename=file.filename, data=file.read())
-    # db_session.add(upload)
-    # db_session.commit()
-#
-    # return f"Uploaded: {file.filename}"
-    # return render_template('loadfile.html')
 
 
 @ app.route('/admin/processjson', methods=['POST'])
