@@ -32,7 +32,7 @@ def unauthorized():
 @app.route('/home')
 def home():
     teams = Team.query.all()
-    return render_template('home.html', teams=teams, current_user=current_user)
+    return render_template('index.html', teams=teams, current_user=current_user)
 
 
 @app.route('/user/<int:user_id>')
@@ -46,7 +46,7 @@ def user(user_id):
     print(user_id)
     print(current_user.get_id())
 
-    return render_template('user.html', user=user)
+    return render_template('accounts/user.html', user=user)
 
 
 @app.route('/register', methods=('GET', 'POST'))
@@ -67,7 +67,7 @@ def register():
             db_session.commit()
             return redirect(url_for('login'))
         flash('A user already exist with that email address.')
-    return render_template('register.html', form=form)
+    return render_template('accounts/register.html', form=form)
 
 
 @app.route('/login/', methods=['GET', 'POST'])
@@ -86,7 +86,7 @@ def login():
             flash("Wrong Password - Try Again!")
         else:
             flash("That User Doesn't Exist! Try Again...")
-    return render_template('login.html', form=form)
+    return render_template('accounts/login.html', form=form)
 
 
 @app.route('/logout', methods=('GET', 'POST'))
@@ -125,12 +125,12 @@ def edit(user_id):
 
             db_session.commit()
             flash("User updated successfully!")
-            return render_template('edit.html', form=form, user=user, id=user_id)
+            return render_template('accounts/edit.html', form=form, user=user, id=user_id)
         except:
             flash("Error! There was a problem edit user... try again.")
-            return render_template('edit.html', form=form, user=user, id=user_id)
+            return render_template('accounts/edit.html', form=form, user=user, id=user_id)
     else:
-        return render_template('edit.html', form=form, user=user, id=user_id)
+        return render_template('accounts/edit.html', form=form, user=user, id=user_id)
 
 
 @app.post('/delete/<int:user_id>')
@@ -147,7 +147,7 @@ def delete(user_id):
             db_session.delete(user)
             db_session.commit()
             flash("User deleted successfully!")
-            return render_template('register.html', form=form)
+            return render_template('accounts/register.html', form=form)
 
         except:
             flash("Whoops! There was a problem deleting user, try again...")
