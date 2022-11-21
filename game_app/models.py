@@ -89,7 +89,7 @@ class Team(database.Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(100), nullable=False, unique=True)
     games_played = Column(Integer, nullable=False)
-    wins = Column(Integer, unique=True)
+    wins = Column(Integer, nullable=False)
     draws = Column(Integer, nullable=False)
     lost = Column(Integer, nullable=False)
     goal_scored = Column(Integer, nullable=False)
@@ -98,6 +98,7 @@ class Team(database.Base):
     points = Column(Integer, nullable=False)
     group = Column(String(100), nullable=False)
     play_off = Column(Integer, nullable=False)
+    image_name = Column(String(100), nullable=False)
 
     def __repr__(self) -> str:
         return self.name

@@ -32,7 +32,13 @@ def unauthorized():
 @app.route('/home')
 def home():
     teams = Team.query.all()
-    return render_template('index.html', teams=teams, current_user=current_user)
+    full_filename = os.path.join(config.IMG_FOLDER, 'qatar_48x48.png')
+    IMG_LIST = os.listdir('game_app/static/files')
+    IMG_LIST = ['files/' + i for i in IMG_LIST]
+    #
+    print("________________")
+    print(IMG_LIST)
+    return render_template('index.html', teams=teams, current_user=current_user, image_list=IMG_LIST)
 
 
 @app.route('/user/<int:user_id>')
@@ -168,9 +174,11 @@ def upload_file():
             flash("No file part")
             return redirect(request.url)
         file = request.files['file']
+
         if file.filename == '':
             flash("No selected file")
             return redirect(request.url)
+        
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             file.save(os.path.join(config.UPLOAD_FOLDER, filename))
@@ -199,20 +207,25 @@ def processjson(file_idx):
     SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
     json_url = os.path.join(SITE_ROOT, "static/files", file.filename)
     data = json.load(open(json_url))
-    team = Team(name=data['team']['name'],
-                   games_played=0,
-                   wins=0,
-                   draws=0,
-                   lost=0,
-                   goal_scored=0,
-                   goal_lost=0,
-                   goal_balance=0,
-                   points=0,
-                   group=data['team']['group'],
-                   play_off=0,
-                   )
-    db_session.add(team)
-    db_session.commit()
+    
+    i = 0
+    while i < 4 : 
+        team = Team(name=data['team'][i]['name'],
+                       games_played=0,
+                       wins=0,
+                       draws=0,
+                       lost=0,
+                       goal_scored=0,
+                       goal_lost=0,
+                       goal_balance=0,
+                       points=0,
+                       group=data['team'][i]['group'],
+                       play_off=0,
+                       image_name=f"files/{data['team'][i]['name']}_48x48.png"
+                       )
+        db_session.add(team)
+        db_session.commit()
+        i += 1
 
 
 # Errors

@@ -24,6 +24,7 @@ class Config:
     
     STATIC_FOLDER = 'static'
     UPLOAD_FOLDER = 'game_app/static/files'
+    IMG_FOLDER = os.path.join('static', 'files')
     ALLOWED_EXTENSIONS = {'txt', 'png', 'jpg', 'json'}
     TEMPLATES_FOLDER = 'templates'
     HOST = 'localhost'

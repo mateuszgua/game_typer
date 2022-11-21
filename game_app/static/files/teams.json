@@ -1,6 +1,7 @@
 {
-    "team": {
-        "name": "Katar",
-        "group": "A"
-    }
+    "team": [
+        {"id": 1, "name": "qatar", "group": "A"},
+        {"id": 2, "name": "netherlands", "group": "A"},
+        {"id": 3, "name": "ecuador", "group": "A"},
+        {"id": 4, "name": "senegal", "group": "A"}]
 }

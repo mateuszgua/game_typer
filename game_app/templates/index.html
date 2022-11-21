@@ -24,7 +24,11 @@
         {% for team in teams %}
         <tr>
             <th scope="row">{{ team.id }}</th>
-            <td>FlagPhoto</td>
+            {% for image in image_list %}
+                {% if image == team.image_name %}
+                    <td><img src="{{ url_for('static', filename=image)}}" alt="Flag" height="30px" width="30px"></td>
+                {% endif %}
+            {% endfor %}
             <td>{{ team.name }}</td>
             <td>{{ team.games_played }}</td>
             <td>{{ team.wins }}</td>
@@ -38,5 +42,4 @@
         {% endfor %}
     </tbody>
 </table>
-
 {% endblock %}
