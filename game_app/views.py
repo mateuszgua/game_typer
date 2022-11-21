@@ -35,8 +35,6 @@ def home():
     full_filename = os.path.join(config.IMG_FOLDER, 'qatar_48x48.png')
     IMG_LIST = os.listdir('game_app/static/files')
     IMG_LIST = ['files/' + i for i in IMG_LIST]
-    #
-    print("________________")
     print(IMG_LIST)
     return render_template('index.html', teams=teams, current_user=current_user, image_list=IMG_LIST)
 
@@ -209,7 +207,7 @@ def processjson(file_idx):
     data = json.load(open(json_url))
     
     i = 0
-    while i < 4 : 
+    while i < 8 : 
         team = Team(name=data['team'][i]['name'],
                        games_played=0,
                        wins=0,

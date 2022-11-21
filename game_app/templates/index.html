@@ -4,42 +4,95 @@
 
 <h2 class="title">{% block title %} World Cup 2022 {% endblock %}</h2>
 <br>
-<table id="data" class="table table-striped">
-    <thead class="table-dark">
-        <tr>
-            <th scope="col">No.</th>
-            <th scope="col">Img</th>
-            <th scope="col">Team</th>
-            <th scope="col">MP</th>
-            <th scope="col">W</th>
-            <th scope="col">D</th>
-            <th scope="col">L</th>
-            <th scope="col">GF</th>
-            <th scope="col">GA</th>
-            <th scope="col">GD</th>
-            <th scope="col">Pts</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for team in teams %}
-        <tr>
-            <th scope="row">{{ team.id }}</th>
-            {% for image in image_list %}
-                {% if image == team.image_name %}
-                    <td><img src="{{ url_for('static', filename=image)}}" alt="Flag" height="30px" width="30px"></td>
-                {% endif %}
-            {% endfor %}
-            <td>{{ team.name }}</td>
-            <td>{{ team.games_played }}</td>
-            <td>{{ team.wins }}</td>
-            <td>{{ team.draws }}</td>
-            <td>{{ team.lost }}</td>
-            <td>{{ team.goal_scored }}</td>
-            <td>{{ team.goal_lost }}</td>
-            <td>{{ team.goal_balance }}</td>
-            <td>{{ team.points }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <p>Group A</p>
+            <table id="data" class="table table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th scope="col">No.</th>
+                        <th scope="col">Img</th>
+                        <th scope="col">Team</th>
+                        <th scope="col">MP</th>
+                        <th scope="col">W</th>
+                        <th scope="col">D</th>
+                        <th scope="col">L</th>
+                        <th scope="col">GF</th>
+                        <th scope="col">GA</th>
+                        <th scope="col">GD</th>
+                        <th scope="col">Pts</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for team in teams %}
+                        {% if team.group == "A" %}
+                        <tr>
+                            <th scope="row">{{ team.id }}</th>
+                            {% for image in image_list %}
+                                {% if image == team.image_name %}
+                                    <td><img src="{{ url_for('static', filename=image)}}" alt="Flag" height="30px" width="30px"></td>
+                                {% endif %}
+                            {% endfor %}
+                            <td>{{ team.name }}</td>
+                            <td>{{ team.games_played }}</td>
+                            <td>{{ team.wins }}</td>
+                            <td>{{ team.draws }}</td>
+                            <td>{{ team.lost }}</td>
+                            <td>{{ team.goal_scored }}</td>
+                            <td>{{ team.goal_lost }}</td>
+                            <td>{{ team.goal_balance }}</td>
+                            <td>{{ team.points }}</td>
+                        </tr>
+                        {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="col">
+            <p>Group B</p>
+            <table id="data" class="table table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th scope="col">No.</th>
+                        <th scope="col">Img</th>
+                        <th scope="col">Team</th>
+                        <th scope="col">MP</th>
+                        <th scope="col">W</th>
+                        <th scope="col">D</th>
+                        <th scope="col">L</th>
+                        <th scope="col">GF</th>
+                        <th scope="col">GA</th>
+                        <th scope="col">GD</th>
+                        <th scope="col">Pts</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for team in teams %}
+                        {% if team.group == "B" %}
+                        <tr>
+                            <th scope="row">{{ team.id }}</th>
+                            {% for image in image_list %}
+                                {% if image == team.image_name %}
+                                    <td><img src="{{ url_for('static', filename=image)}}" alt="Flag" height="30px" width="30px"></td>
+                                {% endif %}
+                            {% endfor %}
+                            <td>{{ team.name }}</td>
+                            <td>{{ team.games_played }}</td>
+                            <td>{{ team.wins }}</td>
+                            <td>{{ team.draws }}</td>
+                            <td>{{ team.lost }}</td>
+                            <td>{{ team.goal_scored }}</td>
+                            <td>{{ team.goal_lost }}</td>
+                            <td>{{ team.goal_balance }}</td>
+                            <td>{{ team.points }}</td>
+                        </tr>
+                        {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
 {% endblock %}
