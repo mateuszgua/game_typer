@@ -41,6 +41,7 @@ class User(database.Base, UserMixin):
                         server_default=func.now(), nullable=False)
     roles = relationship('Role', secondary='roles_users',
                          backref=backref('users', lazy='dynamic'))
+    points = Column(Integer)
 
     def __repr__(self) -> str:
         return str(self.id)
@@ -111,3 +112,24 @@ class UploadFile(database.Base):
     created_at = Column(DateTime(timezone=True),
                         server_default=func.now(), nullable=False)
     data = Column(LargeBinary)
+
+
+class UserType(database.Base):
+    __tablename__ = 'user_type'
+    id = Column(Integer, primary_key=True)
+    user_id = relationship('User', backref=backref('user_type', lazy='dynamic'))
+    game_id = (Integer)
+    game_type =  Column(String(10))
+    type_goals_team_1 = Column(Integer)
+    type_goals_team_2 = Column(Integer)
+
+
+class Game(database.Base):
+    __tablename__ = 'games'
+    id = Column(Integer, primary_key=True)
+    game_teams =  Column(String(10))
+    game_day = Column(DateTime(), nullable=False)
+    game_time = Column(DateTime(), nullable=False)
+    goals_team_1 = Column(Integer, nullable=False)
+    goals_team_2 = Column(Integer, nullable=False)
+    result = Column(String(10))

@@ -1,6 +1,6 @@
 from game_app import app, login_manager, admin
 from game_app.forms import RegistrationForm, LoginForm, EditUserForm
-from game_app.models import User, Role, Team, UserAdminView, RoleAdminView, UploadFile
+from game_app.models import User, Role, Team, UserAdminView, RoleAdminView, UploadFile, Game, UserType
 from game_app.database import db_session
 from game_app.config import Config
 
@@ -16,7 +16,8 @@ config = Config()
 
 admin.add_view(UserAdminView(User, db_session))
 admin.add_view(RoleAdminView(Role, db_session))
-
+admin.add_view(RoleAdminView(Game, db_session))
+admin.add_view(RoleAdminView(UserType, db_session))
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -207,7 +208,7 @@ def processjson(file_idx):
     data = json.load(open(json_url))
     
     i = 0
-    while i < 8 : 
+    while i < 32 : 
         team = Team(name=data['team'][i]['name'],
                        games_played=0,
                        wins=0,
