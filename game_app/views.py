@@ -1,5 +1,5 @@
 from game_app import app, login_manager, admin
-from game_app.forms import RegistrationForm, LoginForm, EditUserForm
+from game_app.forms import RegistrationForm, LoginForm, EditUserForm, AddGameForm
 from game_app.models import User, Role, Team, UserAdminView, RoleAdminView, UploadFile, Game, UserType
 from game_app.database import db_session
 from game_app.config import Config
@@ -33,7 +33,6 @@ def unauthorized():
 @app.route('/home')
 def home():
     teams = Team.query.all()
-    full_filename = os.path.join(config.IMG_FOLDER, 'qatar_48x48.png')
     IMG_LIST = os.listdir('game_app/static/files')
     IMG_LIST = ['files/' + i for i in IMG_LIST]
     print(IMG_LIST)
@@ -225,6 +224,27 @@ def processjson(file_idx):
         db_session.add(team)
         db_session.commit()
         i += 1
+
+
+@app.route('/admin/games', methods=['GET', 'POST'])
+def games():
+    games = Game.query.all()
+    teams = Team.query.all()
+    form = AddGameForm()
+    if form.validate_on_submit():
+        existing_game = Game.query.filter_by(game_teams=form.game_teams.data).first()
+        if existing_game is None:
+            game = Game(game_teams=form.game_teams.data,
+                        team_1=form.team_1.data,
+                        team_2=form.team_2.data,
+                        game_day=form.game_day.data,
+                        game_time=form.game_time.data,
+                        )
+            db_session.add(game)
+            db_session.commit()
+            # return redirect(url_for('login'))
+            flash('Add game successfully.')
+    return render_template('gameslist.html', teams=teams, games=games, form=form)
 
 
 # Errors

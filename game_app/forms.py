@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, BooleanField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, DateField, TimeField
 from wtforms.validators import DataRequired, Email, EqualTo
 
 
@@ -29,3 +29,12 @@ class EditUserForm(FlaskForm):
                               DataRequired(), EqualTo('password1')])
     nick = StringField('Nick', validators=[DataRequired()])
     submit = SubmitField('Change')
+
+
+class AddGameForm(FlaskForm):
+    game_teams = StringField('Team')
+    team_1 = StringField('Team 1')
+    team_2 = StringField('Team 2')
+    game_day = DateField('Date')
+    game_time = TimeField('Time')
+    submit = SubmitField('Add')
