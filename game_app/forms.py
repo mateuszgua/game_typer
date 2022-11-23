@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, BooleanField, DateField, TimeField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, DateField, TimeField, IntegerField
 from wtforms.validators import DataRequired, Email, EqualTo
 
 
@@ -35,6 +35,8 @@ class AddGameForm(FlaskForm):
     game_teams = StringField('Team')
     team_1 = StringField('Team 1')
     team_2 = StringField('Team 2')
+    goals_team_1 = IntegerField('Goals team 1')
+    goals_team_1 = IntegerField('Goals team 2')
     game_day = DateField('Date')
     game_time = TimeField('Time')
     submit = SubmitField('Add')

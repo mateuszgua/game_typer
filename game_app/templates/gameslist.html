@@ -40,7 +40,7 @@
                         <th scope="col">Date</th>
                         <th scope="col">Time</th>
                         <th scope="col">Result</th>
-                        <th scope="col">Edit</th>
+                        <th scope="col">Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -51,8 +51,29 @@
                             <td class="text-capitalize">{{ game.team_2 }}</td>
                             <td>{{ game.game_day }}</td>
                             <td>{{ game.game_time }}</td>
-                            <td>{{ game.goals_team_1 }} : {{ game.goals_team_1 }}</td>
-                            <td><button type="button" class="btn btn-warning">Edit</button></td>
+                            {% if toggle_area == 1 %}
+                            <td>
+                                <form action="" method="POST">
+                                    <input type="value" name="goal_team_1" size="1" value="{{ request.form['goal_team_1'] }}"> : 
+                                    <input type="value" name="goal_team_2" size="1" value="{{ request.form['goal_team_2'] }}"/>
+                                </form>
+                            </td>    
+                            <!-- <td>{{ game.goals_team_1 }} : {{ game.goals_team_1 }}</td> -->
+                            {% else %}
+                                <td>
+                                    <form action="" method="POST">
+                                        <input type="value" name="goal_team_1" size="1"/> : 
+                                        <input type="value" name="goal_team_2" size="1"/>
+                                    </form>
+                                </td>
+                            {% endif %}
+                            <td>
+                                <form action="" method="POST">
+                                    <input type="submit" value="Save" name="save">
+                                </form>
+                                    <!-- <input type="submit" class="btn btn-warning" value={{ game.id }} name="edit">Edit</input>
+                                <input type="submit" class="btn btn-success" value={{ game.id }} name="save">Save</input> -->
+                            </td>
                         </tr>
                     {% endfor %}
                 </tbody>

@@ -242,10 +242,63 @@ def games():
                         )
             db_session.add(game)
             db_session.commit()
-            # return redirect(url_for('login'))
             flash('Add game successfully.')
-    return render_template('gameslist.html', teams=teams, games=games, form=form)
+    
+    toggle_area = 1
 
+    if request.method == 'POST':
+        game = Game.query.filter_by(id=1).first()
+        # goals_team_1 = request.form['goal_team_1']
+        # goals_team_2 = request.form['goal_team_2']
+        
+        try:
+            game.goals_team_1 = goals_team_1
+            game.goals_team_2 = goals_team_2
+
+            db_session.commit()
+            flash("Game updated successfully!")
+        except:
+            flash("Error! There was a problem edit game... try again.")
+        # if 'Edit' in request.form:
+            # toggle_area = 0
+            # edit_game()
+            # return render_template('gameslist.html', teams=teams, games=games, form=form, toggle_area=toggle_area)
+        # elif 'Save' in request.form:
+            # save_game(game_id=request.form['save'])
+            # toggle_area = 1
+            # return render_template('gameslist.html', teams=teams, games=games, form=form, toggle_area=toggle_area)
+        # else:
+            # pass
+    # else:
+        # toggle_area = 1
+        # print(toggle_area)
+    # toggle_area = 1
+    return render_template('gameslist.html', teams=teams, games=games, form=form, toggle_area=toggle_area)
+    
+
+def edit_game():
+    toggle_area = 0
+    print(toggle_area)
+    # return render_template('gameslist.html', toggle_area)
+    
+
+def save_game(game_id):
+    game = Game.query.filter_by(id=game_id).first()
+    
+    goals_team_1=request.form['goal_team_1']
+    goals_team_2=request.form['goal_team_2']
+    try:
+        game.goals_team_1 = goals_team_1
+        game.goals_team_2 = goals_team_2
+        
+        db_session.commit()
+        flash("Game updated successfully!")
+    except:
+        flash("Error! There was a problem edit game... try again.")
+    toggle_area = 1
+    print(toggle_area)
+    # return render_template('gameslist.html', toggle_area)
+    
 
 # Errors
 @ app.errorhandler(404)
