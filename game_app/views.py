@@ -1,6 +1,6 @@
 from game_app import app, login_manager, admin
 from game_app.forms import RegistrationForm, LoginForm, EditUserForm, AddGameForm
-from game_app.models import User, Role, Team, UserAdminView, RoleAdminView, UploadFile, Game, UserType
+from game_app.models import User, Role, Team, UserAdminView, RoleAdminView, UploadFile, Game, UserType, Type
 from game_app.database import db_session
 from game_app.config import Config
 
@@ -284,7 +284,48 @@ def delete_game(game_id):
     
     return redirect(url_for('game_edit'))
 
+@app.route('/user/types', methods=['GET', 'POST'])
+def types():
+    games = Game.query.all()
+    types = Type.query.all()
+    user = User.query.filter_by(id=1).first()
 
+    if request.method == 'POST':
+        type = Game.query.filter_by(id=request.form['action']).first()
+        team1 = request.form.get('team1')
+        team2 = request.form.get('team2')
+        
+        try:
+            type.type_goals_team_1 = team1
+            type.type_goals_team_2 = team2
+
+            db_session.commit()
+            flash("Type updated successfully!")
+            return redirect(url_for('types'))
+        except:
+            flash("Error! There was a problem edit type... try again.")
+    return render_template('accounts/usertypes.html', games=games, types=types, user=user)
+
+
+
+    form = AddGameForm()
+    if form.validate_on_submit():
+        existing_game = Game.query.filter_by(id=form.id.data).first()
+        if existing_game is None:
+            game = Game(id=form.id.data,
+                        team_1=form.team_1.data,
+                        team_2=form.team_2.data,
+                        game_day=form.game_day.data,
+                        game_time=form.game_time.data,
+                        )
+            db_session.add(game)
+            db_session.commit()
+            flash('Add type successfully.')
+            return redirect(url_for('games'))
+        flash('Whoops! There was a problem!')
+    return render_template('gameslist.html', teams=teams, games=games, form=form)
+
+    
 # Errors
 @ app.errorhandler(404)
 def page_not_found(error_description):
