@@ -233,7 +233,7 @@ def games():
     form = AddGameForm()
     if form.validate_on_submit():
         existing_game = Game.query.filter_by(game_teams=form.game_teams.data).first()
-        if existing_game is None:
+        if existing_game is not None:
             game = Game(game_teams=form.game_teams.data,
                         team_1=form.team_1.data,
                         team_2=form.team_2.data,
@@ -243,62 +243,45 @@ def games():
             db_session.add(game)
             db_session.commit()
             flash('Add game successfully.')
-    
-    toggle_area = 1
+        flash('Whoops! There was a problem!')
+    return render_template('gameslist.html', teams=teams, games=games, form=form)
 
+    
+@app.route('/admin/game_edit', methods=['GET', 'POST'])
+def game_edit():
+    games = Game.query.all()
+    
     if request.method == 'POST':
-        game = Game.query.filter_by(id=1).first()
-        # goals_team_1 = request.form['goal_team_1']
-        # goals_team_2 = request.form['goal_team_2']
+        game = Game.query.filter_by(id=request.form['action']).first()
+        team1 = request.form.get('team1')
+        team2 = request.form.get('team2')
         
         try:
-            game.goals_team_1 = goals_team_1
-            game.goals_team_2 = goals_team_2
+            game.goals_team_1 = team1
+            game.goals_team_2 = team2
 
             db_session.commit()
             flash("Game updated successfully!")
+            return render_template('gamesedit.html', games=games)
         except:
             flash("Error! There was a problem edit game... try again.")
-        # if 'Edit' in request.form:
-            # toggle_area = 0
-            # edit_game()
-            # return render_template('gameslist.html', teams=teams, games=games, form=form, toggle_area=toggle_area)
-        # elif 'Save' in request.form:
-            # save_game(game_id=request.form['save'])
-            # toggle_area = 1
-            # return render_template('gameslist.html', teams=teams, games=games, form=form, toggle_area=toggle_area)
-        # else:
-            # pass
-    # else:
-        # toggle_area = 1
-        # print(toggle_area)
-    # toggle_area = 1
-    return render_template('gameslist.html', teams=teams, games=games, form=form, toggle_area=toggle_area)
-    
+    return render_template('gamesedit.html', games=games)
 
-def edit_game():
-    toggle_area = 0
-    print(toggle_area)
-    # return render_template('gameslist.html', toggle_area)
-    
 
-def save_game(game_id):
+@app.post('/delete_game/<int:game_id>')    
+def delete_game(game_id):
+    game_id = request.form['delete']
     game = Game.query.filter_by(id=game_id).first()
     
-    goals_team_1=request.form['goal_team_1']
-    goals_team_2=request.form['goal_team_2']
     try:
-        game.goals_team_1 = goals_team_1
-        game.goals_team_2 = goals_team_2
-        
+        db_session.delete(game)
         db_session.commit()
-        flash("Game updated successfully!")
+        games = Game.query.all()
+        flash("Game deleted successfully!")
+        return render_template('gamesedit.html', games=games)
     except:
-        flash("Error! There was a problem edit game... try again.")
-    toggle_area = 1
-    print(toggle_area)
-    # return render_template('gameslist.html', toggle_area)
-    
+        flash("Whoops! There was a problem deleting game, try again...")
+
 
 # Errors
 @ app.errorhandler(404)

@@ -51,28 +51,9 @@
                             <td class="text-capitalize">{{ game.team_2 }}</td>
                             <td>{{ game.game_day }}</td>
                             <td>{{ game.game_time }}</td>
-                            {% if toggle_area == 1 %}
+                            <td>{{ game.goals_team_1 }} : {{ game.goals_team_2 }}</td>
                             <td>
-                                <form action="" method="POST">
-                                    <input type="value" name="goal_team_1" size="1" value="{{ request.form['goal_team_1'] }}"> : 
-                                    <input type="value" name="goal_team_2" size="1" value="{{ request.form['goal_team_2'] }}"/>
-                                </form>
-                            </td>    
-                            <!-- <td>{{ game.goals_team_1 }} : {{ game.goals_team_1 }}</td> -->
-                            {% else %}
-                                <td>
-                                    <form action="" method="POST">
-                                        <input type="value" name="goal_team_1" size="1"/> : 
-                                        <input type="value" name="goal_team_2" size="1"/>
-                                    </form>
-                                </td>
-                            {% endif %}
-                            <td>
-                                <form action="" method="POST">
-                                    <input type="submit" value="Save" name="save">
-                                </form>
-                                    <!-- <input type="submit" class="btn btn-warning" value={{ game.id }} name="edit">Edit</input>
-                                <input type="submit" class="btn btn-success" value={{ game.id }} name="save">Save</input> -->
+                                <a class="btn btn-warning" href="{{ url_for('game_edit') }}" role="button" >Edit</a>
                             </td>
                         </tr>
                     {% endfor %}
