@@ -243,6 +243,7 @@ def games():
             db_session.add(game)
             db_session.commit()
             flash('Add game successfully.')
+            return redirect(url_for('games'))
         flash('Whoops! There was a problem!')
     return render_template('gameslist.html', teams=teams, games=games, form=form)
 
@@ -262,15 +263,14 @@ def game_edit():
 
             db_session.commit()
             flash("Game updated successfully!")
-            return render_template('gamesedit.html', games=games)
+            return redirect(url_for('game_edit'))
         except:
             flash("Error! There was a problem edit game... try again.")
     return render_template('gamesedit.html', games=games)
 
 
-@app.post('/delete_game/<int:game_id>')    
+@app.post('/admin/delete_game/<int:game_id>')    
 def delete_game(game_id):
-    game_id = request.form['delete']
     game = Game.query.filter_by(id=game_id).first()
     
     try:
@@ -281,6 +281,8 @@ def delete_game(game_id):
         return render_template('gamesedit.html', games=games)
     except:
         flash("Whoops! There was a problem deleting game, try again...")
+    
+    return redirect(url_for('game_edit'))
 
 
 # Errors
