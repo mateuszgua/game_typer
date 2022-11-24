@@ -32,7 +32,7 @@ class EditUserForm(FlaskForm):
 
 
 class AddGameForm(FlaskForm):
-    game_teams = StringField('Team')
+    id = IntegerField('Id')
     team_1 = StringField('Team 1')
     team_2 = StringField('Team 2')
     game_day = DateField('Date')

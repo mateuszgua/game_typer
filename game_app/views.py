@@ -232,9 +232,9 @@ def games():
     teams = Team.query.all()
     form = AddGameForm()
     if form.validate_on_submit():
-        existing_game = Game.query.filter_by(game_teams=form.game_teams.data).first()
-        if existing_game is not None:
-            game = Game(game_teams=form.game_teams.data,
+        existing_game = Game.query.filter_by(id=form.id.data).first()
+        if existing_game is None:
+            game = Game(id=form.id.data,
                         team_1=form.team_1.data,
                         team_2=form.team_2.data,
                         game_day=form.game_day.data,
