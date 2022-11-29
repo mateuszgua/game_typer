@@ -21,7 +21,11 @@ admin.add_view(RoleAdminView(Game, db_session))
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(user_id)
+    try:
+        return User.query.get(user_id)
+    except:
+        return None
+    # return User.query.get(user_id)
 
 
 @login_manager.unauthorized_handler
@@ -40,9 +44,16 @@ def home():
 
 
 @app.route('/user/<int:user_id>')
-@login_required
+# @login_required
 def user(user_id):
     user = User.query.filter_by(id=user_id).first()
+
+    user_id = current_user.get_id()
+    print("___________________")
+    print(user_id)
+    user_auth = current_user.is_authenticated
+    print("___________________")
+    print(user_auth)
 
     return render_template('accounts/user.html', user=user)
 
@@ -281,28 +292,52 @@ def delete_game(game_id):
 
 
 @app.route('/user/types', methods=['GET', 'POST'])
-@login_required
 def types():
     games = Game.query.all()
-    types = Type.query.all()
-    user = User.query.filter_by(id=1).first()
-    type = Type.query.filter_by(id=1).first()
+    # types = Type.query.all(user_id=user_id)
 
-    if request.method == 'POST':
-        type = Game.query.filter_by(id=1).first()
-        team1 = request.form.get('team1')
-        team2 = request.form.get('team2')
+    # user_id = current_user.get_id()
+    user_id = 1
 
-        try:
-            type.type_goals_team_1 = team1
-            type.type_goals_team_2 = team2
+    user = User.query.filter_by(id=user_id).first()
+    types = Type.query.filter_by(user_id=user_id).first()
 
-            db_session.commit()
-            flash("Type updated successfully!")
-            return redirect(url_for('types'))
-        except:
-            flash("Error! There was a problem edit type... try again.")
-    return render_template('accounts/usertypes.html', games=games, types=types, user=user)
+    # if request.method == 'POST':
+    # type = Game.query.filter_by(id=1).first()
+    # team1 = request.form.get('team1')
+    # team2 = request.form.get('team2')
+#
+    # try:
+    # type.type_goals_team_1 = team1
+    # type.type_goals_team_2 = team2
+#
+    # db_session.commit()
+    # flash("Type updated successfully!")
+    # return redirect(url_for('types'))
+    # except:
+    # flash("Error! There was a problem edit type... try again.")
+    return render_template('accounts/usertypes.html', types=types)
+
+
+@app.post('/user/load_types')
+def load_types():
+
+    games = Game.query.all()
+
+    # user_id = current_user.get_id()
+    user_id = 1
+
+    for game in games:
+        user_type = Type(
+            game_id=game.id,
+            type_goals_team_1=None,
+            type_goals_team_2=None,
+            type_points=None,
+            user_id=user_id)
+        db_session.add(user_type)
+    db_session.commit()
+    flash("Types addes successfully!")
+    return redirect(url_for('types'))
 
     # form = AddGameForm()
     # if form.validate_on_submit():

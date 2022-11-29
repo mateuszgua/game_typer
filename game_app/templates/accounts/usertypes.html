@@ -28,6 +28,23 @@
 
 <br>
 
+<div class="form-check">
+    <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1">
+    <label class="form-check-label" for="flexRadioDefault1">
+        Add games 1
+    </label>
+</div>
+<div class="form-check">
+    <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault2" checked>
+    <label class="form-check-label" for="flexRadioDefault2">
+        Add games 2
+    </label>
+</div>
+<form method="POST" action="{{ url_for('load_types') }}">
+    <input class="btn btn-primary" type="submit" name="load" value="Load types">
+</form>
+<br>
+
 <div class="container">
     <div class="row">
         <div class="col-md-auto">
@@ -45,30 +62,33 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for game in games %}
-                        <!-- {% for type in types %} -->
-                            <tr class="text-center">
-                                <th scope="row">{{ game.id }}</th>
-                                <td class="text-capitalize">{{ game.team_1 }} - {{ game.team_2 }}</td>
-                                <td>{{ game.game_day }}</td>
-                                <td>{{ game.game_time }}</td>
-                                <td>{{ game.goals_team_1 }} : {{ game.goals_team_2 }}</td>
-                                <!-- <td>{{ type.type_goals_team_1 }} : {{ type.type_goals_team_2 }}</td> -->
-                                <td>{{ user.points }}</td>
-                                <td>
-                                    <a class="btn btn-warning" href="{{ url_for('types') }}" role="button" >Edit</a>
-                                </td>
-                            </tr>
-                        <!-- {% endfor %} -->
+                    <!-- {% for game in games %} -->
+                    {% for type in types %}
+                    <tr class="text-center">
+                        <th scope="row">{{ type.game_id }}</th>
+                        <td>{{ type.type_goals_team_1 }} : {{ type.type_goals_team_2 }}</td>
+                        <td>{{ type.points }}</td>
+                        <td>abc</td>
+                        <td>abc</td>
+                        <td>abc</td>
+                        <td>abc</td>
+                        <!-- <td class="text-capitalize">{{ game.team_1 }} - {{ game.team_2 }}</td> -->
+                        <!-- <td>{{ game.game_day }}</td> -->
+                        <!-- <td>{{ game.game_time }}</td> -->
+                        <!-- <td>{{ game.goals_team_1 }} : {{ game.goals_team_2 }}</td> -->
+                        <!-- <td>{{ type.type_goals_team_1 }} : {{ type.type_goals_team_2 }}</td> -->
+                        <!-- <td>{{ user.points }}</td> -->
+                        <td>
+                            <a class="btn btn-warning" href="{{ url_for('types') }}" role="button">Edit</a>
+                        </td>
+                    </tr>
                     {% endfor %}
+                    <!-- {% endfor %} -->
                 </tbody>
             </table>
         </div>
         <div class="col-md-auto">
             <br>
-        </div>
-        <div class="col">
-           <br>
         </div>
     </div>
 </div>
