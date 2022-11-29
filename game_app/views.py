@@ -6,7 +6,7 @@ from game_app.config import Config
 
 import os
 import uuid
-from flask import render_template, url_for, redirect, request, flash, session, json
+from flask import render_template, url_for, redirect, request, flash, json
 from flask_login import login_user, current_user, logout_user, login_required
 
 from werkzeug.utils import secure_filename
@@ -18,9 +18,10 @@ admin.add_view(UserAdminView(User, db_session))
 admin.add_view(RoleAdminView(Role, db_session))
 admin.add_view(RoleAdminView(Game, db_session))
 
+
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    return User.query.get(user_id)
 
 
 @login_manager.unauthorized_handler
@@ -39,15 +40,9 @@ def home():
 
 
 @app.route('/user/<int:user_id>')
+@login_required
 def user(user_id):
     user = User.query.filter_by(id=user_id).first()
-    # delete
-    user_id1 = User.query.get(int(user_id))
-    print(user_id1)
-    print(f"To jest user: %s", current_user.is_authenticated)
-    print(f"To jest user: %s", session.get('id'))
-    print(user_id)
-    print(current_user.get_id())
 
     return render_template('accounts/user.html', user=user)
 
@@ -83,6 +78,7 @@ def login():
         user = User.query.filter_by(email=form.email.data).first()
         if user:
             if user.check_password(password=form.password1.data):
+                user.authenticated = True
                 login_user(user, remember=form.remember.data)
                 next = request.args.get('next')
                 return redirect(next or (url_for('user', user_id=user.id)))
@@ -95,22 +91,18 @@ def login():
 @app.route('/logout', methods=('GET', 'POST'))
 @login_required
 def logout():
-    session.clear()
+    user = current_user
+    user.authenticated = False
     logout_user()
     flash("You have been logged out!")
-    return redirect(url_for('login', next=request.url))
+    return redirect(url_for('login'))
 
 
 @app.route('/edit/<int:user_id>', methods=('GET', 'POST'))
+@login_required
 def edit(user_id):
     form = EditUserForm()
     user = User.query.filter_by(id=user_id).first()
-
-    # To delete
-    print(f"To jest user: %s", current_user.is_authenticated)
-    print(f"To jest user: %s", session.get('id'))
-    print(user_id)
-    print(current_user.get_id())
 
     if request.method == 'POST':
         firstname = request.form['firstname']
@@ -137,10 +129,8 @@ def edit(user_id):
 
 
 @app.post('/delete/<int:user_id>')
+@login_required
 def delete(user_id):
-    # delete
-    print(user_id)
-    print(current_user.get_id())
 
     if user_id == current_user.get_id():
         user = User.query.filter_by(id=user_id).first()
@@ -165,6 +155,7 @@ def allowed_file(filename):
 
 
 @app.route('/admin/upload_file', methods=['GET', 'POST'])
+@login_required
 def upload_file():
     if request.method == 'POST':
         if 'file' not in request.files:
@@ -175,7 +166,7 @@ def upload_file():
         if file.filename == '':
             flash("No selected file")
             return redirect(request.url)
-        
+
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             file.save(os.path.join(config.UPLOAD_FOLDER, filename))
@@ -187,6 +178,7 @@ def upload_file():
 
 
 @app.route('/admin/select_file', methods=['GET', 'POST'])
+@login_required
 def select_file():
     files = UploadFile.query.all()
     if request.method == 'POST':
@@ -204,28 +196,29 @@ def processjson(file_idx):
     SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
     json_url = os.path.join(SITE_ROOT, "static/files", file.filename)
     data = json.load(open(json_url))
-    
+
     i = 0
-    while i < 32 : 
+    while i < 32:
         team = Team(name=data['team'][i]['name'],
-                       games_played=0,
-                       wins=0,
-                       draws=0,
-                       lost=0,
-                       goal_scored=0,
-                       goal_lost=0,
-                       goal_balance=0,
-                       points=0,
-                       group=data['team'][i]['group'],
-                       play_off=0,
-                       image_name=f"files/{data['team'][i]['name']}_48x48.png"
-                       )
+                    games_played=0,
+                    wins=0,
+                    draws=0,
+                    lost=0,
+                    goal_scored=0,
+                    goal_lost=0,
+                    goal_balance=0,
+                    points=0,
+                    group=data['team'][i]['group'],
+                    play_off=0,
+                    image_name=f"files/{data['team'][i]['name']}_48x48.png"
+                    )
         db_session.add(team)
         db_session.commit()
         i += 1
 
 
 @app.route('/admin/games', methods=['GET', 'POST'])
+@login_required
 def games():
     games = Game.query.all()
     teams = Team.query.all()
@@ -247,16 +240,17 @@ def games():
         flash('Whoops! There was a problem!')
     return render_template('gameslist.html', teams=teams, games=games, form=form, user=user)
 
-    
+
 @app.route('/admin/game_edit', methods=['GET', 'POST'])
+@login_required
 def game_edit():
     games = Game.query.all()
-    
+
     if request.method == 'POST':
         game = Game.query.filter_by(id=request.form['action']).first()
         team1 = request.form.get('team1')
         team2 = request.form.get('team2')
-        
+
         try:
             game.goals_team_1 = team1
             game.goals_team_2 = team2
@@ -269,10 +263,11 @@ def game_edit():
     return render_template('gamesedit.html', games=games)
 
 
-@app.post('/admin/delete_game/<int:game_id>')    
+@app.post('/admin/delete_game/<int:game_id>')
+@login_required
 def delete_game(game_id):
     game = Game.query.filter_by(id=game_id).first()
-    
+
     try:
         db_session.delete(game)
         db_session.commit()
@@ -281,10 +276,12 @@ def delete_game(game_id):
         return render_template('gamesedit.html', games=games)
     except:
         flash("Whoops! There was a problem deleting game, try again...")
-    
+
     return redirect(url_for('game_edit'))
 
+
 @app.route('/user/types', methods=['GET', 'POST'])
+@login_required
 def types():
     games = Game.query.all()
     types = Type.query.all()
@@ -295,7 +292,7 @@ def types():
         type = Game.query.filter_by(id=1).first()
         team1 = request.form.get('team1')
         team2 = request.form.get('team2')
-        
+
         try:
             type.type_goals_team_1 = team1
             type.type_goals_team_2 = team2
@@ -307,26 +304,24 @@ def types():
             flash("Error! There was a problem edit type... try again.")
     return render_template('accounts/usertypes.html', games=games, types=types, user=user)
 
-
-
     # form = AddGameForm()
     # if form.validate_on_submit():
-        # existing_game = Game.query.filter_by(id=form.id.data).first()
-        # if existing_game is None:
-            # game = Game(id=form.id.data,
-                        # team_1=form.team_1.data,
-                        # team_2=form.team_2.data,
-                        # game_day=form.game_day.data,
-                        # game_time=form.game_time.data,
-                        # )
-            # db_session.add(game)
-            # db_session.commit()
-            # flash('Add type successfully.')
-            # return redirect(url_for('games'))
-        # flash('Whoops! There was a problem!')
+    # existing_game = Game.query.filter_by(id=form.id.data).first()
+    # if existing_game is None:
+    # game = Game(id=form.id.data,
+    # team_1=form.team_1.data,
+    # team_2=form.team_2.data,
+    # game_day=form.game_day.data,
+    # game_time=form.game_time.data,
+    # )
+    # db_session.add(game)
+    # db_session.commit()
+    # flash('Add type successfully.')
+    # return redirect(url_for('games'))
+    # flash('Whoops! There was a problem!')
     # return render_template('gameslist.html', teams=teams, games=games, form=form)
 
-    
+
 # Errors
 @ app.errorhandler(404)
 def page_not_found(error_description):

@@ -27,7 +27,7 @@ class Role(database.Base, RoleMixin):
     permissions = Column(UnicodeText)
 
 
-class User(database.Base, UserMixin):
+class User(UserMixin, database.Base):
     __tablename__ = 'user'
     id = Column(Integer, primary_key=True)
     firstname = Column(String(100), nullable=False)
@@ -37,12 +37,13 @@ class User(database.Base, UserMixin):
     email = Column(String(100), nullable=False, unique=True)
     active = Column(Boolean())
     fs_uniquifier = Column(String(255), unique=True, nullable=False)
+    authenticated = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True),
                         server_default=func.now(), nullable=False)
     roles = relationship('Role', secondary='roles_users',
                          backref=backref('users', lazy='dynamic'))
     # types = relationship('Type', secondary='user_type',
-                        #  backref=backref('users', lazy='dynamic'))
+    #  backref=backref('users', lazy='dynamic'))
     types = relationship('Type', backref='user')
     points = Column(Integer)
 
@@ -54,6 +55,18 @@ class User(database.Base, UserMixin):
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+
+    def is_active(self):
+        return True
+
+    def get_id(self):
+        return self.email
+
+    def is_authenticated(self):
+        return self.authenticated
+
+    def is_anonymous(self):
+        return False
 
 
 class AdminMixin:
@@ -137,13 +150,13 @@ class Type(database.Base):
 class Game(database.Base):
     __tablename__ = 'games'
     id = Column(Integer, primary_key=True)
-    game_discipline =  Column(String(20))
-    game_name =  Column(String(20))
-    team_1 =  Column(String(20))
-    team_2 =  Column(String(20))
+    game_discipline = Column(String(20))
+    game_name = Column(String(20))
+    team_1 = Column(String(20))
+    team_2 = Column(String(20))
     game_day = Column(Date(), nullable=False)
     game_time = Column(Time(), nullable=False)
     goals_team_1 = Column(Integer)
     goals_team_2 = Column(Integer)
-    game_phase = Column(String(30)) 
+    game_phase = Column(String(30))
     result = Column(String(10))
