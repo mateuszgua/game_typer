@@ -1,6 +1,6 @@
 from game_app import app, login_manager, admin
 from game_app.forms import RegistrationForm, LoginForm, EditUserForm, AddGameForm
-from game_app.models import User, Role, Team, UserAdminView, RoleAdminView, UploadFile, Game, UserType, Type
+from game_app.models import User, Role, Team, UserAdminView, RoleAdminView, UploadFile, Game, Type
 from game_app.database import db_session
 from game_app.config import Config
 
@@ -17,7 +17,6 @@ config = Config()
 admin.add_view(UserAdminView(User, db_session))
 admin.add_view(RoleAdminView(Role, db_session))
 admin.add_view(RoleAdminView(Game, db_session))
-admin.add_view(RoleAdminView(UserType, db_session))
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -231,6 +230,7 @@ def games():
     games = Game.query.all()
     teams = Team.query.all()
     form = AddGameForm()
+    user = User.query.filter_by(id=1).first()
     if form.validate_on_submit():
         existing_game = Game.query.filter_by(id=form.id.data).first()
         if existing_game is None:
@@ -245,7 +245,7 @@ def games():
             flash('Add game successfully.')
             return redirect(url_for('games'))
         flash('Whoops! There was a problem!')
-    return render_template('gameslist.html', teams=teams, games=games, form=form)
+    return render_template('gameslist.html', teams=teams, games=games, form=form, user=user)
 
     
 @app.route('/admin/game_edit', methods=['GET', 'POST'])
@@ -289,9 +289,10 @@ def types():
     games = Game.query.all()
     types = Type.query.all()
     user = User.query.filter_by(id=1).first()
+    type = Type.query.filter_by(id=1).first()
 
     if request.method == 'POST':
-        type = Game.query.filter_by(id=request.form['action']).first()
+        type = Game.query.filter_by(id=1).first()
         team1 = request.form.get('team1')
         team2 = request.form.get('team2')
         
@@ -308,22 +309,22 @@ def types():
 
 
 
-    form = AddGameForm()
-    if form.validate_on_submit():
-        existing_game = Game.query.filter_by(id=form.id.data).first()
-        if existing_game is None:
-            game = Game(id=form.id.data,
-                        team_1=form.team_1.data,
-                        team_2=form.team_2.data,
-                        game_day=form.game_day.data,
-                        game_time=form.game_time.data,
-                        )
-            db_session.add(game)
-            db_session.commit()
-            flash('Add type successfully.')
-            return redirect(url_for('games'))
-        flash('Whoops! There was a problem!')
-    return render_template('gameslist.html', teams=teams, games=games, form=form)
+    # form = AddGameForm()
+    # if form.validate_on_submit():
+        # existing_game = Game.query.filter_by(id=form.id.data).first()
+        # if existing_game is None:
+            # game = Game(id=form.id.data,
+                        # team_1=form.team_1.data,
+                        # team_2=form.team_2.data,
+                        # game_day=form.game_day.data,
+                        # game_time=form.game_time.data,
+                        # )
+            # db_session.add(game)
+            # db_session.commit()
+            # flash('Add type successfully.')
+            # return redirect(url_for('games'))
+        # flash('Whoops! There was a problem!')
+    # return render_template('gameslist.html', teams=teams, games=games, form=form)
 
     
 # Errors

@@ -41,8 +41,9 @@ class User(database.Base, UserMixin):
                         server_default=func.now(), nullable=False)
     roles = relationship('Role', secondary='roles_users',
                          backref=backref('users', lazy='dynamic'))
-    types = relationship('Type', secondary='user_type',
-                         backref=backref('users', lazy='dynamic'))
+    # types = relationship('Type', secondary='user_type',
+                        #  backref=backref('users', lazy='dynamic'))
+    types = relationship('Type', backref='user')
     points = Column(Integer)
 
     def __repr__(self) -> str:
@@ -115,29 +116,34 @@ class UploadFile(database.Base):
                         server_default=func.now(), nullable=False)
     data = Column(LargeBinary)
 
-class UserType(database.Base):
-    __tablename__ = 'user_type'
-    id = Column(Integer(), primary_key=True)
-    user_id = Column('user_id', Integer(), ForeignKey('user.id'))
-    type_id = Column('type_id', Integer(), ForeignKey('type.id'))
+
+# class UserType(database.Base):
+    # __tablename__ = 'user_type'
+    # id = Column(Integer(), primary_key=True)
+    # user_id = Column('user_id', Integer(), ForeignKey('user.id'))
+    # type_id = Column('type_id', Integer(), ForeignKey('type.id'))
+
 
 class Type(database.Base):
     __tablename__ = 'type'
     id = Column(Integer, primary_key=True)
     game_id = (Integer)
-    game_type =  Column(String(10))
     type_goals_team_1 = Column(Integer)
     type_goals_team_2 = Column(Integer)
+    type_points = Column(Integer)
+    user_id = Column(Integer, ForeignKey('user.id'))
 
 
 class Game(database.Base):
     __tablename__ = 'games'
     id = Column(Integer, primary_key=True)
-    game_teams =  Column(String(10))
+    game_discipline =  Column(String(20))
+    game_name =  Column(String(20))
     team_1 =  Column(String(20))
     team_2 =  Column(String(20))
     game_day = Column(Date(), nullable=False)
     game_time = Column(Time(), nullable=False)
     goals_team_1 = Column(Integer)
     goals_team_2 = Column(Integer)
+    game_phase = Column(String(30)) 
     result = Column(String(10))

@@ -45,19 +45,21 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for type, game in types, games %}
-                       <tr class="text-center">
-                            <th scope="row">{{ type.id }}</th>
-                            <td class="text-capitalize">{{ game.team_1 }} - {{ game.team_2 }}</td>
-                            <td>{{ game.game_day }}</td>
-                            <td>{{ game.game_time }}</td>
-                            <td>{{ game.goals_team_1 }} : {{ game.goals_team_2 }}</td>
-                            <td>{{ type.type_goals_team_1 }} : {{ game.type_goals_team_2 }}</td>
-                            <!-- <td>{{ user.points }}</td> -->
-                            <td>
-                                <!-- <a class="btn btn-warning" href="{{ url_for('types') }}" role="button" >Edit</a> -->
-                            </td>
-                        </tr>
+                    {% for game in games %}
+                        <!-- {% for type in types %} -->
+                            <tr class="text-center">
+                                <th scope="row">{{ game.id }}</th>
+                                <td class="text-capitalize">{{ game.team_1 }} - {{ game.team_2 }}</td>
+                                <td>{{ game.game_day }}</td>
+                                <td>{{ game.game_time }}</td>
+                                <td>{{ game.goals_team_1 }} : {{ game.goals_team_2 }}</td>
+                                <!-- <td>{{ type.type_goals_team_1 }} : {{ type.type_goals_team_2 }}</td> -->
+                                <td>{{ user.points }}</td>
+                                <td>
+                                    <a class="btn btn-warning" href="{{ url_for('types') }}" role="button" >Edit</a>
+                                </td>
+                            </tr>
+                        <!-- {% endfor %} -->
                     {% endfor %}
                 </tbody>
             </table>
