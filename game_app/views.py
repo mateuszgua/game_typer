@@ -239,6 +239,9 @@ def games():
         existing_game = Game.query.filter_by(id=form.id.data).first()
         if existing_game is None:
             game = Game(id=form.id.data,
+                        discipline=form.discipline.data,
+                        game_name=form.tournament.data,
+                        game_phase=form.game_phase.data,
                         team_1=form.team_1.data,
                         team_2=form.team_2.data,
                         game_day=form.game_day.data,
@@ -293,14 +296,15 @@ def delete_game(game_id):
 
 @app.route('/user/types', methods=['GET', 'POST'])
 def types():
+
     games = Game.query.all()
-    # types = Type.query.all(user_id=user_id)
+    user_types = Type.query.all()
 
     # user_id = current_user.get_id()
     user_id = 1
 
     user = User.query.filter_by(id=user_id).first()
-    types = Type.query.filter_by(user_id=user_id).first()
+    # user_types = Type.query.filter_by(user_id=user_id).first()
 
     # if request.method == 'POST':
     # type = Game.query.filter_by(id=1).first()
@@ -316,7 +320,7 @@ def types():
     # return redirect(url_for('types'))
     # except:
     # flash("Error! There was a problem edit type... try again.")
-    return render_template('accounts/usertypes.html', types=types)
+    return render_template('accounts/usertypes.html', user_types=user_types, games=games, user=user)
 
 
 @app.post('/user/load_types')
@@ -357,7 +361,31 @@ def load_types():
     # return render_template('gameslist.html', teams=teams, games=games, form=form)
 
 
+@ app.route('/admin/db_update', methods=['GET', 'POST'])
+def db_update():
+
+    if request.method == 'POST':
+        try:
+            table_name1 = 'type'
+            table_name2 = 'games'
+
+            column_name1 = 'tournament'
+            column_name2 = 'tournament'
+
+            query1 = f"ALTER TABLE {table_name1} ADD {column_name1} VARCHAR(20);"
+            db_session.execute(query1)
+
+            query2 = f"ALTER TABLE {table_name2} ADD {column_name2} VARCHAR(20);"
+            db_session.execute(query2)
+
+            flash("Database update successfully!")
+        except:
+            flash("There was a problem edit database...!")
+    return render_template('dbupdate.html')
+
 # Errors
+
+
 @ app.errorhandler(404)
 def page_not_found(error_description):
     return render_template('404.html', error_description=error_description)

@@ -34,6 +34,7 @@ class EditUserForm(FlaskForm):
 class AddGameForm(FlaskForm):
     id = IntegerField('Id')
     discipline = StringField('Discipline')
+    tournament = StringField('Tournament name')
     game_phase = StringField('Phase')
     team_1 = StringField('Team 1')
     team_2 = StringField('Team 2')

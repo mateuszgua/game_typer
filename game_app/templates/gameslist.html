@@ -45,17 +45,17 @@
                 </thead>
                 <tbody>
                     {% for game in games %}
-                       <tr class="text-center">
-                            <th scope="row">{{ game.id }}</th>
-                            <td class="text-capitalize">{{ game.team_1 }}</td>
-                            <td class="text-capitalize">{{ game.team_2 }}</td>
-                            <td>{{ game.game_day }}</td>
-                            <td>{{ game.game_time }}</td>
-                            <td>{{ game.goals_team_1 }} : {{ game.goals_team_2 }}</td>
-                            <td>
-                                <a class="btn btn-warning" href="{{ url_for('game_edit') }}" role="button" >Edit</a>
-                            </td>
-                        </tr>
+                    <tr class="text-center">
+                        <th scope="row">{{ game.id }}</th>
+                        <td class="text-capitalize">{{ game.team_1 }}</td>
+                        <td class="text-capitalize">{{ game.team_2 }}</td>
+                        <td>{{ game.game_day }}</td>
+                        <td>{{ game.game_time }}</td>
+                        <td>{{ game.goals_team_1 }} : {{ game.goals_team_2 }}</td>
+                        <td>
+                            <a class="btn btn-warning" href="{{ url_for('game_edit') }}" role="button">Edit</a>
+                        </td>
+                    </tr>
                     {% endfor %}
                 </tbody>
             </table>
@@ -64,10 +64,10 @@
             <div class="card border-dark mb-3" style="max-width: 18rem;">
                 <div class="card-header text-center">Add game</div>
                 <div class="card-body text-dark ">
-                  <p class="card-text text-center">
-                    {{ render_form(form) }}
-                    {{ form.csrf_token }}
-                    {{ form.hidden_tag() }}
+                    <p class="card-text text-center">
+                        {{ render_form(form) }}
+                        {{ form.csrf_token }}
+                        {{ form.hidden_tag() }}
                 </div>
             </div>
         </div>
@@ -81,10 +81,10 @@
                 </thead>
                 <tbody>
                     {% for team in teams %}
-                        <tr class="text-center">
-                            <th scope="row">{{ team.id }}</th>
-                            <td class="text-capitalize">{{ team.name }}</td>
-                        </tr>
+                    <tr class="text-center">
+                        <th scope="row">{{ team.id }}</th>
+                        <td class="text-capitalize">{{ team.name }}</td>
+                    </tr>
                     {% endfor %}
                 </tbody>
             </table>

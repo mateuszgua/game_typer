@@ -25,6 +25,8 @@
 {% endfor %}
 
 <h2 class="title text-center">{% block title %} Games World Cup 2022 {% endblock %}</h2>
+<br>
+<p class="text-center">User points: {{user.points}}</p>
 
 <br>
 
@@ -57,33 +59,33 @@
                         <th scope="col">Time</th>
                         <th scope="col">Result</th>
                         <th scope="col">Type</th>
-                        <th scope="col">User pts</th>
+                        <th scope="col">User pts from game</th>
                         <th scope="col">Action</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- {% for game in games %} -->
-                    {% for type in types %}
+                    {% for user_type in user_types %}
                     <tr class="text-center">
-                        <th scope="row">{{ type.game_id }}</th>
-                        <td>{{ type.type_goals_team_1 }} : {{ type.type_goals_team_2 }}</td>
-                        <td>{{ type.points }}</td>
-                        <td>abc</td>
-                        <td>abc</td>
-                        <td>abc</td>
-                        <td>abc</td>
-                        <!-- <td class="text-capitalize">{{ game.team_1 }} - {{ game.team_2 }}</td> -->
-                        <!-- <td>{{ game.game_day }}</td> -->
-                        <!-- <td>{{ game.game_time }}</td> -->
-                        <!-- <td>{{ game.goals_team_1 }} : {{ game.goals_team_2 }}</td> -->
-                        <!-- <td>{{ type.type_goals_team_1 }} : {{ type.type_goals_team_2 }}</td> -->
-                        <!-- <td>{{ user.points }}</td> -->
+                        <th scope="row">{{ user_type.game_id }}</th>
+                        {% for game in games %}
+                        {% if user_type.game_id == game.id %}
+                        <td>{{ game.team_1 }} - {{ game.team_2 }}</td>
+                        <td>{{ game.game_day }}</td>
+                        <td>{{ game.game_time }}</td>
+                        {% if game.result == None %}
+                        <td>-</td>
+                        {% else %}
+                        <td>{{ game.result }}</td>
+                        {% endif %}
+                        {% endif %}
+                        {% endfor %}
+                        <td>{{ user_type.type_goals_team_1 }} : {{ user_type.type_goals_team_2 }}</td>
+                        <td>{{ user_type.type_points }}</td>
                         <td>
                             <a class="btn btn-warning" href="{{ url_for('types') }}" role="button">Edit</a>
                         </td>
                     </tr>
                     {% endfor %}
-                    <!-- {% endfor %} -->
                 </tbody>
             </table>
         </div>

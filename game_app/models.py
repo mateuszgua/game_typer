@@ -140,7 +140,8 @@ class UploadFile(database.Base):
 class Type(database.Base):
     __tablename__ = 'type'
     id = Column(Integer, primary_key=True)
-    game_id = (Integer)
+    game_id = Column(Integer)
+    tournament = Column(String(20))
     type_goals_team_1 = Column(Integer)
     type_goals_team_2 = Column(Integer)
     type_points = Column(Integer)
@@ -151,7 +152,7 @@ class Game(database.Base):
     __tablename__ = 'games'
     id = Column(Integer, primary_key=True)
     game_discipline = Column(String(20))
-    game_name = Column(String(20))
+    tournament = Column(String(20))
     team_1 = Column(String(20))
     team_2 = Column(String(20))
     game_day = Column(Date(), nullable=False)
