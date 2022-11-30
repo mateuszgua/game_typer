@@ -39,7 +39,6 @@ def home():
     teams = Team.query.all()
     IMG_LIST = os.listdir('game_app/static/files')
     IMG_LIST = ['files/' + i for i in IMG_LIST]
-    print(IMG_LIST)
     return render_template('index.html', teams=teams, current_user=current_user, image_list=IMG_LIST)
 
 
@@ -259,21 +258,6 @@ def games():
 @app.route('/admin/game_edit', methods=['GET', 'POST'])
 def game_edit():
     games = Game.query.all()
-#
-    # if request.method == 'POST':
-    # game = Game.query.filter_by(id=request.form['action']).first()
-    # team1 = request.form.get('team1')
-    # team2 = request.form.get('team2')
-#
-    # try:
-    # game.goals_team_1 = team1
-    # game.goals_team_2 = team2
-#
-    # db_session.commit()
-    # flash("Game updated successfully!")
-    # return redirect(url_for('game_edit'))
-    # except:
-    # flash("Error! There was a problem edit game... try again.")
     return render_template('gamesedit.html', games=games)
 
 
@@ -319,7 +303,7 @@ def edit_all_games():
         tournament = request.form.get('all_tournament')
         phase = request.form.get('all_phase')
 
-        while row < rows:
+        while row <= rows:
             edit_game = Game.query.filter_by(id=row).first()
             edit_game.game_discipline = discipline
             edit_game.tournament = tournament
@@ -360,29 +344,14 @@ def types():
     user_id = 1
 
     user = User.query.filter_by(id=user_id).first()
-    # user_types = Type.query.filter_by(user_id=user_id).first()
-
-    # if request.method == 'POST':
-    # type = Game.query.filter_by(id=1).first()
-    # team1 = request.form.get('team1')
-    # team2 = request.form.get('team2')
-#
-    # try:
-    # type.type_goals_team_1 = team1
-    # type.type_goals_team_2 = team2
-#
-    # db_session.commit()
-    # flash("Type updated successfully!")
-    # return redirect(url_for('types'))
-    # except:
-    # flash("Error! There was a problem edit type... try again.")
     return render_template('accounts/usertypes.html', user_types=user_types, games=games, user=user)
 
 
 @app.post('/user/load_types')
 def load_types():
+    #
     user_id = 1
-    tournament_name = "abc"
+    tournament_name = "World Cup 2022"
     user = User.query.filter_by(id=user_id).first()
     games = Game.query.all()
 
@@ -414,10 +383,8 @@ def load_types():
 
 def is_tournament_exist(tournament_name, user):
     for tournament in user.tournaments:
-        if tournament_name == tournament:
+        if tournament_name == tournament.tournament:
             return True
-        else:
-            return False
 
 
 @app.post('/user/edit_type/<int:type_id>')
