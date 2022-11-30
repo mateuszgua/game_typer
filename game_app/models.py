@@ -45,6 +45,7 @@ class User(UserMixin, database.Base):
     # types = relationship('Type', secondary='user_type',
     #  backref=backref('users', lazy='dynamic'))
     types = relationship('Type', backref='user')
+    tournaments = relationship('UserTournaments', backref='user')
     points = Column(Integer)
 
     def __repr__(self) -> str:
@@ -130,11 +131,11 @@ class UploadFile(database.Base):
     data = Column(LargeBinary)
 
 
-# class UserType(database.Base):
-    # __tablename__ = 'user_type'
-    # id = Column(Integer(), primary_key=True)
-    # user_id = Column('user_id', Integer(), ForeignKey('user.id'))
-    # type_id = Column('type_id', Integer(), ForeignKey('type.id'))
+class UserTournaments(database.Base):
+    __tablename__ = 'tournament'
+    id = Column(Integer(), primary_key=True)
+    tournament = Column(String(20))
+    user_id = Column(Integer, ForeignKey('user.id'))
 
 
 class Type(database.Base):

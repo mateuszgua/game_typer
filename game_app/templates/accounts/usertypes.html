@@ -59,8 +59,8 @@
                         <th scope="col">Time</th>
                         <th scope="col">Result</th>
                         <th scope="col">Type</th>
-                        <th scope="col">User pts from game</th>
                         <th scope="col">Action</th>
+                        <th scope="col">User pts from game</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -72,18 +72,27 @@
                         <td>{{ game.team_1 }} - {{ game.team_2 }}</td>
                         <td>{{ game.game_day }}</td>
                         <td>{{ game.game_time }}</td>
-                        {% if game.result == None %}
+                        {% if game.goals_team_1 == None %}
                         <td>-</td>
                         {% else %}
-                        <td>{{ game.result }}</td>
+                        <td>{{ game.goals_team_1 }} : {{ game.goals_team_2 }}</td>
                         {% endif %}
                         {% endif %}
                         {% endfor %}
-                        <td>{{ user_type.type_goals_team_1 }} : {{ user_type.type_goals_team_2 }}</td>
+
+                        <form method="POST" action="{{ url_for('edit_type', type_id=user_type.game_id) }}"
+                            name="edit_type">
+                            <td>
+                                <input class="text-center" type="text" id="team1" name="team1" size="1"
+                                    value={{user_type.type_goals_team_1}}> :
+                                <input class="text-center" type="text" id="team2" name="team2" size="1"
+                                    value={{user_type.type_goals_team_2}}>
+                            </td>
+                            <td>
+                                <input class="btn btn-success" type="submit" value="Type game" name="action">
+                            </td>
+                        </form>
                         <td>{{ user_type.type_points }}</td>
-                        <td>
-                            <a class="btn btn-warning" href="{{ url_for('types') }}" role="button">Edit</a>
-                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>

@@ -1,6 +1,6 @@
 from game_app import app, login_manager, admin
 from game_app.forms import RegistrationForm, LoginForm, EditUserForm, AddGameForm
-from game_app.models import User, Role, Team, UserAdminView, RoleAdminView, UploadFile, Game, Type
+from game_app.models import User, Role, Team, UserAdminView, RoleAdminView, UploadFile, Game, Type, UserTournaments
 from game_app.database import db_session
 from game_app.config import Config
 
@@ -229,12 +229,13 @@ def processjson(file_idx):
 
 
 @app.route('/admin/games', methods=['GET', 'POST'])
-@login_required
 def games():
     games = Game.query.all()
     teams = Team.query.all()
     form = AddGameForm()
-    user = User.query.filter_by(id=1).first()
+    #
+    user_id = 1
+    user = User.query.filter_by(id=user_id).first()
     if form.validate_on_submit():
         existing_game = Game.query.filter_by(id=form.id.data).first()
         if existing_game is None:
@@ -256,29 +257,84 @@ def games():
 
 
 @app.route('/admin/game_edit', methods=['GET', 'POST'])
-@login_required
 def game_edit():
     games = Game.query.all()
-
-    if request.method == 'POST':
-        game = Game.query.filter_by(id=request.form['action']).first()
-        team1 = request.form.get('team1')
-        team2 = request.form.get('team2')
-
-        try:
-            game.goals_team_1 = team1
-            game.goals_team_2 = team2
-
-            db_session.commit()
-            flash("Game updated successfully!")
-            return redirect(url_for('game_edit'))
-        except:
-            flash("Error! There was a problem edit game... try again.")
+#
+    # if request.method == 'POST':
+    # game = Game.query.filter_by(id=request.form['action']).first()
+    # team1 = request.form.get('team1')
+    # team2 = request.form.get('team2')
+#
+    # try:
+    # game.goals_team_1 = team1
+    # game.goals_team_2 = team2
+#
+    # db_session.commit()
+    # flash("Game updated successfully!")
+    # return redirect(url_for('game_edit'))
+    # except:
+    # flash("Error! There was a problem edit game... try again.")
     return render_template('gamesedit.html', games=games)
 
 
+@app.post('/admin/edit_one_game/<int:game_id>')
+def edit_one_game(game_id):
+
+    edit_game = Game.query.filter_by(id=game_id).first()
+    discipline = request.form.get('discipline')
+    tournament = request.form.get('tournament')
+    phase = request.form.get('phase')
+    name_team_1 = request.form.get('name_team_1')
+    name_team_2 = request.form.get('name_team_2')
+    game_date = request.form.get('game_day')
+    game_time = request.form.get('game_time')
+    team1 = request.form.get('team1')
+    team2 = request.form.get('team2')
+
+    try:
+        edit_game.game_discipline = discipline
+        edit_game.tournament = tournament
+        edit_game.game_phase = phase
+        edit_game.team_1 = name_team_1
+        edit_game.team_2 = name_team_2
+        edit_game.game_day = game_date
+        edit_game.game_time = game_time
+        edit_game.goals_team_1 = team1
+        edit_game.goals_team_2 = team2
+        db_session.commit()
+        flash("Game updated successfully!")
+        return redirect(url_for('game_edit'))
+    except:
+        flash("Error! There was a problem edit game... try again.")
+    return redirect(url_for('game_edit'))
+
+
+@app.post('/admin/edit_all_games')
+def edit_all_games():
+    rows = Game.query.count()
+    row = 1
+
+    try:
+        discipline = request.form.get('all_discipline')
+        tournament = request.form.get('all_tournament')
+        phase = request.form.get('all_phase')
+
+        while row < rows:
+            edit_game = Game.query.filter_by(id=row).first()
+            edit_game.game_discipline = discipline
+            edit_game.tournament = tournament
+            edit_game.game_phase = phase
+            row += 1
+        db_session.commit()
+        flash("All games updated successfully!")
+        return redirect(url_for('game_edit'))
+
+    except:
+        flash("Error! There was a problem edit all games... try again.")
+    return redirect(url_for('game_edit'))
+
+
 @app.post('/admin/delete_game/<int:game_id>')
-@login_required
 def delete_game(game_id):
     game = Game.query.filter_by(id=game_id).first()
 
@@ -325,40 +381,60 @@ def types():
 
 @app.post('/user/load_types')
 def load_types():
-
+    user_id = 1
+    tournament_name = "abc"
+    user = User.query.filter_by(id=user_id).first()
     games = Game.query.all()
 
-    # user_id = current_user.get_id()
-    user_id = 1
+    if is_tournament_exist(tournament_name, user):
+        flash("Tournament exist!")
+        return redirect(url_for('types'))
+    else:
+        try:
+            for game in games:
+                user_type = Type(
+                    game_id=game.id,
+                    type_goals_team_1=None,
+                    type_goals_team_2=None,
+                    type_points=None,
+                    user_id=user_id)
+                db_session.add(user_type)
 
-    for game in games:
-        user_type = Type(
-            game_id=game.id,
-            type_goals_team_1=None,
-            type_goals_team_2=None,
-            type_points=None,
-            user_id=user_id)
-        db_session.add(user_type)
-    db_session.commit()
-    flash("Types addes successfully!")
+            user_tournament = UserTournaments(
+                tournament=game.tournament,
+                user_id=user_id)
+            db_session.add(user_tournament)
+            db_session.commit()
+            flash("Types addes successfully!")
+            return redirect(url_for('types'))
+        except:
+            flash('Whoops! There was a problem to add games for types!')
+            return redirect(url_for('types'))
+
+
+def is_tournament_exist(tournament_name, user):
+    for tournament in user.tournaments:
+        if tournament_name == tournament:
+            return True
+        else:
+            return False
+
+
+@app.post('/user/edit_type/<int:type_id>')
+def edit_type(type_id):
+
+    edit_type = Type.query.filter_by(id=type_id).first()
+    team1 = request.form.get('team1')
+    team2 = request.form.get('team2')
+
+    try:
+        edit_type.type_goals_team_1 = team1
+        edit_type.type_goals_team_2 = team2
+        db_session.commit()
+        flash("Type updated successfully!")
+    except:
+        flash("Error! There was a problem edit type... try again.")
     return redirect(url_for('types'))
-
-    # form = AddGameForm()
-    # if form.validate_on_submit():
-    # existing_game = Game.query.filter_by(id=form.id.data).first()
-    # if existing_game is None:
-    # game = Game(id=form.id.data,
-    # team_1=form.team_1.data,
-    # team_2=form.team_2.data,
-    # game_day=form.game_day.data,
-    # game_time=form.game_time.data,
-    # )
-    # db_session.add(game)
-    # db_session.commit()
-    # flash('Add type successfully.')
-    # return redirect(url_for('games'))
-    # flash('Whoops! There was a problem!')
-    # return render_template('gameslist.html', teams=teams, games=games, form=form)
 
 
 @ app.route('/admin/db_update', methods=['GET', 'POST'])
