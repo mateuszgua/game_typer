@@ -341,7 +341,10 @@ def tips():
     # user_id = current_user.get_id()
     user_id = 1
     user = User.query.filter_by(id=user_id).first()
-    present = datetime.now()
+
+    for user_tip in user_tips:
+        is_date_locked(user_tip.id)
+
     return render_template('accounts/usertips.html', user_tips=user_tips, games=games, user=user)
 
 
@@ -392,14 +395,42 @@ def edit_tip(tip_id):
     team1 = request.form.get('team1')
     team2 = request.form.get('team2')
 
-    try:
-        edit_tip.tip_goals_team_1 = team1
-        edit_tip.tip_goals_team_2 = team2
-        db_session.commit()
-        flash("Tip updated successfully!")
-    except:
-        flash("Error! There was a problem edit tip... try again.")
+    if edit_tip.tip_lock == 0 or edit_tip.tip_lock == None:
+
+        if is_date_locked(tip_id):
+            flash("Sorry, it's to late for tip this game!")
+        else:
+            try:
+                edit_tip.tip_goals_team_1 = team1
+                edit_tip.tip_goals_team_2 = team2
+                db_session.commit()
+                flash("Tip updated successfully!")
+            except:
+                flash("Error! There was a problem edit tip... try again.")
+            return redirect(url_for('tips'))
+    else:
+        flash("Sorry, it's to late for tip this game!")
     return redirect(url_for('tips'))
+
+
+def is_date_locked(tip_id):
+    game = Game.query.filter_by(id=tip_id).first()
+    game_day = game.game_day
+    game_time = game.game_time
+
+    present = datetime.now()
+    string_date_time = f"{game_day} {game_time}"
+    date_time = datetime.strptime(string_date_time, "%Y-%m-%d %H:%M:%S")
+
+    if present >= date_time:
+        lock_tip(tip_id)
+        return True
+
+
+def lock_tip(tip_id):
+    edit_tip = Tip.query.filter_by(id=tip_id).first()
+    edit_tip.tip_lock = 1
+    db_session.commit()
 
 
 @ app.route('/admin/db_update', methods=['GET', 'POST'])

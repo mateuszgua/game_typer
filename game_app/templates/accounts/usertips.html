@@ -79,7 +79,26 @@
                         {% endif %}
                         {% endif %}
                         {% endfor %}
-
+                        {% if user_tip.tip_lock == 1 %}
+                        <form method="POST" action="{{ url_for('edit_tip', tip_id=user_tip.game_id) }}" name="edit_tip">
+                            <td>
+                                {% if user_tip.tip_goals_team_1 == None or user_tip.tip_goals_team_2 == None %}
+                                <input class="text-center" type="text" id="team1" name="team1" size="1" value="-"
+                                    disabled> :
+                                <input class="text-center" type="text" id="team2" name="team2" size="1" value="-"
+                                    disabled>
+                                {% else %}
+                                <input class="text-center" type="text" id="team1" name="team1" size="1"
+                                    value={{user_tip.tip_goals_team_1}} disabled> :
+                                <input class="text-center" type="text" id="team2" name="team2" size="1"
+                                    value={{user_tip.tip_goals_team_2}} disabled>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <input class="btn btn-success" type="submit" value="Save tip" name="action" disabled>
+                            </td>
+                        </form>
+                        {% else %}
                         <form method="POST" action="{{ url_for('edit_tip', tip_id=user_tip.game_id) }}" name="edit_tip">
                             <td>
                                 <input class="text-center" type="text" id="team1" name="team1" size="1"
@@ -88,9 +107,10 @@
                                     value={{user_tip.tip_goals_team_2}}>
                             </td>
                             <td>
-                                <input class="btn btn-success" type="submit" value="Tip game" name="action">
+                                <input class="btn btn-success" type="submit" value="Save tip" name="action">
                             </td>
                         </form>
+                        {% endif %}
                         <td>{{ user_tip.tip_points }}</td>
                     </tr>
                     {% endfor %}
