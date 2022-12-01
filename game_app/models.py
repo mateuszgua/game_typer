@@ -145,6 +145,7 @@ class Tip(database.Base):
     tip_goals_team_2 = Column(Integer)
     tip_points = Column(Integer)
     tip_lock = Column(Integer)
+    winner = Column(Integer)
     user_id = Column(Integer, ForeignKey('user.id'))
 
 
@@ -161,3 +162,5 @@ class Game(database.Base):
     goals_team_2 = Column(Integer)
     game_phase = Column(String(30))
     result = Column(String(10))
+    winner = Column(Integer)
+    finished = Column(Integer)

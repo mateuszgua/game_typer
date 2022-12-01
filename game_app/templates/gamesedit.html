@@ -78,6 +78,7 @@
             <th scope="col">Date</th>
             <th scope="col">Time</th>
             <th scope="col">Result</th>
+            <th scope="col">Completed</th>
             <th scope="col">Save</th>
             <th scope="col">Delete</th>
         </tr>
@@ -111,6 +112,18 @@
                 <td>
                     <input type="text" id="team1" name="team1" size="1" value={{game.goals_team_1}}> :
                     <input type="text" id="team2" name="team2" size="1" value={{game.goals_team_2}}>
+                </td>
+                <td>
+                    {% if game.finished == 1 %}
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="game_completed" name="game_completed"
+                            checked>
+                    </div>
+                    {% else %}
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="game_completed" name="game_completed">
+                    </div>
+                    {% endif %}
                 </td>
                 <td>
                     <input class="btn btn-success" type="submit" value="Save" name="action">

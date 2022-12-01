@@ -232,6 +232,7 @@ def games():
     games = Game.query.all()
     teams = Team.query.all()
     form = AddGameForm()
+
     #
     user_id = 1
     user = User.query.filter_by(id=user_id).first()
@@ -274,6 +275,7 @@ def edit_one_game(game_id):
     game_time = request.form.get('game_time')
     team1 = request.form.get('team1')
     team2 = request.form.get('team2')
+    finished = request.form.get('game_completed') != None
 
     try:
         edit_game.game_discipline = discipline
@@ -285,12 +287,51 @@ def edit_one_game(game_id):
         edit_game.game_time = game_time
         edit_game.goals_team_1 = team1
         edit_game.goals_team_2 = team2
+        edit_game.finished = finished
         db_session.commit()
+
+        if finished == True:
+            set_winner(edit_game)
+            update_tip_points(game_id)
+
         flash("Game updated successfully!")
         return redirect(url_for('game_edit'))
     except:
         flash("Error! There was a problem edit game... try again.")
     return redirect(url_for('game_edit'))
+
+
+def set_winner(edit_game):
+    if edit_game.goals_team_1 > edit_game.goals_team_2:
+        edit_game.winner = 1
+    elif edit_game.goals_team_1 < edit_game.goals_team_2:
+        edit_game.winner = 2
+    else:
+        edit_game.winner = 0
+    db_session.commit()
+
+
+def update_tip_points(game_id):
+    game = Game.query.filter_by(id=game_id).first()
+    tips = Tip.query.all()
+
+    for tip in tips:
+        if tip.game_id == game_id:
+            if tip.tip_goals_team_1 != None and tip.tip_goals_team_2 != None:
+                game_difference = game.goals_team_1 - game.goals_team_2
+                tip_difference = tip.tip_goals_team_1 - tip.tip_goals_team_2
+
+                if tip.tip_goals_team_1 == game.goals_team_1 and tip.tip_goals_team_2 == game.goals_team_2:
+                    tip.tip_points = 5
+                elif tip.winner == game.winner and game_difference == tip_difference:
+                    tip.tip_points = 3
+                elif tip.winner == game.winner:
+                    tip.tip_points = 2
+                else:
+                    tip.tip_points = 0
+            else:
+                tip.tip_points = 0
+            db_session.commit()
 
 
 @app.post('/admin/edit_all_games')
@@ -338,6 +379,7 @@ def delete_game(game_id):
 def tips():
     games = Game.query.all()
     user_tips = Tip.query.all()
+
     # user_id = current_user.get_id()
     user_id = 1
     user = User.query.filter_by(id=user_id).first()
@@ -403,6 +445,7 @@ def edit_tip(tip_id):
             try:
                 edit_tip.tip_goals_team_1 = team1
                 edit_tip.tip_goals_team_2 = team2
+                tip_winner(edit_tip)
                 db_session.commit()
                 flash("Tip updated successfully!")
             except:
@@ -411,6 +454,15 @@ def edit_tip(tip_id):
     else:
         flash("Sorry, it's to late for tip this game!")
     return redirect(url_for('tips'))
+
+
+def tip_winner(edit_tip):
+    if edit_tip.tip_goals_team_1 > edit_tip.tip_goals_team_2:
+        edit_tip.winner = 1
+    elif edit_tip.tip_goals_team_1 < edit_tip.tip_goals_team_2:
+        edit_tip.winner = 2
+    else:
+        edit_tip.winner = 0
 
 
 def is_date_locked(tip_id):
