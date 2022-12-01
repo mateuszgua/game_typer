@@ -1,14 +1,40 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container-fluid">
+
         <a class="navbar-brand" href="{{ url_for('home') }}">GameTyper</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
             aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
+
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
 
                 {% if current_user.is_authenticated %}
+
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                        Admin
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <li><a class="dropdown-item" href="{{ url_for('games') }}">Games</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('upload_file') }}">Add file</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('select_file') }}">Load file to db</a></li>
+                    </ul>
+                </li>
+
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                        Profile
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <li><a class="dropdown-item" href="{{ url_for('types') }}">Types</a></li>
+                        <li><a class="dropdown-item" href="#">User info</a></li>
+                    </ul>
+                </li>
+
                 <li class="nav-item">
                     <a class="nav-link active" aria-current="page" href="{{ url_for('logout') }}">Logout</a>
                 </li>
@@ -16,10 +42,6 @@
                 {% else %}
                 <li class="nav-item">
                     <a class="nav-link active" aria-current="page" href="{{ url_for('login') }}">Login</a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="{{ url_for('logout') }}">Logout</a>
                 </li>
 
                 {% endif %}
@@ -32,10 +54,12 @@
                     <a class="nav-link" href="#">About</a>
                 </li>
             </ul>
+
             <form class="d-flex">
                 <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
                 <button class="btn btn-outline-success" type="submit">Search</button>
             </form>
+
         </div>
     </div>
 </nav>

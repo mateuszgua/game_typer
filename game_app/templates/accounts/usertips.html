@@ -1,0 +1,126 @@
+{% extends 'layouts/base.html' %}
+
+
+{% from 'bootstrap5/form.html' import render_form %}
+
+{% block content %}
+
+{% for message in get_flashed_messages() %}
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+    <symbol id="exclamation-triangle-fill" fill="currentColor" viewBox="0 0 16 16">
+        <path
+            d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
+    </symbol>
+</svg>
+
+<div class="alert alert-warning d-flex align-items-center" role="alert">
+    <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Warning:">
+        <use xlink:href="#exclamation-triangle-fill" />
+    </svg>
+    <div>
+        {{ message }}
+    </div>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{% endfor %}
+
+<h2 class="title text-center">{% block title %} Games World Cup 2022 {% endblock %}</h2>
+<br>
+<p class="text-center">User points: {{user.points}}</p>
+
+<br>
+
+<div class="form-check">
+    <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1">
+    <label class="form-check-label" for="flexRadioDefault1">
+        Add games 1
+    </label>
+</div>
+<div class="form-check">
+    <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault2" checked>
+    <label class="form-check-label" for="flexRadioDefault2">
+        Add games 2
+    </label>
+</div>
+<form method="POST" action="{{ url_for('load_tips') }}">
+    <input class="btn btn-primary" type="submit" name="load" value="Load tips">
+</form>
+<br>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-auto">
+            <table id="data" class="table table-striped table-bordered">
+                <thead class="table-dark">
+                    <tr class="text-center">
+                        <th scope="col">Id.</th>
+                        <th scope="col">Game</th>
+                        <th scope="col">Date</th>
+                        <th scope="col">Time</th>
+                        <th scope="col">Result</th>
+                        <th scope="col">Tip</th>
+                        <th scope="col">Action</th>
+                        <th scope="col">User pts from game</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user_tip in user_tips %}
+                    <tr class="text-center">
+                        <th scope="row">{{ user_tip.game_id }}</th>
+                        {% for game in games %}
+                        {% if user_tip.game_id == game.id %}
+                        <td>{{ game.team_1 }} - {{ game.team_2 }}</td>
+                        <td>{{ game.game_day }}</td>
+                        <td>{{ game.game_time }}</td>
+                        {% if game.goals_team_1 == None %}
+                        <td>-</td>
+                        {% else %}
+                        <td>{{ game.goals_team_1 }} : {{ game.goals_team_2 }}</td>
+                        {% endif %}
+                        {% endif %}
+                        {% endfor %}
+                        {% if user_tip.tip_lock == 1 %}
+                        <form method="POST" action="{{ url_for('edit_tip', tip_id=user_tip.game_id) }}" name="edit_tip">
+                            <td>
+                                {% if user_tip.tip_goals_team_1 == None or user_tip.tip_goals_team_2 == None %}
+                                <input class="text-center" type="text" id="team1" name="team1" size="1" value="-"
+                                    disabled> :
+                                <input class="text-center" type="text" id="team2" name="team2" size="1" value="-"
+                                    disabled>
+                                {% else %}
+                                <input class="text-center" type="text" id="team1" name="team1" size="1"
+                                    value={{user_tip.tip_goals_team_1}} disabled> :
+                                <input class="text-center" type="text" id="team2" name="team2" size="1"
+                                    value={{user_tip.tip_goals_team_2}} disabled>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <input class="btn btn-success" type="submit" value="Save tip" name="action" disabled>
+                            </td>
+                        </form>
+                        {% else %}
+                        <form method="POST" action="{{ url_for('edit_tip', tip_id=user_tip.game_id) }}" name="edit_tip">
+                            <td>
+                                <input class="text-center" type="text" id="team1" name="team1" size="1"
+                                    value={{user_tip.tip_goals_team_1}}> :
+                                <input class="text-center" type="text" id="team2" name="team2" size="1"
+                                    value={{user_tip.tip_goals_team_2}}>
+                            </td>
+                            <td>
+                                <input class="btn btn-success" type="submit" value="Save tip" name="action">
+                            </td>
+                        </form>
+                        {% endif %}
+                        <td>{{ user_tip.tip_points }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="col-md-auto">
+            <br>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

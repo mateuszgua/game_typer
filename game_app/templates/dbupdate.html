@@ -1,8 +1,14 @@
-{% extends 'base.html' %}
+{% extends 'layouts/base.html' %}
+
 
 {% from 'bootstrap5/form.html' import render_form %}
 
 {% block content %}
+
+<h2 class="title text-center">{% block title %} Update database {% endblock %}</h2>
+
+<br>
+
 
 {% for message in get_flashed_messages() %}
 <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
@@ -22,19 +28,5 @@
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>
 {% endfor %}
-
-<body>
-
-    <h2>Login</h2>
-    {{ render_form(form) }}
-    {{ form.csrf_token }}
-    {{ form.hidden_tag() }}
-
-    <div class="login-signup">
-        <span>Don't have an account?</span>
-        <a href="{{ url_for('register') }}">Sign up.</a>
-    </div>
-    <!-- Bootstrap JS -->
-</body>
 
 {% endblock %}
