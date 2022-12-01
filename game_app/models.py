@@ -115,9 +115,17 @@ class Team(database.Base):
     group = Column(String(100), nullable=False)
     play_off = Column(Integer, nullable=False)
     image_name = Column(String(100), nullable=False)
+    game_played = relationship('GamesPlayed', backref='team')
 
     def __repr__(self) -> str:
         return self.name
+
+
+class GamesPlayed(database.Base):
+    __tablename__ = 'gamesplayed'
+    id = Column(Integer(), primary_key=True)
+    game_id = Column(Integer)
+    team_id = Column(Integer, ForeignKey('team.id'))
 
 
 class UploadFile(database.Base):

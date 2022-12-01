@@ -1,6 +1,6 @@
 from game_app import app, login_manager, admin
 from game_app.forms import RegistrationForm, LoginForm, EditUserForm, AddGameForm
-from game_app.models import User, Role, Team, UserAdminView, RoleAdminView, UploadFile, Game, Tip, UserTournaments
+from game_app.models import User, Role, Team, UserAdminView, RoleAdminView, UploadFile, Game, Tip, UserTournaments, GamesPlayed
 from game_app.database import db_session
 from game_app.config import Config
 
@@ -293,6 +293,7 @@ def edit_one_game(game_id):
         if finished == True:
             set_winner(edit_game)
             update_tip_points(game_id)
+            update_team_points(edit_game)
 
         flash("Game updated successfully!")
         return redirect(url_for('game_edit'))
@@ -332,6 +333,98 @@ def update_tip_points(game_id):
             else:
                 tip.tip_points = 0
             db_session.commit()
+
+
+def update_team_points(edit_game):
+    team_name_1 = edit_game.team_1
+    team_name_2 = edit_game.team_2
+
+    team_1 = Team.query.filter_by(name=team_name_1.lower()).first()
+    team_2 = Team.query.filter_by(name=team_name_2.lower()).first()
+
+    games_played = GamesPlayed.query.all()
+
+    if is_game_played_exist(edit_game, games_played):
+        pass
+    else:
+        fill_teams_table(edit_game, team_1, team_2)
+        game_played_team_1 = GamesPlayed(
+            game_id=edit_game.id,
+            team_id=team_1.id)
+        db_session.add(game_played_team_1)
+        game_played_team_2 = GamesPlayed(
+            game_id=edit_game.id,
+            team_id=team_2.id)
+        db_session.add(game_played_team_2)
+        db_session.commit()
+    print("___________________")
+    print("Ole 3")
+
+
+def is_game_played_exist(edit_game, games_played):
+    for game_played in games_played:
+        if edit_game.id == game_played.game_id:
+            return True
+
+
+def fill_teams_table(edit_game, team_1, team_2):
+    if edit_game.winner == 1:
+        team_1.games_played += 1
+        team_1.wins += 1
+        team_1.draws += 0
+        team_1.lost += 0
+        team_1.goal_scored += edit_game.goals_team_1
+        team_1.goal_lost += edit_game.goals_team_2
+        team_1.goal_balance = team_1.goal_scored - team_1.goal_lost
+        team_1.points += 3
+
+        team_2.games_played += 1
+        team_2.wins += 0
+        team_2.draws += 0
+        team_2.lost += 1
+        team_2.goal_scored += edit_game.goals_team_2
+        team_2.goal_lost += edit_game.goals_team_1
+        team_2.goal_balance = team_2.goal_scored - team_2.goal_lost
+        team_2.points += 0
+
+    elif edit_game.winner == 2:
+        team_1.games_played += 1
+        team_1.wins += 0
+        team_1.draws += 0
+        team_1.lost += 1
+        team_1.goal_scored += edit_game.goals_team_1
+        team_1.goal_lost += edit_game.goals_team_2
+        team_1.goal_balance = team_1.goal_scored - team_1.goal_lost
+        team_1.points += 0
+
+        team_2.games_played += 1
+        team_2.wins += 1
+        team_2.draws += 0
+        team_2.lost += 0
+        team_2.goal_scored += edit_game.goals_team_2
+        team_2.goal_lost += edit_game.goals_team_1
+        team_2.goal_balance = team_2.goal_scored - team_2.goal_lost
+        team_2.points += 3
+
+    elif edit_game.winner == 0:
+        team_1.games_played += 1
+        team_1.wins += 0
+        team_1.draws += 1
+        team_1.lost += 0
+        team_1.goal_scored += edit_game.goals_team_1
+        team_1.goal_lost += edit_game.goals_team_2
+        team_1.goal_balance = team_1.goal_scored - team_1.goal_lost
+        team_1.points += 1
+
+        team_2.games_played += 1
+        team_2.wins += 0
+        team_2.draws += 1
+        team_2.lost += 0
+        team_2.goal_scored += edit_game.goals_team_2
+        team_2.goal_lost += edit_game.goals_team_1
+        team_2.goal_balance = team_2.goal_scored - team_2.goal_lost
+        team_2.points += 1
+    db_session.commit()
 
 
 @app.post('/admin/edit_all_games')
