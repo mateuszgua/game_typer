@@ -42,8 +42,8 @@
         Add games 2
     </label>
 </div>
-<form method="POST" action="{{ url_for('load_types') }}">
-    <input class="btn btn-primary" type="submit" name="load" value="Load types">
+<form method="POST" action="{{ url_for('load_tips') }}">
+    <input class="btn btn-primary" type="submit" name="load" value="Load tips">
 </form>
 <br>
 
@@ -64,11 +64,11 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for user_type in user_types %}
+                    {% for user_tip in user_tips %}
                     <tr class="text-center">
-                        <th scope="row">{{ user_type.game_id }}</th>
+                        <th scope="row">{{ user_tip.game_id }}</th>
                         {% for game in games %}
-                        {% if user_type.game_id == game.id %}
+                        {% if user_tip.game_id == game.id %}
                         <td>{{ game.team_1 }} - {{ game.team_2 }}</td>
                         <td>{{ game.game_day }}</td>
                         <td>{{ game.game_time }}</td>
@@ -80,19 +80,18 @@
                         {% endif %}
                         {% endfor %}
 
-                        <form method="POST" action="{{ url_for('edit_type', type_id=user_type.game_id) }}"
-                            name="edit_type">
+                        <form method="POST" action="{{ url_for('edit_tip', tip_id=user_tip.game_id) }}" name="edit_tip">
                             <td>
                                 <input class="text-center" type="text" id="team1" name="team1" size="1"
-                                    value={{user_type.type_goals_team_1}}> :
+                                    value={{user_tip.tip_goals_team_1}}> :
                                 <input class="text-center" type="text" id="team2" name="team2" size="1"
-                                    value={{user_type.type_goals_team_2}}>
+                                    value={{user_tip.tip_goals_team_2}}>
                             </td>
                             <td>
-                                <input class="btn btn-success" type="submit" value="Type game" name="action">
+                                <input class="btn btn-success" type="submit" value="Tip game" name="action">
                             </td>
                         </form>
-                        <td>{{ user_type.type_points }}</td>
+                        <td>{{ user_tip.tip_points }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>

@@ -42,9 +42,7 @@ class User(UserMixin, database.Base):
                         server_default=func.now(), nullable=False)
     roles = relationship('Role', secondary='roles_users',
                          backref=backref('users', lazy='dynamic'))
-    # types = relationship('Type', secondary='user_type',
-    #  backref=backref('users', lazy='dynamic'))
-    types = relationship('Type', backref='user')
+    tip = relationship('Tip', backref='user')
     tournaments = relationship('UserTournaments', backref='user')
     points = Column(Integer)
 
@@ -138,14 +136,15 @@ class UserTournaments(database.Base):
     user_id = Column(Integer, ForeignKey('user.id'))
 
 
-class Type(database.Base):
-    __tablename__ = 'type'
+class Tip(database.Base):
+    __tablename__ = 'tip'
     id = Column(Integer, primary_key=True)
     game_id = Column(Integer)
     tournament = Column(String(20))
-    type_goals_team_1 = Column(Integer)
-    type_goals_team_2 = Column(Integer)
-    type_points = Column(Integer)
+    tip_goals_team_1 = Column(Integer)
+    tip_goals_team_2 = Column(Integer)
+    tip_points = Column(Integer)
+    tip_lock = Column(Integer)
     user_id = Column(Integer, ForeignKey('user.id'))
 
 

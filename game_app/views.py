@@ -1,6 +1,6 @@
 from game_app import app, login_manager, admin
 from game_app.forms import RegistrationForm, LoginForm, EditUserForm, AddGameForm
-from game_app.models import User, Role, Team, UserAdminView, RoleAdminView, UploadFile, Game, Type, UserTournaments
+from game_app.models import User, Role, Team, UserAdminView, RoleAdminView, UploadFile, Game, Tip, UserTournaments
 from game_app.database import db_session
 from game_app.config import Config
 
@@ -10,7 +10,7 @@ from flask import render_template, url_for, redirect, request, flash, json
 from flask_login import login_user, current_user, logout_user, login_required
 
 from werkzeug.utils import secure_filename
-
+from datetime import datetime
 
 config = Config()
 
@@ -334,21 +334,19 @@ def delete_game(game_id):
     return redirect(url_for('game_edit'))
 
 
-@app.route('/user/types', methods=['GET', 'POST'])
-def types():
-
+@app.route('/user/tips', methods=['GET', 'POST'])
+def tips():
     games = Game.query.all()
-    user_types = Type.query.all()
-
+    user_tips = Tip.query.all()
     # user_id = current_user.get_id()
     user_id = 1
-
     user = User.query.filter_by(id=user_id).first()
-    return render_template('accounts/usertypes.html', user_types=user_types, games=games, user=user)
+    present = datetime.now()
+    return render_template('accounts/usertips.html', user_tips=user_tips, games=games, user=user)
 
 
-@app.post('/user/load_types')
-def load_types():
+@app.post('/user/load_tips')
+def load_tips():
     #
     user_id = 1
     tournament_name = "World Cup 2022"
@@ -357,28 +355,28 @@ def load_types():
 
     if is_tournament_exist(tournament_name, user):
         flash("Tournament exist!")
-        return redirect(url_for('types'))
+        return redirect(url_for('tips'))
     else:
         try:
             for game in games:
-                user_type = Type(
+                user_tip = Tip(
                     game_id=game.id,
-                    type_goals_team_1=None,
-                    type_goals_team_2=None,
-                    type_points=None,
+                    tip_goals_team_1=None,
+                    tip_goals_team_2=None,
+                    tip_points=None,
                     user_id=user_id)
-                db_session.add(user_type)
+                db_session.add(user_tip)
 
             user_tournament = UserTournaments(
                 tournament=game.tournament,
                 user_id=user_id)
             db_session.add(user_tournament)
             db_session.commit()
-            flash("Types addes successfully!")
-            return redirect(url_for('types'))
+            flash("Tips addes successfully!")
+            return redirect(url_for('tips'))
         except:
-            flash('Whoops! There was a problem to add games for types!')
-            return redirect(url_for('types'))
+            flash('Whoops! There was a problem to add games for tips!')
+            return redirect(url_for('tips'))
 
 
 def is_tournament_exist(tournament_name, user):
@@ -387,21 +385,21 @@ def is_tournament_exist(tournament_name, user):
             return True
 
 
-@app.post('/user/edit_type/<int:type_id>')
-def edit_type(type_id):
+@app.post('/user/edit_tip/<int:tip_id>')
+def edit_tip(tip_id):
 
-    edit_type = Type.query.filter_by(id=type_id).first()
+    edit_tip = Tip.query.filter_by(id=tip_id).first()
     team1 = request.form.get('team1')
     team2 = request.form.get('team2')
 
     try:
-        edit_type.type_goals_team_1 = team1
-        edit_type.type_goals_team_2 = team2
+        edit_tip.tip_goals_team_1 = team1
+        edit_tip.tip_goals_team_2 = team2
         db_session.commit()
-        flash("Type updated successfully!")
+        flash("Tip updated successfully!")
     except:
-        flash("Error! There was a problem edit type... try again.")
-    return redirect(url_for('types'))
+        flash("Error! There was a problem edit tip... try again.")
+    return redirect(url_for('tips'))
 
 
 @ app.route('/admin/db_update', methods=['GET', 'POST'])
@@ -409,7 +407,7 @@ def db_update():
 
     if request.method == 'POST':
         try:
-            table_name1 = 'type'
+            table_name1 = 'tip'
             table_name2 = 'games'
 
             column_name1 = 'tournament'
