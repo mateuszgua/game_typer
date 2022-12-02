@@ -10,7 +10,7 @@ from flask import render_template, url_for, redirect, request, flash, json
 from flask_login import login_user, current_user, logout_user, login_required
 
 from werkzeug.utils import secure_filename
-from datetime import datetime
+from datetime import datetime, timedelta, date
 
 config = Config()
 
@@ -41,10 +41,15 @@ def home():
     IMG_LIST = os.listdir('game_app/static/files')
     IMG_LIST = ['files/' + i for i in IMG_LIST]
 
+    last_games = list_last_games()
+    current_games = list_current_games()
+    next_games = list_next_games()
+
     group_list = create_sorted_list()
     sort_team_table(group_list)
 
-    return render_template('index.html', teams=teams, current_user=current_user, image_list=IMG_LIST, group_list=group_list)
+    return render_template('index.html', teams=teams, current_user=current_user, image_list=IMG_LIST,
+                           group_list=group_list, last_games=last_games, current_games=current_games, next_games=next_games)
 
 
 def create_sorted_list():
@@ -83,6 +88,38 @@ def sort_team_table(group_list):
             team.group_position = i
             db_session.commit()
             i += 1
+
+
+def list_last_games():
+    present = date.today()
+    i = 1
+    day_yesterday = present - timedelta(days=i)
+
+    last_games = Game.query.filter_by(
+        game_day=day_yesterday).order_by(Game.game_time.asc()).all()
+    for last_game in last_games:
+        print("________________")
+        print(last_game)
+
+    return last_games
+
+
+def list_current_games():
+    present = date.today()
+
+    current_games = Game.query.filter_by(
+        game_day=present).order_by(Game.game_time.asc()).all()
+    return current_games
+
+
+def list_next_games():
+    present = date.today()
+    i = 1
+    day_tommorow = present + timedelta(days=i)
+
+    next_games = Game.query.filter_by(
+        game_day=day_tommorow).order_by(Game.game_time.asc()).all()
+    return next_games
 
 
 @app.route('/user/<int:user_id>')

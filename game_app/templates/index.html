@@ -9,59 +9,72 @@
 <div class="container">
     <div class="row">
         <div class="col">
-            <div class="card border-dark mb-3" style="max-width: 20rem;">
+            <div class="card border-dark mb-3" style="max-width: 30rem;">
                 <div class="card-header text-center">Last</div>
                 <div class="card-body text-dark">
+                    {% for last_game in last_games %}
                     <div class="row">
-                        <div class="col">
-                            <h5 class="card-title text-center">Usa</h5>
+                        <div class="col text-left">
+                            <h5 class="card-title text-center">{{ last_game.team_1 }}</h5>
                         </div>
                         <div class="col">
-                            <h5 class="card-title text-center">1 : 1</h5>
+                            <h5 class="card-title text-center">{{ last_game.goals_team_1 }} : {{ last_game.goals_team_2
+                                }}</h5>
                         </div>
                         <div class="col">
-                            <h5 class="card-title text-center">Wales</h5>
+                            <h5 class="card-title text-center">{{ last_game.team_2 }}</h5>
                         </div>
                     </div>
-                    <p class="card-text text-center">Group B</p>
+                    <p class="card-text text-center">{{ last_game.game_day }} / {{ last_game.game_time }}
+                        <br class="card-text text-center">Group {{ last_game.game_phase }}
+                    </p>
+                    {% endfor %}
                 </div>
             </div>
         </div>
         <div class="col">
-            <div class="card border-dark mb-3" style="max-width: 20rem;">
+            <div class="card border-dark mb-3" style="max-width: 30rem;">
                 <div class="card-header text-center">Today</div>
                 <div class="card-body text-dark">
+                    {% for current_game in current_games %}
                     <div class="row">
                         <div class="col">
-                            <h5 class="card-title text-center">Argentina</h5>
+                            <h5 class="card-title text-center">{{ current_game.team_1 }}</h5>
                         </div>
                         <div class="col">
-                            <h5 class="card-title text-center"> - </h5>
+                            <h5 class="card-title text-center"> - : - </h5>
                         </div>
                         <div class="col">
-                            <h5 class="card-title text-center">Brazil</h5>
+                            <h5 class="card-title text-center">{{ current_game.team_2 }}</h5>
                         </div>
                     </div>
-                    <p class="card-text text-center">Group C</p>
+                    <p class="card-text text-center">{{ current_game.game_day }} / {{ current_game.game_time }}
+                        <br class="card-text text-center">Group {{ current_game.game_phase }}
+                    </p>
+                    {% endfor %}
                 </div>
             </div>
         </div>
         <div class="col">
-            <div class="card border-dark mb-3" style="max-width: 20rem;">
+            <div class="card border-dark mb-3" style="max-width: 30rem;">
                 <div class="card-header text-center">Next</div>
                 <div class="card-body text-dark">
+                    {% for next_game in next_games %}
                     <div class="row">
                         <div class="col">
-                            <h5 class="card-title text-center">Poland</h5>
+                            <h5 class="card-title text-center">{{ next_game.team_1 }}</h5>
                         </div>
                         <div class="col">
-                            <h5 class="card-title text-center"> - </h5>
+                            <h5 class="card-title text-center"> - : - </h5>
                         </div>
                         <div class="col">
-                            <h5 class="card-title text-center">Mexico</h5>
+                            <h5 class="card-title text-center">{{ next_game.team_2 }}</h5>
                         </div>
                     </div>
-                    <p class="card-text text-center">Group C</p>
+                    <p class="card-text text-center">{{ next_game.game_day }} / {{ next_game.game_time }}
+                        <br class="card-text text-center">Group {{ next_game.game_phase }}
+                    </p>
+                    {% endfor %}
                 </div>
             </div>
         </div>
