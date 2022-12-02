@@ -41,9 +41,16 @@
                         <div class="col">
                             <h5 class="card-title text-center">{{ current_game.team_1 }}</h5>
                         </div>
+                        {% if current_game.goals_team_1 == None or current_game.goals_team_2 == None %}
                         <div class="col">
                             <h5 class="card-title text-center"> - : - </h5>
                         </div>
+                        {% else %}
+                        <div class="col">
+                            <h5 class="card-title text-center"> {{ current_game.goals_team_1 }} : {{
+                                current_game.goals_team_2 }} </h5>
+                        </div>
+                        {% endif %}
                         <div class="col">
                             <h5 class="card-title text-center">{{ current_game.team_2 }}</h5>
                         </div>

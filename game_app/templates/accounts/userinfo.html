@@ -1,0 +1,32 @@
+{% extends 'layouts/base.html' %}
+
+{% block content %}
+<span class="title">
+    <h2>{% block title %} {{ user.firstname }} {{ user.lastname }}{% endblock %}</h2>
+</span>
+<div class="content">
+    <div class="user">
+        <p>
+            <b class="first_name">First name:</b> {{ user.firstname }}
+        </p>
+        <p>
+            <b class="last_name">Last name:</b> {{ user.lastname }}
+        </p>
+        <p>
+            <b class="last_name">Nick:</b> {{ user.nick }}
+        </p>
+        <p>
+            <b class="last_name">Email:</b> {{ user.email }}
+        </p>
+        <p>
+            <b class="last_name">Joined:</b> {{ user.created_at }}
+        </p>
+        <p></p>
+        <a href="{{ url_for('edit', user_id=user.id) }}">Edit</a>
+        <hr>
+        <form method="POST" action="{{ url_for('delete', user_id=user.id) }}">
+            <input type="submit" value="Delete User" onclick="return confirm('Are you want to delte this entry?')">
+        </form>
+    </div>
+</div>
+{% endblock %}

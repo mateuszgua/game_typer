@@ -122,6 +122,8 @@ def list_next_games():
 # @login_required
 def user(user_id):
     user = User.query.filter_by(id=user_id).first()
+    IMG_LIST = os.listdir('game_app/static/files')
+    IMG_LIST = ['files/' + i for i in IMG_LIST]
 
     user_id = current_user.get_id()
     print("___________________")
@@ -130,7 +132,7 @@ def user(user_id):
     print("___________________")
     print(user_auth)
 
-    return render_template('accounts/user.html', user=user)
+    return render_template('accounts/user.html', user=user, image_list=IMG_LIST)
 
 
 @app.route('/register', methods=('GET', 'POST'))
@@ -241,7 +243,7 @@ def allowed_file(filename):
 
 
 @app.route('/admin/upload_file', methods=['GET', 'POST'])
-@login_required
+# @login_required
 def upload_file():
     if request.method == 'POST':
         if 'file' not in request.files:
@@ -264,7 +266,7 @@ def upload_file():
 
 
 @app.route('/admin/select_file', methods=['GET', 'POST'])
-@login_required
+# @login_required
 def select_file():
     files = UploadFile.query.all()
     if request.method == 'POST':
