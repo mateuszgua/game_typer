@@ -357,8 +357,6 @@ def update_team_points(edit_game):
             team_id=team_2.id)
         db_session.add(game_played_team_2)
         db_session.commit()
-    print("___________________")
-    print("Ole 3")
 
 
 def is_game_played_exist(edit_game, games_played):
@@ -368,7 +366,7 @@ def is_game_played_exist(edit_game, games_played):
 
 
 def fill_teams_table(edit_game, team_1, team_2):
-    if edit_game.winner == 1:
+    if int(edit_game.winner) == 1:
         team_1.games_played += 1
         team_1.wins += 1
         team_1.draws += 0
@@ -387,7 +385,7 @@ def fill_teams_table(edit_game, team_1, team_2):
         team_2.goal_balance = team_2.goal_scored - team_2.goal_lost
         team_2.points += 0
 
-    elif edit_game.winner == 2:
+    elif int(edit_game.winner) == 2:
         team_1.games_played += 1
         team_1.wins += 0
         team_1.draws += 0
@@ -406,7 +404,7 @@ def fill_teams_table(edit_game, team_1, team_2):
         team_2.goal_balance = team_2.goal_scored - team_2.goal_lost
         team_2.points += 3
 
-    elif edit_game.winner == 0:
+    elif int(edit_game.winner) == 0:
         team_1.games_played += 1
         team_1.wins += 0
         team_1.draws += 1
