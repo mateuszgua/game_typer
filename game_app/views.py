@@ -1,6 +1,6 @@
 from game_app import app, login_manager, admin
 from game_app.forms import RegistrationForm, LoginForm, EditUserForm, AddGameForm
-from game_app.models import User, Role, Team, UserAdminView, RoleAdminView, UploadFile, Game, Tip, UserTournaments
+from game_app.models import User, Role, Team, UserAdminView, RoleAdminView, UploadFile, Game, Tip, UserTournaments, GamesPlayed
 from game_app.database import db_session
 from game_app.config import Config
 
@@ -10,7 +10,7 @@ from flask import render_template, url_for, redirect, request, flash, json
 from flask_login import login_user, current_user, logout_user, login_required
 
 from werkzeug.utils import secure_filename
-from datetime import datetime
+from datetime import datetime, timedelta, date
 
 config = Config()
 
@@ -21,10 +21,11 @@ admin.add_view(RoleAdminView(Game, db_session))
 
 @login_manager.user_loader
 def load_user(user_id):
-    try:
-        return User.query.get(user_id)
-    except:
-        return None
+    pass
+    # try:
+    # return User.query.get(user_id)
+    # except:
+    # return None
     # return User.query.get(user_id)
 
 
@@ -39,7 +40,82 @@ def home():
     teams = Team.query.all()
     IMG_LIST = os.listdir('game_app/static/files')
     IMG_LIST = ['files/' + i for i in IMG_LIST]
-    return render_template('index.html', teams=teams, current_user=current_user, image_list=IMG_LIST)
+
+    last_games = list_last_games()
+    current_games = list_current_games()
+    next_games = list_next_games()
+
+    group_list = create_sorted_list()
+    sort_team_table(group_list)
+
+    return render_template('index.html', teams=teams, current_user=current_user, image_list=IMG_LIST,
+                           group_list=group_list, last_games=last_games, current_games=current_games, next_games=next_games)
+
+
+def create_sorted_list():
+    group_list = []
+    group_A = Team.query.filter_by(
+        group="A").order_by(Team.points.desc(), Team.goal_balance.desc()).all()
+    group_list.insert(0, group_A)
+    group_B = Team.query.filter_by(
+        group="B").order_by(Team.points.desc(), Team.goal_balance.desc()).all()
+    group_list.insert(1, group_B)
+    group_C = Team.query.filter_by(
+        group="C").order_by(Team.points.desc(), Team.goal_balance.desc()).all()
+    group_list.insert(2, group_C)
+    group_D = Team.query.filter_by(
+        group="D").order_by(Team.points.desc(), Team.goal_balance.desc()).all()
+    group_list.insert(3, group_D)
+    group_E = Team.query.filter_by(
+        group="E").order_by(Team.points.desc(), Team.goal_balance.desc()).all()
+    group_list.insert(4, group_E)
+    group_F = Team.query.filter_by(
+        group="F").order_by(Team.points.desc(), Team.goal_balance.desc()).all()
+    group_list.insert(5, group_F)
+    group_G = Team.query.filter_by(
+        group="G").order_by(Team.points.desc(), Team.goal_balance.desc()).all()
+    group_list.insert(6, group_G)
+    group_H = Team.query.filter_by(
+        group="H").order_by(Team.points.desc(), Team.goal_balance.desc()).all()
+    group_list.insert(7, group_H)
+    return group_list
+
+
+def sort_team_table(group_list):
+    for group in group_list:
+        i = 1
+        for team in group:
+            team.group_position = i
+            db_session.commit()
+            i += 1
+
+
+def list_last_games():
+    present = date.today()
+    i = 1
+    day_yesterday = present - timedelta(days=i)
+
+    last_games = Game.query.filter_by(
+        game_day=day_yesterday).order_by(Game.game_time.asc()).all()
+    return last_games
+
+
+def list_current_games():
+    present = date.today()
+
+    current_games = Game.query.filter_by(
+        game_day=present).order_by(Game.game_time.asc()).all()
+    return current_games
+
+
+def list_next_games():
+    present = date.today()
+    i = 1
+    day_tommorow = present + timedelta(days=i)
+
+    next_games = Game.query.filter_by(
+        game_day=day_tommorow).order_by(Game.game_time.asc()).all()
+    return next_games
 
 
 @app.route('/user/<int:user_id>')
@@ -130,9 +206,9 @@ def edit(user_id):
 
             db_session.commit()
             flash("User updated successfully!")
-            return render_template('accounts/edit.html', form=form, user=user, id=user_id)
         except:
             flash("Error! There was a problem edit user... try again.")
+        finally:
             return render_template('accounts/edit.html', form=form, user=user, id=user_id)
     else:
         return render_template('accounts/edit.html', form=form, user=user, id=user_id)
@@ -232,6 +308,7 @@ def games():
     games = Game.query.all()
     teams = Team.query.all()
     form = AddGameForm()
+
     #
     user_id = 1
     user = User.query.filter_by(id=user_id).first()
@@ -274,6 +351,7 @@ def edit_one_game(game_id):
     game_time = request.form.get('game_time')
     team1 = request.form.get('team1')
     team2 = request.form.get('team2')
+    finished = request.form.get('game_completed') != None
 
     try:
         edit_game.game_discipline = discipline
@@ -285,12 +363,143 @@ def edit_one_game(game_id):
         edit_game.game_time = game_time
         edit_game.goals_team_1 = team1
         edit_game.goals_team_2 = team2
+        edit_game.finished = finished
         db_session.commit()
+
+        if finished == True:
+            set_winner(edit_game)
+            update_tip_points(game_id)
+            update_team_points(edit_game)
+
         flash("Game updated successfully!")
         return redirect(url_for('game_edit'))
     except:
         flash("Error! There was a problem edit game... try again.")
-    return redirect(url_for('game_edit'))
+    finally:
+        return redirect(url_for('game_edit'))
+
+
+def set_winner(edit_game):
+    if edit_game.goals_team_1 > edit_game.goals_team_2:
+        edit_game.winner = 1
+    elif edit_game.goals_team_1 < edit_game.goals_team_2:
+        edit_game.winner = 2
+    else:
+        edit_game.winner = 0
+    db_session.commit()
+
+
+def update_tip_points(game_id):
+    game = Game.query.filter_by(id=game_id).first()
+    tips = Tip.query.all()
+
+    for tip in tips:
+        if tip.game_id == game_id:
+            if tip.tip_goals_team_1 != None and tip.tip_goals_team_2 != None:
+                game_difference = game.goals_team_1 - game.goals_team_2
+                tip_difference = tip.tip_goals_team_1 - tip.tip_goals_team_2
+
+                if tip.tip_goals_team_1 == game.goals_team_1 and tip.tip_goals_team_2 == game.goals_team_2:
+                    tip.tip_points = 5
+                elif tip.winner == game.winner and game_difference == tip_difference:
+                    tip.tip_points = 3
+                elif tip.winner == game.winner:
+                    tip.tip_points = 2
+                else:
+                    tip.tip_points = 0
+            else:
+                tip.tip_points = 0
+            db_session.commit()
+
+
+def update_team_points(edit_game):
+    team_name_1 = edit_game.team_1
+    team_name_2 = edit_game.team_2
+
+    team_1 = Team.query.filter_by(name=team_name_1.lower()).first()
+    team_2 = Team.query.filter_by(name=team_name_2.lower()).first()
+
+    games_played = GamesPlayed.query.all()
+
+    if is_game_played_exist(edit_game, games_played):
+        pass
+    else:
+        fill_teams_table(edit_game, team_1, team_2)
+        game_played_team_1 = GamesPlayed(
+            game_id=edit_game.id,
+            team_id=team_1.id)
+        db_session.add(game_played_team_1)
+        game_played_team_2 = GamesPlayed(
+            game_id=edit_game.id,
+            team_id=team_2.id)
+        db_session.add(game_played_team_2)
+        db_session.commit()
+
+
+def is_game_played_exist(edit_game, games_played):
+    for game_played in games_played:
+        if edit_game.id == game_played.game_id:
+            return True
+
+
+def fill_teams_table(edit_game, team_1, team_2):
+    if int(edit_game.winner) == 1:
+        team_1.games_played += 1
+        team_1.wins += 1
+        team_1.draws += 0
+        team_1.lost += 0
+        team_1.goal_scored += edit_game.goals_team_1
+        team_1.goal_lost += edit_game.goals_team_2
+        team_1.goal_balance = team_1.goal_scored - team_1.goal_lost
+        team_1.points += 3
+
+        team_2.games_played += 1
+        team_2.wins += 0
+        team_2.draws += 0
+        team_2.lost += 1
+        team_2.goal_scored += edit_game.goals_team_2
+        team_2.goal_lost += edit_game.goals_team_1
+        team_2.goal_balance = team_2.goal_scored - team_2.goal_lost
+        team_2.points += 0
+
+    elif int(edit_game.winner) == 2:
+        team_1.games_played += 1
+        team_1.wins += 0
+        team_1.draws += 0
+        team_1.lost += 1
+        team_1.goal_scored += edit_game.goals_team_1
+        team_1.goal_lost += edit_game.goals_team_2
+        team_1.goal_balance = team_1.goal_scored - team_1.goal_lost
+        team_1.points += 0
+
+        team_2.games_played += 1
+        team_2.wins += 1
+        team_2.draws += 0
+        team_2.lost += 0
+        team_2.goal_scored += edit_game.goals_team_2
+        team_2.goal_lost += edit_game.goals_team_1
+        team_2.goal_balance = team_2.goal_scored - team_2.goal_lost
+        team_2.points += 3
+
+    elif int(edit_game.winner) == 0:
+        team_1.games_played += 1
+        team_1.wins += 0
+        team_1.draws += 1
+        team_1.lost += 0
+        team_1.goal_scored += edit_game.goals_team_1
+        team_1.goal_lost += edit_game.goals_team_2
+        team_1.goal_balance = team_1.goal_scored - team_1.goal_lost
+        team_1.points += 1
+
+        team_2.games_played += 1
+        team_2.wins += 0
+        team_2.draws += 1
+        team_2.lost += 0
+        team_2.goal_scored += edit_game.goals_team_2
+        team_2.goal_lost += edit_game.goals_team_1
+        team_2.goal_balance = team_2.goal_scored - team_2.goal_lost
+        team_2.points += 1
+    db_session.commit()
 
 
 @app.post('/admin/edit_all_games')
@@ -312,10 +521,10 @@ def edit_all_games():
         db_session.commit()
         flash("All games updated successfully!")
         return redirect(url_for('game_edit'))
-
     except:
         flash("Error! There was a problem edit all games... try again.")
-    return redirect(url_for('game_edit'))
+    finally:
+        return redirect(url_for('game_edit'))
 
 
 @app.post('/admin/delete_game/<int:game_id>')
@@ -330,14 +539,15 @@ def delete_game(game_id):
         return render_template('gamesedit.html', games=games)
     except:
         flash("Whoops! There was a problem deleting game, try again...")
-
-    return redirect(url_for('game_edit'))
+    finally:
+        return redirect(url_for('game_edit'))
 
 
 @app.route('/user/tips', methods=['GET', 'POST'])
 def tips():
     games = Game.query.all()
     user_tips = Tip.query.all()
+
     # user_id = current_user.get_id()
     user_id = 1
     user = User.query.filter_by(id=user_id).first()
@@ -376,9 +586,9 @@ def load_tips():
             db_session.add(user_tournament)
             db_session.commit()
             flash("Tips addes successfully!")
-            return redirect(url_for('tips'))
         except:
             flash('Whoops! There was a problem to add games for tips!')
+        finally:
             return redirect(url_for('tips'))
 
 
@@ -403,14 +613,25 @@ def edit_tip(tip_id):
             try:
                 edit_tip.tip_goals_team_1 = team1
                 edit_tip.tip_goals_team_2 = team2
+                tip_winner(edit_tip)
                 db_session.commit()
                 flash("Tip updated successfully!")
             except:
                 flash("Error! There was a problem edit tip... try again.")
-            return redirect(url_for('tips'))
+            finally:
+                return redirect(url_for('tips'))
     else:
         flash("Sorry, it's to late for tip this game!")
     return redirect(url_for('tips'))
+
+
+def tip_winner(edit_tip):
+    if edit_tip.tip_goals_team_1 > edit_tip.tip_goals_team_2:
+        edit_tip.winner = 1
+    elif edit_tip.tip_goals_team_1 < edit_tip.tip_goals_team_2:
+        edit_tip.winner = 2
+    else:
+        edit_tip.winner = 0
 
 
 def is_date_locked(tip_id):

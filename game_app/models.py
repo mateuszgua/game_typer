@@ -113,11 +113,20 @@ class Team(database.Base):
     goal_balance = Column(Integer, nullable=False)
     points = Column(Integer, nullable=False)
     group = Column(String(100), nullable=False)
+    group_position = Column(Integer)
     play_off = Column(Integer, nullable=False)
     image_name = Column(String(100), nullable=False)
+    game_played = relationship('GamesPlayed', backref='team')
 
     def __repr__(self) -> str:
         return self.name
+
+
+class GamesPlayed(database.Base):
+    __tablename__ = 'gamesplayed'
+    id = Column(Integer(), primary_key=True)
+    game_id = Column(Integer)
+    team_id = Column(Integer, ForeignKey('team.id'))
 
 
 class UploadFile(database.Base):
@@ -145,6 +154,7 @@ class Tip(database.Base):
     tip_goals_team_2 = Column(Integer)
     tip_points = Column(Integer)
     tip_lock = Column(Integer)
+    winner = Column(Integer)
     user_id = Column(Integer, ForeignKey('user.id'))
 
 
@@ -161,3 +171,5 @@ class Game(database.Base):
     goals_team_2 = Column(Integer)
     game_phase = Column(String(30))
     result = Column(String(10))
+    winner = Column(Integer)
+    finished = Column(Integer)
