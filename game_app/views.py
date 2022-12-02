@@ -97,10 +97,6 @@ def list_last_games():
 
     last_games = Game.query.filter_by(
         game_day=day_yesterday).order_by(Game.game_time.asc()).all()
-    for last_game in last_games:
-        print("________________")
-        print(last_game)
-
     return last_games
 
 
