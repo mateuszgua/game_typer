@@ -21,10 +21,11 @@ admin.add_view(RoleAdminView(Game, db_session))
 
 @login_manager.user_loader
 def load_user(user_id):
-    try:
-        return User.query.get(user_id)
-    except:
-        return None
+    pass
+    # try:
+    # return User.query.get(user_id)
+    # except:
+    # return None
     # return User.query.get(user_id)
 
 
@@ -39,7 +40,49 @@ def home():
     teams = Team.query.all()
     IMG_LIST = os.listdir('game_app/static/files')
     IMG_LIST = ['files/' + i for i in IMG_LIST]
-    return render_template('index.html', teams=teams, current_user=current_user, image_list=IMG_LIST)
+
+    group_list = create_sorted_list()
+    sort_team_table(group_list)
+
+    return render_template('index.html', teams=teams, current_user=current_user, image_list=IMG_LIST, group_list=group_list)
+
+
+def create_sorted_list():
+    group_list = []
+    group_A = Team.query.filter_by(
+        group="A").order_by(Team.points.desc(), Team.goal_balance.desc()).all()
+    group_list.insert(0, group_A)
+    group_B = Team.query.filter_by(
+        group="B").order_by(Team.points.desc(), Team.goal_balance.desc()).all()
+    group_list.insert(1, group_B)
+    group_C = Team.query.filter_by(
+        group="C").order_by(Team.points.desc(), Team.goal_balance.desc()).all()
+    group_list.insert(2, group_C)
+    group_D = Team.query.filter_by(
+        group="D").order_by(Team.points.desc(), Team.goal_balance.desc()).all()
+    group_list.insert(3, group_D)
+    group_E = Team.query.filter_by(
+        group="E").order_by(Team.points.desc(), Team.goal_balance.desc()).all()
+    group_list.insert(4, group_E)
+    group_F = Team.query.filter_by(
+        group="F").order_by(Team.points.desc(), Team.goal_balance.desc()).all()
+    group_list.insert(5, group_F)
+    group_G = Team.query.filter_by(
+        group="G").order_by(Team.points.desc(), Team.goal_balance.desc()).all()
+    group_list.insert(6, group_G)
+    group_H = Team.query.filter_by(
+        group="H").order_by(Team.points.desc(), Team.goal_balance.desc()).all()
+    group_list.insert(7, group_H)
+    return group_list
+
+
+def sort_team_table(group_list):
+    for group in group_list:
+        i = 1
+        for team in group:
+            team.group_position = i
+            db_session.commit()
+            i += 1
 
 
 @app.route('/user/<int:user_id>')
@@ -130,9 +173,9 @@ def edit(user_id):
 
             db_session.commit()
             flash("User updated successfully!")
-            return render_template('accounts/edit.html', form=form, user=user, id=user_id)
         except:
             flash("Error! There was a problem edit user... try again.")
+        finally:
             return render_template('accounts/edit.html', form=form, user=user, id=user_id)
     else:
         return render_template('accounts/edit.html', form=form, user=user, id=user_id)
@@ -299,7 +342,8 @@ def edit_one_game(game_id):
         return redirect(url_for('game_edit'))
     except:
         flash("Error! There was a problem edit game... try again.")
-    return redirect(url_for('game_edit'))
+    finally:
+        return redirect(url_for('game_edit'))
 
 
 def set_winner(edit_game):
@@ -444,10 +488,10 @@ def edit_all_games():
         db_session.commit()
         flash("All games updated successfully!")
         return redirect(url_for('game_edit'))
-
     except:
         flash("Error! There was a problem edit all games... try again.")
-    return redirect(url_for('game_edit'))
+    finally:
+        return redirect(url_for('game_edit'))
 
 
 @app.post('/admin/delete_game/<int:game_id>')
@@ -462,8 +506,8 @@ def delete_game(game_id):
         return render_template('gamesedit.html', games=games)
     except:
         flash("Whoops! There was a problem deleting game, try again...")
-
-    return redirect(url_for('game_edit'))
+    finally:
+        return redirect(url_for('game_edit'))
 
 
 @app.route('/user/tips', methods=['GET', 'POST'])
@@ -509,9 +553,9 @@ def load_tips():
             db_session.add(user_tournament)
             db_session.commit()
             flash("Tips addes successfully!")
-            return redirect(url_for('tips'))
         except:
             flash('Whoops! There was a problem to add games for tips!')
+        finally:
             return redirect(url_for('tips'))
 
 
@@ -541,7 +585,8 @@ def edit_tip(tip_id):
                 flash("Tip updated successfully!")
             except:
                 flash("Error! There was a problem edit tip... try again.")
-            return redirect(url_for('tips'))
+            finally:
+                return redirect(url_for('tips'))
     else:
         flash("Sorry, it's to late for tip this game!")
     return redirect(url_for('tips'))

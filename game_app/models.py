@@ -113,6 +113,7 @@ class Team(database.Base):
     goal_balance = Column(Integer, nullable=False)
     points = Column(Integer, nullable=False)
     group = Column(String(100), nullable=False)
+    group_position = Column(Integer)
     play_off = Column(Integer, nullable=False)
     image_name = Column(String(100), nullable=False)
     game_played = relationship('GamesPlayed', backref='team')
