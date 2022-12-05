@@ -90,330 +90,543 @@
 
 <br>
 
-<div class="container">
-    <div class="row">
-        <div class="col">
-            <p class="fw-bolder text-center">Group A</p>
-            <table id="data" class="table table-striped">
-                <thead class="table-dark">
-                    <tr class="text-center">
-                        <th scope="col">No.</th>
-                        <th scope="col">Img</th>
-                        <th scope="col">Team</th>
-                        <th scope="col">MP</th>
-                        <th scope="col">W</th>
-                        <th scope="col">D</th>
-                        <th scope="col">L</th>
-                        <th scope="col">GF</th>
-                        <th scope="col">GA</th>
-                        <th scope="col">GD</th>
-                        <th scope="col">Pts</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for team in group_list[0] %}
-                    <tr class="text-center">
-                        <th scope="row">{{ team.group_position }}</th>
-                        <td><img src="{{ url_for('static', filename=team.image_name)}}" alt="Flag" height="30px"
-                                width="30px">
-                        </td>
-                        <td class="text-capitalize">{{ team.name }}</td>
-                        <td>{{ team.games_played }}</td>
-                        <td>{{ team.wins }}</td>
-                        <td>{{ team.draws }}</td>
-                        <td>{{ team.lost }}</td>
-                        <td>{{ team.goal_scored }}</td>
-                        <td>{{ team.goal_lost }}</td>
-                        <td>{{ team.goal_balance }}</td>
-                        <td>{{ team.points }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        <div class="col">
-            <p class="fw-bolder text-center">Group B</p>
-            <table id="data" class="table table-striped">
-                <thead class="table-dark">
-                    <tr class="text-center">
-                        <th scope="col">No.</th>
-                        <th scope="col">Img</th>
-                        <th scope="col">Team</th>
-                        <th scope="col">MP</th>
-                        <th scope="col">W</th>
-                        <th scope="col">D</th>
-                        <th scope="col">L</th>
-                        <th scope="col">GF</th>
-                        <th scope="col">GA</th>
-                        <th scope="col">GD</th>
-                        <th scope="col">Pts</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for team in group_list[1] %}
-                    <tr class="text-center">
-                        <th scope="row">{{ team.group_position }}</th>
-                        <td><img src="{{ url_for('static', filename=team.image_name)}}" alt="Flag" height="30px"
-                                width="30px">
-                        </td>
-                        <td class="text-capitalize">{{ team.name }}</td>
-                        <td>{{ team.games_played }}</td>
-                        <td>{{ team.wins }}</td>
-                        <td>{{ team.draws }}</td>
-                        <td>{{ team.lost }}</td>
-                        <td>{{ team.goal_scored }}</td>
-                        <td>{{ team.goal_lost }}</td>
-                        <td>{{ team.goal_balance }}</td>
-                        <td>{{ team.points }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+
+<nav>
+    <div class="nav nav-tabs" id="nav-tab" role="tablist">
+        <button class="nav-link active" id="nav-home-tab" data-bs-toggle="tab" data-bs-target="#nav-home" type="button"
+            role="tab" aria-controls="nav-home" aria-selected="true">Group phase</button>
+        <button class="nav-link" id="nav-profile-tab" data-bs-toggle="tab" data-bs-target="#nav-profile" type="button"
+            role="tab" aria-controls="nav-profile" aria-selected="false">Final phase</button>
+    </div>
+</nav>
+
+<div class="tab-content" id="nav-tabContent">
+    <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    <p class="fw-bolder text-center">Group A</p>
+                    <table id="data" class="table table-striped">
+                        <thead class="table-dark">
+                            <tr class="text-center">
+                                <th scope="col">No.</th>
+                                <th scope="col">Img</th>
+                                <th scope="col">Team</th>
+                                <th scope="col">MP</th>
+                                <th scope="col">W</th>
+                                <th scope="col">D</th>
+                                <th scope="col">L</th>
+                                <th scope="col">GF</th>
+                                <th scope="col">GA</th>
+                                <th scope="col">GD</th>
+                                <th scope="col">Pts</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for team in group_list[0] %}
+                            <tr class="text-center">
+                                <th scope="row">{{ team.group_position }}</th>
+                                <td><img src="{{ url_for('static', filename=team.image_name)}}" alt="Flag" height="30px"
+                                        width="30px">
+                                </td>
+                                <td class="text-capitalize">{{ team.name }}</td>
+                                <td>{{ team.games_played }}</td>
+                                <td>{{ team.wins }}</td>
+                                <td>{{ team.draws }}</td>
+                                <td>{{ team.lost }}</td>
+                                <td>{{ team.goal_scored }}</td>
+                                <td>{{ team.goal_lost }}</td>
+                                <td>{{ team.goal_balance }}</td>
+                                <td>{{ team.points }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col">
+                    <p class="fw-bolder text-center">Group B</p>
+                    <table id="data" class="table table-striped">
+                        <thead class="table-dark">
+                            <tr class="text-center">
+                                <th scope="col">No.</th>
+                                <th scope="col">Img</th>
+                                <th scope="col">Team</th>
+                                <th scope="col">MP</th>
+                                <th scope="col">W</th>
+                                <th scope="col">D</th>
+                                <th scope="col">L</th>
+                                <th scope="col">GF</th>
+                                <th scope="col">GA</th>
+                                <th scope="col">GD</th>
+                                <th scope="col">Pts</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for team in group_list[1] %}
+                            <tr class="text-center">
+                                <th scope="row">{{ team.group_position }}</th>
+                                <td><img src="{{ url_for('static', filename=team.image_name)}}" alt="Flag" height="30px"
+                                        width="30px">
+                                </td>
+                                <td class="text-capitalize">{{ team.name }}</td>
+                                <td>{{ team.games_played }}</td>
+                                <td>{{ team.wins }}</td>
+                                <td>{{ team.draws }}</td>
+                                <td>{{ team.lost }}</td>
+                                <td>{{ team.goal_scored }}</td>
+                                <td>{{ team.goal_lost }}</td>
+                                <td>{{ team.goal_balance }}</td>
+                                <td>{{ team.points }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <br>
+            <div class="row">
+                <div class="col">
+                    <p class="fw-bolder text-center">Group C</p>
+                    <table id="data" class="table table-striped">
+                        <thead class="table-dark">
+                            <tr class="text-center">
+                                <th scope="col">No.</th>
+                                <th scope="col">Img</th>
+                                <th scope="col">Team</th>
+                                <th scope="col">MP</th>
+                                <th scope="col">W</th>
+                                <th scope="col">D</th>
+                                <th scope="col">L</th>
+                                <th scope="col">GF</th>
+                                <th scope="col">GA</th>
+                                <th scope="col">GD</th>
+                                <th scope="col">Pts</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for team in group_list[2] %}
+                            <tr class="text-center">
+                                <th scope="row">{{ team.group_position }}</th>
+                                <td><img src="{{ url_for('static', filename=team.image_name)}}" alt="Flag" height="30px"
+                                        width="30px">
+                                </td>
+                                <td class="text-capitalize">{{ team.name }}</td>
+                                <td>{{ team.games_played }}</td>
+                                <td>{{ team.wins }}</td>
+                                <td>{{ team.draws }}</td>
+                                <td>{{ team.lost }}</td>
+                                <td>{{ team.goal_scored }}</td>
+                                <td>{{ team.goal_lost }}</td>
+                                <td>{{ team.goal_balance }}</td>
+                                <td>{{ team.points }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col">
+                    <p class="fw-bolder text-center">Group D</p>
+                    <table id="data" class="table table-striped">
+                        <thead class="table-dark">
+                            <tr class="text-center">
+                                <th scope="col">No.</th>
+                                <th scope="col">Img</th>
+                                <th scope="col">Team</th>
+                                <th scope="col">MP</th>
+                                <th scope="col">W</th>
+                                <th scope="col">D</th>
+                                <th scope="col">L</th>
+                                <th scope="col">GF</th>
+                                <th scope="col">GA</th>
+                                <th scope="col">GD</th>
+                                <th scope="col">Pts</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for team in group_list[3] %}
+                            <tr class="text-center">
+                                <th scope="row">{{ team.group_position }}</th>
+                                <td><img src="{{ url_for('static', filename=team.image_name)}}" alt="Flag" height="30px"
+                                        width="30px">
+                                </td>
+                                <td class="text-capitalize">{{ team.name }}</td>
+                                <td>{{ team.games_played }}</td>
+                                <td>{{ team.wins }}</td>
+                                <td>{{ team.draws }}</td>
+                                <td>{{ team.lost }}</td>
+                                <td>{{ team.goal_scored }}</td>
+                                <td>{{ team.goal_lost }}</td>
+                                <td>{{ team.goal_balance }}</td>
+                                <td>{{ team.points }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <br>
+            <div class="row">
+                <div class="col">
+                    <p class="fw-bolder text-center">Group E</p>
+                    <table id="data" class="table table-striped">
+                        <thead class="table-dark">
+                            <tr class="text-center">
+                                <th scope="col">No.</th>
+                                <th scope="col">Img</th>
+                                <th scope="col">Team</th>
+                                <th scope="col">MP</th>
+                                <th scope="col">W</th>
+                                <th scope="col">D</th>
+                                <th scope="col">L</th>
+                                <th scope="col">GF</th>
+                                <th scope="col">GA</th>
+                                <th scope="col">GD</th>
+                                <th scope="col">Pts</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for team in group_list[4] %}
+                            <tr class="text-center">
+                                <th scope="row">{{ team.group_position }}</th>
+                                <td><img src="{{ url_for('static', filename=team.image_name)}}" alt="Flag" height="30px"
+                                        width="30px">
+                                </td>
+                                <td class="text-capitalize">{{ team.name }}</td>
+                                <td>{{ team.games_played }}</td>
+                                <td>{{ team.wins }}</td>
+                                <td>{{ team.draws }}</td>
+                                <td>{{ team.lost }}</td>
+                                <td>{{ team.goal_scored }}</td>
+                                <td>{{ team.goal_lost }}</td>
+                                <td>{{ team.goal_balance }}</td>
+                                <td>{{ team.points }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col">
+                    <p class="fw-bolder text-center">Group F</p>
+                    <table id="data" class="table table-striped">
+                        <thead class="table-dark">
+                            <tr class="text-center">
+                                <th scope="col">No.</th>
+                                <th scope="col">Img</th>
+                                <th scope="col">Team</th>
+                                <th scope="col">MP</th>
+                                <th scope="col">W</th>
+                                <th scope="col">D</th>
+                                <th scope="col">L</th>
+                                <th scope="col">GF</th>
+                                <th scope="col">GA</th>
+                                <th scope="col">GD</th>
+                                <th scope="col">Pts</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for team in group_list[5] %}
+                            <tr class="text-center">
+                                <th scope="row">{{ team.group_position }}</th>
+                                <td><img src="{{ url_for('static', filename=team.image_name)}}" alt="Flag" height="30px"
+                                        width="30px">
+                                </td>
+                                <td class="text-capitalize">{{ team.name }}</td>
+                                <td>{{ team.games_played }}</td>
+                                <td>{{ team.wins }}</td>
+                                <td>{{ team.draws }}</td>
+                                <td>{{ team.lost }}</td>
+                                <td>{{ team.goal_scored }}</td>
+                                <td>{{ team.goal_lost }}</td>
+                                <td>{{ team.goal_balance }}</td>
+                                <td>{{ team.points }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <br>
+            <div class="row">
+                <div class="col">
+                    <p class="fw-bolder text-center">Group G</p>
+                    <table id="data" class="table table-striped">
+                        <thead class="table-dark">
+                            <tr class="text-center">
+                                <th scope="col">No.</th>
+                                <th scope="col">Img</th>
+                                <th scope="col">Team</th>
+                                <th scope="col">MP</th>
+                                <th scope="col">W</th>
+                                <th scope="col">D</th>
+                                <th scope="col">L</th>
+                                <th scope="col">GF</th>
+                                <th scope="col">GA</th>
+                                <th scope="col">GD</th>
+                                <th scope="col">Pts</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for team in group_list[6] %}
+                            <tr class="text-center">
+                                <th scope="row">{{ team.group_position }}</th>
+                                <td><img src="{{ url_for('static', filename=team.image_name)}}" alt="Flag" height="30px"
+                                        width="30px">
+                                </td>
+                                <td class="text-capitalize">{{ team.name }}</td>
+                                <td>{{ team.games_played }}</td>
+                                <td>{{ team.wins }}</td>
+                                <td>{{ team.draws }}</td>
+                                <td>{{ team.lost }}</td>
+                                <td>{{ team.goal_scored }}</td>
+                                <td>{{ team.goal_lost }}</td>
+                                <td>{{ team.goal_balance }}</td>
+                                <td>{{ team.points }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col">
+                    <p class="fw-bolder text-center">Group H</p>
+                    <table id="data" class="table table-striped">
+                        <thead class="table-dark">
+                            <tr class="text-center">
+                                <th scope="col">No.</th>
+                                <th scope="col">Img</th>
+                                <th scope="col">Team</th>
+                                <th scope="col">MP</th>
+                                <th scope="col">W</th>
+                                <th scope="col">D</th>
+                                <th scope="col">L</th>
+                                <th scope="col">GF</th>
+                                <th scope="col">GA</th>
+                                <th scope="col">GD</th>
+                                <th scope="col">Pts</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for team in group_list[7] %}
+                            <tr class="text-center">
+                                <th scope="row">{{ team.group_position }}</th>
+                                <td><img src="{{ url_for('static', filename=team.image_name)}}" alt="Flag" height="30px"
+                                        width="30px">
+                                </td>
+                                <td class="text-capitalize">{{ team.name }}</td>
+                                <td>{{ team.games_played }}</td>
+                                <td>{{ team.wins }}</td>
+                                <td>{{ team.draws }}</td>
+                                <td>{{ team.lost }}</td>
+                                <td>{{ team.goal_scored }}</td>
+                                <td>{{ team.goal_lost }}</td>
+                                <td>{{ team.goal_balance }}</td>
+                                <td>{{ team.points }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
-    <br>
-    <div class="row">
-        <div class="col">
-            <p class="fw-bolder text-center">Group C</p>
-            <table id="data" class="table table-striped">
-                <thead class="table-dark">
-                    <tr class="text-center">
-                        <th scope="col">No.</th>
-                        <th scope="col">Img</th>
-                        <th scope="col">Team</th>
-                        <th scope="col">MP</th>
-                        <th scope="col">W</th>
-                        <th scope="col">D</th>
-                        <th scope="col">L</th>
-                        <th scope="col">GF</th>
-                        <th scope="col">GA</th>
-                        <th scope="col">GD</th>
-                        <th scope="col">Pts</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for team in group_list[2] %}
-                    <tr class="text-center">
-                        <th scope="row">{{ team.group_position }}</th>
-                        <td><img src="{{ url_for('static', filename=team.image_name)}}" alt="Flag" height="30px"
-                                width="30px">
-                        </td>
-                        <td class="text-capitalize">{{ team.name }}</td>
-                        <td>{{ team.games_played }}</td>
-                        <td>{{ team.wins }}</td>
-                        <td>{{ team.draws }}</td>
-                        <td>{{ team.lost }}</td>
-                        <td>{{ team.goal_scored }}</td>
-                        <td>{{ team.goal_lost }}</td>
-                        <td>{{ team.goal_balance }}</td>
-                        <td>{{ team.points }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        <div class="col">
-            <p class="fw-bolder text-center">Group D</p>
-            <table id="data" class="table table-striped">
-                <thead class="table-dark">
-                    <tr class="text-center">
-                        <th scope="col">No.</th>
-                        <th scope="col">Img</th>
-                        <th scope="col">Team</th>
-                        <th scope="col">MP</th>
-                        <th scope="col">W</th>
-                        <th scope="col">D</th>
-                        <th scope="col">L</th>
-                        <th scope="col">GF</th>
-                        <th scope="col">GA</th>
-                        <th scope="col">GD</th>
-                        <th scope="col">Pts</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for team in group_list[3] %}
-                    <tr class="text-center">
-                        <th scope="row">{{ team.group_position }}</th>
-                        <td><img src="{{ url_for('static', filename=team.image_name)}}" alt="Flag" height="30px"
-                                width="30px">
-                        </td>
-                        <td class="text-capitalize">{{ team.name }}</td>
-                        <td>{{ team.games_played }}</td>
-                        <td>{{ team.wins }}</td>
-                        <td>{{ team.draws }}</td>
-                        <td>{{ team.lost }}</td>
-                        <td>{{ team.goal_scored }}</td>
-                        <td>{{ team.goal_lost }}</td>
-                        <td>{{ team.goal_balance }}</td>
-                        <td>{{ team.points }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+    <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
+        <br>
+
+        <table class="table my-auto">
+            <thead>
+                <tr class="text-center">
+                    <th scope="col">1/8 final</th>
+                    <th scope="col"></th>
+                    <th scope="col">1/4 final</th>
+                    <th scope="col"></th>
+                    <th scope="col">1/2 final</th>
+                    <th scope="col"> </th>
+                    <th scope="col">final</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <div class="card text-dark bg-light mb-3" style="max-width: 18rem;">
+                            <div class="card-header text-center">Date</div>
+                            <div class="card-body">
+                                <p class="card-text">Team 1</p>
+                                <p class="card-text">Team 2</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td> </td>
+                    <td class="align-items-center" rowspan="2">
+                        <div class="card text-dark bg-light mb-3" style="max-width: 18rem;">
+                            <div class="card-header">Date</div>
+                            <div class="card-body">
+                                <p class="card-text">Team 1</p>
+                                <p class="card-text">Team 2</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td></td>
+                    <td class="align-items-center" rowspan="4">
+                        <div class="card text-dark bg-light mb-3" style="max-width: 18rem;">
+                            <div class="card-header">Date</div>
+                            <div class="card-body">
+                                <p class="card-text">Team 1</p>
+                                <p class="card-text">Team 2</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td> </td>
+                    <td class="justify-content-center" rowspan="8">
+                        <div class="card text-dark bg-light mb-3" style="max-width: 18rem;">
+                            <div class="card-header">Date</div>
+                            <div class="card-body">
+                                <p class="card-text">Team 1</p>
+                                <p class="card-text">Team 2</p>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="card text-dark bg-light mb-3" style="max-width: 18rem;">
+                            <div class="card-header">Date</div>
+                            <div class="card-body">
+                                <p class="card-text">Team 1</p>
+                                <p class="card-text">Team 2</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td> </td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="card text-dark bg-light mb-3" style="max-width: 18rem;">
+                            <div class="card-header">Date</div>
+                            <div class="card-body">
+                                <p class="card-text">Team 1</p>
+                                <p class="card-text">Team 2</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td> </td>
+                    <td class="justify-content-center" rowspan="2">
+                        <div class="card text-dark bg-light mb-3" style="max-width: 18rem;">
+                            <div class="card-header">Date</div>
+                            <div class="card-body">
+                                <p class="card-text">Team 1</p>
+                                <p class="card-text">Team 2</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="card text-dark bg-light mb-3" style="max-width: 18rem;">
+                            <div class="card-header">Date</div>
+                            <div class="card-body">
+                                <p class="card-text">Team 1</p>
+                                <p class="card-text">Team 2</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td> </td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="card text-dark bg-light mb-3" style="max-width: 18rem;">
+                            <div class="card-header">Date</div>
+                            <div class="card-body">
+                                <p class="card-text">Team 1</p>
+                                <p class="card-text">Team 2</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td> </td>
+                    <td class="justify-content-center" rowspan="2">
+                        <div class="card text-dark bg-light mb-3" style="max-width: 18rem;">
+                            <div class="card-header">Date</div>
+                            <div class="card-body">
+                                <p class="card-text">Team 1</p>
+                                <p class="card-text">Team 2</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td></td>
+                    <td class="justify-content-center" rowspan="4">
+                        <div class="card text-dark bg-light mb-3" style="max-width: 18rem;">
+                            <div class="card-header">Date</div>
+                            <div class="card-body">
+                                <p class="card-text">Team 1</p>
+                                <p class="card-text">Team 2</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="card text-dark bg-light mb-3" style="max-width: 18rem;">
+                            <div class="card-header">Date</div>
+                            <div class="card-body">
+                                <p class="card-text">Team 1</p>
+                                <p class="card-text">Team 2</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td> </td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="card text-dark bg-light mb-3" style="max-width: 18rem;">
+                            <div class="card-header">Date</div>
+                            <div class="card-body">
+                                <p class="card-text">Team 1</p>
+                                <p class="card-text">Team 2</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td> </td>
+                    <td class="justify-content-center" rowspan="2">
+                        <div class="card text-dark bg-light mb-3" style="max-width: 18rem;">
+                            <div class="card-header">Date</div>
+                            <div class="card-body">
+                                <p class="card-text">Team 1</p>
+                                <p class="card-text">Team 2</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="card text-dark bg-light mb-3" style="max-width: 18rem;">
+                            <div class="card-header">Date</div>
+                            <div class="card-body">
+                                <p class="card-text">Team 1</p>
+                                <p class="card-text">Team 2</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td> </td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+
     </div>
-    <br>
-    <div class="row">
-        <div class="col">
-            <p class="fw-bolder text-center">Group E</p>
-            <table id="data" class="table table-striped">
-                <thead class="table-dark">
-                    <tr class="text-center">
-                        <th scope="col">No.</th>
-                        <th scope="col">Img</th>
-                        <th scope="col">Team</th>
-                        <th scope="col">MP</th>
-                        <th scope="col">W</th>
-                        <th scope="col">D</th>
-                        <th scope="col">L</th>
-                        <th scope="col">GF</th>
-                        <th scope="col">GA</th>
-                        <th scope="col">GD</th>
-                        <th scope="col">Pts</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for team in group_list[4] %}
-                    <tr class="text-center">
-                        <th scope="row">{{ team.group_position }}</th>
-                        <td><img src="{{ url_for('static', filename=team.image_name)}}" alt="Flag" height="30px"
-                                width="30px">
-                        </td>
-                        <td class="text-capitalize">{{ team.name }}</td>
-                        <td>{{ team.games_played }}</td>
-                        <td>{{ team.wins }}</td>
-                        <td>{{ team.draws }}</td>
-                        <td>{{ team.lost }}</td>
-                        <td>{{ team.goal_scored }}</td>
-                        <td>{{ team.goal_lost }}</td>
-                        <td>{{ team.goal_balance }}</td>
-                        <td>{{ team.points }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        <div class="col">
-            <p class="fw-bolder text-center">Group F</p>
-            <table id="data" class="table table-striped">
-                <thead class="table-dark">
-                    <tr class="text-center">
-                        <th scope="col">No.</th>
-                        <th scope="col">Img</th>
-                        <th scope="col">Team</th>
-                        <th scope="col">MP</th>
-                        <th scope="col">W</th>
-                        <th scope="col">D</th>
-                        <th scope="col">L</th>
-                        <th scope="col">GF</th>
-                        <th scope="col">GA</th>
-                        <th scope="col">GD</th>
-                        <th scope="col">Pts</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for team in group_list[5] %}
-                    <tr class="text-center">
-                        <th scope="row">{{ team.group_position }}</th>
-                        <td><img src="{{ url_for('static', filename=team.image_name)}}" alt="Flag" height="30px"
-                                width="30px">
-                        </td>
-                        <td class="text-capitalize">{{ team.name }}</td>
-                        <td>{{ team.games_played }}</td>
-                        <td>{{ team.wins }}</td>
-                        <td>{{ team.draws }}</td>
-                        <td>{{ team.lost }}</td>
-                        <td>{{ team.goal_scored }}</td>
-                        <td>{{ team.goal_lost }}</td>
-                        <td>{{ team.goal_balance }}</td>
-                        <td>{{ team.points }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-    <br>
-    <div class="row">
-        <div class="col">
-            <p class="fw-bolder text-center">Group G</p>
-            <table id="data" class="table table-striped">
-                <thead class="table-dark">
-                    <tr class="text-center">
-                        <th scope="col">No.</th>
-                        <th scope="col">Img</th>
-                        <th scope="col">Team</th>
-                        <th scope="col">MP</th>
-                        <th scope="col">W</th>
-                        <th scope="col">D</th>
-                        <th scope="col">L</th>
-                        <th scope="col">GF</th>
-                        <th scope="col">GA</th>
-                        <th scope="col">GD</th>
-                        <th scope="col">Pts</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for team in group_list[6] %}
-                    <tr class="text-center">
-                        <th scope="row">{{ team.group_position }}</th>
-                        <td><img src="{{ url_for('static', filename=team.image_name)}}" alt="Flag" height="30px"
-                                width="30px">
-                        </td>
-                        <td class="text-capitalize">{{ team.name }}</td>
-                        <td>{{ team.games_played }}</td>
-                        <td>{{ team.wins }}</td>
-                        <td>{{ team.draws }}</td>
-                        <td>{{ team.lost }}</td>
-                        <td>{{ team.goal_scored }}</td>
-                        <td>{{ team.goal_lost }}</td>
-                        <td>{{ team.goal_balance }}</td>
-                        <td>{{ team.points }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        <div class="col">
-            <p class="fw-bolder text-center">Group H</p>
-            <table id="data" class="table table-striped">
-                <thead class="table-dark">
-                    <tr class="text-center">
-                        <th scope="col">No.</th>
-                        <th scope="col">Img</th>
-                        <th scope="col">Team</th>
-                        <th scope="col">MP</th>
-                        <th scope="col">W</th>
-                        <th scope="col">D</th>
-                        <th scope="col">L</th>
-                        <th scope="col">GF</th>
-                        <th scope="col">GA</th>
-                        <th scope="col">GD</th>
-                        <th scope="col">Pts</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for team in group_list[7] %}
-                    <tr class="text-center">
-                        <th scope="row">{{ team.group_position }}</th>
-                        <td><img src="{{ url_for('static', filename=team.image_name)}}" alt="Flag" height="30px"
-                                width="30px">
-                        </td>
-                        <td class="text-capitalize">{{ team.name }}</td>
-                        <td>{{ team.games_played }}</td>
-                        <td>{{ team.wins }}</td>
-                        <td>{{ team.draws }}</td>
-                        <td>{{ team.lost }}</td>
-                        <td>{{ team.goal_scored }}</td>
-                        <td>{{ team.goal_lost }}</td>
-                        <td>{{ team.goal_balance }}</td>
-                        <td>{{ team.points }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
+
 </div>
+
+
+
 
 {% endblock %}
