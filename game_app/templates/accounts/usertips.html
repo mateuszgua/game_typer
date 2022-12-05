@@ -24,27 +24,19 @@
 </div>
 {% endfor %}
 
+{% if tips_amount == 0 %}
+<div class="login-signup">
+    <div>
+        <span>Do you want to play?</span>
+        <br>
+        <a href="{{ url_for('user') }}">Add tournament!</a>
+    </div>
+</div>
+
+{% else %}
 <h2 class="title text-center">{% block title %} Games World Cup 2022 {% endblock %}</h2>
 <br>
-<p class="text-center">User points: {{user.points}}</p>
-
 <br>
-
-<div class="form-check">
-    <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1">
-    <label class="form-check-label" for="flexRadioDefault1">
-        Add games 1
-    </label>
-</div>
-<div class="form-check">
-    <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault2" checked>
-    <label class="form-check-label" for="flexRadioDefault2">
-        Add games 2
-    </label>
-</div>
-<form method="POST" action="{{ url_for('load_tips') }}">
-    <input class="btn btn-primary" type="submit" name="load" value="Load tips">
-</form>
 <br>
 
 <div class="container">
@@ -101,17 +93,26 @@
                         {% else %}
                         <form method="POST" action="{{ url_for('edit_tip', tip_id=user_tip.game_id) }}" name="edit_tip">
                             <td>
+                                {% if user_tip.tip_goals_team_1 == None or user_tip.tip_goals_team_2 == None %}
+                                <input class="text-center" type="text" id="team1" name="team1" size="1" value=" "> :
+                                <input class="text-center" type="text" id="team2" name="team2" size="1" value=" ">
+                                {% else %}
                                 <input class="text-center" type="text" id="team1" name="team1" size="1"
                                     value={{user_tip.tip_goals_team_1}}> :
                                 <input class="text-center" type="text" id="team2" name="team2" size="1"
                                     value={{user_tip.tip_goals_team_2}}>
+                                {% endif %}
                             </td>
                             <td>
                                 <input class="btn btn-success" type="submit" value="Save tip" name="action">
                             </td>
                         </form>
                         {% endif %}
+                        {% if user_tip.tip_points == None %}
+                        <td> - </td>
+                        {% else %}
                         <td>{{ user_tip.tip_points }}</td>
+                        {% endif %}
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -122,5 +123,5 @@
         </div>
     </div>
 </div>
-
+{% endif %}
 {% endblock %}

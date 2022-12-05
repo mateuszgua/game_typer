@@ -21,12 +21,7 @@ admin.add_view(RoleAdminView(Game, db_session))
 
 @login_manager.user_loader
 def load_user(user_id):
-    pass
-    # try:
-    # return User.query.get(user_id)
-    # except:
-    # return None
-    # return User.query.get(user_id)
+    return User.query.get(user_id)
 
 
 @login_manager.unauthorized_handler
@@ -35,11 +30,20 @@ def unauthorized():
     return redirect(url_for('login'))
 
 
+@app.teardown_appcontext
+def shutdown_session(exception=None):
+    db_session.remove()
+
+
 @app.route('/home')
 def home():
     teams = Team.query.all()
-    IMG_LIST = os.listdir('game_app/static/files')
-    IMG_LIST = ['files/' + i for i in IMG_LIST]
+
+    try:
+        images_list = os.listdir('game_app/static/files')
+        images_list = ['files/' + image for image in images_list]
+    except:
+        flash('There is a problem to load all images of flags.')
 
     last_games = list_last_games()
     current_games = list_current_games()
@@ -48,7 +52,7 @@ def home():
     group_list = create_sorted_list()
     sort_team_table(group_list)
 
-    return render_template('index.html', teams=teams, current_user=current_user, image_list=IMG_LIST,
+    return render_template('index.html', teams=teams, image_list=images_list,
                            group_list=group_list, last_games=last_games, current_games=current_games, next_games=next_games)
 
 
@@ -118,19 +122,22 @@ def list_next_games():
     return next_games
 
 
-@app.route('/user/<int:user_id>')
-# @login_required
-def user(user_id):
-    user = User.query.filter_by(id=user_id).first()
-
+@app.route('/user')
+@login_required
+def user():
     user_id = current_user.get_id()
-    print("___________________")
-    print(user_id)
-    user_auth = current_user.is_authenticated
-    print("___________________")
-    print(user_auth)
+    user = User.query.filter_by(id=user_id).first()
+    images_list = os.listdir('game_app/static/files')
+    images_list = ['files/' + image for image in images_list]
+    tournaments = UserTournaments.query.filter_by(user_id=user_id).all()
+    user_tips = Tip.query.filter_by(user_id=user_id).all()
+    user_points = 0
 
-    return render_template('accounts/user.html', user=user)
+    for user_tip in user_tips:
+        if user_tip.tip_points != None:
+            user_points += int(user_tip.tip_points)
+
+    return render_template('accounts/user.html', user=user, image_list=images_list, tournaments=tournaments, user_points=user_points)
 
 
 @app.route('/register', methods=('GET', 'POST'))
@@ -165,6 +172,8 @@ def login():
         if user:
             if user.check_password(password=form.password1.data):
                 user.authenticated = True
+                db_session.add(user)
+                db_session.commit()
                 login_user(user, remember=form.remember.data)
                 next = request.args.get('next')
                 return redirect(next or (url_for('user', user_id=user.id)))
@@ -179,9 +188,19 @@ def login():
 def logout():
     user = current_user
     user.authenticated = False
+    db_session.add(user)
+    db_session.commit()
     logout_user()
     flash("You have been logged out!")
-    return redirect(url_for('login'))
+    return redirect(url_for('home'))
+
+
+@app.route('/user_info')
+@login_required
+def user_info():
+    user_id = current_user.get_id()
+    user = User.query.filter_by(id=user_id).first()
+    return render_template('accounts/userinfo.html', user=user)
 
 
 @app.route('/edit/<int:user_id>', methods=('GET', 'POST'))
@@ -309,8 +328,7 @@ def games():
     teams = Team.query.all()
     form = AddGameForm()
 
-    #
-    user_id = 1
+    user_id = current_user.get_id()
     user = User.query.filter_by(id=user_id).first()
     if form.validate_on_submit():
         existing_game = Game.query.filter_by(id=form.id.data).first()
@@ -361,8 +379,6 @@ def edit_one_game(game_id):
         edit_game.team_2 = name_team_2
         edit_game.game_day = game_date
         edit_game.game_time = game_time
-        edit_game.goals_team_1 = team1
-        edit_game.goals_team_2 = team2
         edit_game.finished = finished
         db_session.commit()
 
@@ -376,6 +392,10 @@ def edit_one_game(game_id):
     except:
         flash("Error! There was a problem edit game... try again.")
     finally:
+        if team1 != None and team2 != None:
+            edit_game.goals_team_1 = team1
+            edit_game.goals_team_2 = team2
+            db_session.commit()
         return redirect(url_for('game_edit'))
 
 
@@ -545,30 +565,30 @@ def delete_game(game_id):
 
 @app.route('/user/tips', methods=['GET', 'POST'])
 def tips():
+    user_id = current_user.get_id()
     games = Game.query.all()
-    user_tips = Tip.query.all()
+    tips_amount = Tip.query.filter_by(user_id=user_id).count()
+    user_tips = Tip.query.filter_by(user_id=user_id).all()
 
-    # user_id = current_user.get_id()
-    user_id = 1
-    user = User.query.filter_by(id=user_id).first()
+    if tips_amount == 0:
+        flash("Please add tournament for your account to show any bet")
+    else:
+        for user_tip in user_tips:
+            is_date_locked(user_tip.game_id)
 
-    for user_tip in user_tips:
-        is_date_locked(user_tip.id)
-
-    return render_template('accounts/usertips.html', user_tips=user_tips, games=games, user=user)
+    return render_template('accounts/usertips.html', user_tips=user_tips, games=games, user=user, tips_amount=tips_amount)
 
 
 @app.post('/user/load_tips')
 def load_tips():
-    #
-    user_id = 1
+    user_id = current_user.get_id()
     tournament_name = "World Cup 2022"
     user = User.query.filter_by(id=user_id).first()
     games = Game.query.all()
 
     if is_tournament_exist(tournament_name, user):
         flash("Tournament exist!")
-        return redirect(url_for('tips'))
+        return redirect(url_for('user'))
     else:
         try:
             for game in games:
@@ -589,7 +609,7 @@ def load_tips():
         except:
             flash('Whoops! There was a problem to add games for tips!')
         finally:
-            return redirect(url_for('tips'))
+            return redirect(url_for('user'))
 
 
 def is_tournament_exist(tournament_name, user):
@@ -607,7 +627,7 @@ def edit_tip(tip_id):
 
     if edit_tip.tip_lock == 0 or edit_tip.tip_lock == None:
 
-        if is_date_locked(tip_id):
+        if is_date_locked(edit_tip.game_id):
             flash("Sorry, it's to late for tip this game!")
         else:
             try:
@@ -649,8 +669,9 @@ def is_date_locked(tip_id):
 
 
 def lock_tip(tip_id):
-    edit_tip = Tip.query.filter_by(id=tip_id).first()
-    edit_tip.tip_lock = 1
+    edit_tip = Tip.query.filter_by(game_id=tip_id).all()
+    for tip in edit_tip:
+        tip.tip_lock = 1
     db_session.commit()
 
 
