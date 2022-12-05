@@ -11,7 +11,7 @@
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
 
                 {% if current_user.is_authenticated %}
-
+                {% if current_user.get_id() == 1 %}
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
                         data-bs-toggle="dropdown" aria-expanded="false">
@@ -23,15 +23,15 @@
                         <li><a class="dropdown-item" href="{{ url_for('select_file') }}">Load file to db</a></li>
                     </ul>
                 </li>
-
+                {% endif %}
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
                         data-bs-toggle="dropdown" aria-expanded="false">
                         Profile
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <li><a class="dropdown-item" href="{{ url_for('types') }}">Types</a></li>
-                        <li><a class="dropdown-item" href="#">User info</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('user') }}">User</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('user_info') }}">User info</a></li>
                     </ul>
                 </li>
 

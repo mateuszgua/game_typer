@@ -26,7 +26,7 @@
                         </div>
                     </div>
                     <p class="card-text text-center">{{ last_game.game_day }} / {{ last_game.game_time }}
-                        <br class="card-text text-center">Group {{ last_game.game_phase }}
+                        <br class="card-text text-center">Phase {{ last_game.game_phase }}
                     </p>
                     {% endfor %}
                 </div>
@@ -56,7 +56,7 @@
                         </div>
                     </div>
                     <p class="card-text text-center">{{ current_game.game_day }} / {{ current_game.game_time }}
-                        <br class="card-text text-center">Group {{ current_game.game_phase }}
+                        <br class="card-text text-center">Phase {{ current_game.game_phase }}
                     </p>
                     {% endfor %}
                 </div>
@@ -79,7 +79,7 @@
                         </div>
                     </div>
                     <p class="card-text text-center">{{ next_game.game_day }} / {{ next_game.game_time }}
-                        <br class="card-text text-center">Group {{ next_game.game_phase }}
+                        <br class="card-text text-center">Phase {{ next_game.game_phase }}
                     </p>
                     {% endfor %}
                 </div>
@@ -114,12 +114,9 @@
                     {% for team in group_list[0] %}
                     <tr class="text-center">
                         <th scope="row">{{ team.group_position }}</th>
-                        {% for image in image_list %}
-                        {% if image == team.image_name %}
-                        <td><img src="{{ url_for('static', filename=image)}}" alt="Flag" height="30px" width="30px">
+                        <td><img src="{{ url_for('static', filename=team.image_name)}}" alt="Flag" height="30px"
+                                width="30px">
                         </td>
-                        {% endif %}
-                        {% endfor %}
                         <td class="text-capitalize">{{ team.name }}</td>
                         <td>{{ team.games_played }}</td>
                         <td>{{ team.wins }}</td>
@@ -154,15 +151,11 @@
                 </thead>
                 <tbody>
                     {% for team in group_list[1] %}
-                    {% if team.group == "B" %}
                     <tr class="text-center">
                         <th scope="row">{{ team.group_position }}</th>
-                        {% for image in image_list %}
-                        {% if image == team.image_name %}
-                        <td><img src="{{ url_for('static', filename=image)}}" alt="Flag" height="30px" width="30px">
+                        <td><img src="{{ url_for('static', filename=team.image_name)}}" alt="Flag" height="30px"
+                                width="30px">
                         </td>
-                        {% endif %}
-                        {% endfor %}
                         <td class="text-capitalize">{{ team.name }}</td>
                         <td>{{ team.games_played }}</td>
                         <td>{{ team.wins }}</td>
@@ -173,7 +166,6 @@
                         <td>{{ team.goal_balance }}</td>
                         <td>{{ team.points }}</td>
                     </tr>
-                    {% endif %}
                     {% endfor %}
                 </tbody>
             </table>
@@ -203,12 +195,9 @@
                     {% for team in group_list[2] %}
                     <tr class="text-center">
                         <th scope="row">{{ team.group_position }}</th>
-                        {% for image in image_list %}
-                        {% if image == team.image_name %}
-                        <td><img src="{{ url_for('static', filename=image)}}" alt="Flag" height="30px" width="30px">
+                        <td><img src="{{ url_for('static', filename=team.image_name)}}" alt="Flag" height="30px"
+                                width="30px">
                         </td>
-                        {% endif %}
-                        {% endfor %}
                         <td class="text-capitalize">{{ team.name }}</td>
                         <td>{{ team.games_played }}</td>
                         <td>{{ team.wins }}</td>
@@ -245,12 +234,9 @@
                     {% for team in group_list[3] %}
                     <tr class="text-center">
                         <th scope="row">{{ team.group_position }}</th>
-                        {% for image in image_list %}
-                        {% if image == team.image_name %}
-                        <td><img src="{{ url_for('static', filename=image)}}" alt="Flag" height="30px" width="30px">
+                        <td><img src="{{ url_for('static', filename=team.image_name)}}" alt="Flag" height="30px"
+                                width="30px">
                         </td>
-                        {% endif %}
-                        {% endfor %}
                         <td class="text-capitalize">{{ team.name }}</td>
                         <td>{{ team.games_played }}</td>
                         <td>{{ team.wins }}</td>
@@ -290,12 +276,9 @@
                     {% for team in group_list[4] %}
                     <tr class="text-center">
                         <th scope="row">{{ team.group_position }}</th>
-                        {% for image in image_list %}
-                        {% if image == team.image_name %}
-                        <td><img src="{{ url_for('static', filename=image)}}" alt="Flag" height="30px" width="30px">
+                        <td><img src="{{ url_for('static', filename=team.image_name)}}" alt="Flag" height="30px"
+                                width="30px">
                         </td>
-                        {% endif %}
-                        {% endfor %}
                         <td class="text-capitalize">{{ team.name }}</td>
                         <td>{{ team.games_played }}</td>
                         <td>{{ team.wins }}</td>
@@ -332,12 +315,9 @@
                     {% for team in group_list[5] %}
                     <tr class="text-center">
                         <th scope="row">{{ team.group_position }}</th>
-                        {% for image in image_list %}
-                        {% if image == team.image_name %}
-                        <td><img src="{{ url_for('static', filename=image)}}" alt="Flag" height="30px" width="30px">
+                        <td><img src="{{ url_for('static', filename=team.image_name)}}" alt="Flag" height="30px"
+                                width="30px">
                         </td>
-                        {% endif %}
-                        {% endfor %}
                         <td class="text-capitalize">{{ team.name }}</td>
                         <td>{{ team.games_played }}</td>
                         <td>{{ team.wins }}</td>
@@ -377,12 +357,9 @@
                     {% for team in group_list[6] %}
                     <tr class="text-center">
                         <th scope="row">{{ team.group_position }}</th>
-                        {% for image in image_list %}
-                        {% if image == team.image_name %}
-                        <td><img src="{{ url_for('static', filename=image)}}" alt="Flag" height="30px" width="30px">
+                        <td><img src="{{ url_for('static', filename=team.image_name)}}" alt="Flag" height="30px"
+                                width="30px">
                         </td>
-                        {% endif %}
-                        {% endfor %}
                         <td class="text-capitalize">{{ team.name }}</td>
                         <td>{{ team.games_played }}</td>
                         <td>{{ team.wins }}</td>
@@ -419,12 +396,9 @@
                     {% for team in group_list[7] %}
                     <tr class="text-center">
                         <th scope="row">{{ team.group_position }}</th>
-                        {% for image in image_list %}
-                        {% if image == team.image_name %}
-                        <td><img src="{{ url_for('static', filename=image)}}" alt="Flag" height="30px" width="30px">
+                        <td><img src="{{ url_for('static', filename=team.image_name)}}" alt="Flag" height="30px"
+                                width="30px">
                         </td>
-                        {% endif %}
-                        {% endfor %}
                         <td class="text-capitalize">{{ team.name }}</td>
                         <td>{{ team.games_played }}</td>
                         <td>{{ team.wins }}</td>
