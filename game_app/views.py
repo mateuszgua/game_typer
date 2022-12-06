@@ -52,8 +52,24 @@ def home():
     group_list = create_sorted_list()
     sort_team_table(group_list)
 
-    return render_template('index.html', teams=teams, image_list=images_list,
-                           group_list=group_list, last_games=last_games, current_games=current_games, next_games=next_games)
+    final_1_8 = Game.query.filter_by(game_phase="1/8").all()
+    final_1_4 = Game.query.filter_by(game_phase="1/4").all()
+    final_1_2 = Game.query.filter_by(game_phase="1/2").all()
+    final_3rd = Game.query.filter_by(game_phase="3rd").all()
+    final = Game.query.filter_by(game_phase="final").all()
+
+    return render_template('index.html',
+                           teams=teams,
+                           image_list=images_list,
+                           group_list=group_list,
+                           last_games=last_games,
+                           current_games=current_games,
+                           next_games=next_games,
+                           final_1_8=final_1_8,
+                           final_1_4=final_1_4,
+                           final_1_2=final_1_2,
+                           final_3rd=final_3rd,
+                           final=final)
 
 
 def create_sorted_list():
@@ -115,7 +131,13 @@ def list_current_games():
 def list_next_games():
     present = date.today()
     i = 1
+    number_of_games = 64
     day_tommorow = present + timedelta(days=i)
+
+    while Game.query.filter_by(game_day=day_tommorow).count() == 0:
+        day_tommorow += timedelta(days=i)
+        if i > number_of_games:
+            break
 
     next_games = Game.query.filter_by(
         game_day=day_tommorow).order_by(Game.game_time.asc()).all()
@@ -137,7 +159,11 @@ def user():
         if user_tip.tip_points != None:
             user_points += int(user_tip.tip_points)
 
-    return render_template('accounts/user.html', user=user, image_list=images_list, tournaments=tournaments, user_points=user_points)
+    return render_template('accounts/user.html',
+                           user=user,
+                           image_list=images_list,
+                           tournaments=tournaments,
+                           user_points=user_points)
 
 
 @app.route('/register', methods=('GET', 'POST'))
@@ -228,9 +254,15 @@ def edit(user_id):
         except:
             flash("Error! There was a problem edit user... try again.")
         finally:
-            return render_template('accounts/edit.html', form=form, user=user, id=user_id)
+            return render_template('accounts/edit.html',
+                                   form=form,
+                                   user=user,
+                                   id=user_id)
     else:
-        return render_template('accounts/edit.html', form=form, user=user, id=user_id)
+        return render_template('accounts/edit.html',
+                               form=form,
+                               user=user,
+                               id=user_id)
 
 
 @app.post('/delete/<int:user_id>')
@@ -347,7 +379,11 @@ def games():
             flash('Add game successfully.')
             return redirect(url_for('games'))
         flash('Whoops! There was a problem!')
-    return render_template('gameslist.html', teams=teams, games=games, form=form, user=user)
+    return render_template('gameslist.html',
+                           teams=teams,
+                           games=games,
+                           form=form,
+                           user=user)
 
 
 @app.route('/admin/game_edit', methods=['GET', 'POST'])
@@ -444,7 +480,10 @@ def update_team_points(edit_game):
     if is_game_played_exist(edit_game, games_played):
         pass
     else:
-        fill_teams_table(edit_game, team_1, team_2)
+        if edit_game.game_phase != "group":
+            pass
+        else:
+            fill_teams_table(edit_game, team_1, team_2)
         game_played_team_1 = GamesPlayed(
             game_id=edit_game.id,
             team_id=team_1.id)
@@ -576,7 +615,10 @@ def tips():
         for user_tip in user_tips:
             is_date_locked(user_tip.game_id)
 
-    return render_template('accounts/usertips.html', user_tips=user_tips, games=games, user=user, tips_amount=tips_amount)
+    return render_template('accounts/usertips.html',
+                           user_tips=user_tips,
+                           games=games,
+                           tips_amount=tips_amount)
 
 
 @app.post('/user/load_tips')
