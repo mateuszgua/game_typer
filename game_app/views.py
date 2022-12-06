@@ -1,6 +1,6 @@
 from game_app import app, login_manager, admin
-from game_app.forms import RegistrationForm, LoginForm, EditUserForm, AddGameForm
-from game_app.models import User, Role, Team, UserAdminView, RoleAdminView, UploadFile, Game, Tip, UserTournaments, GamesPlayed
+from game_app.forms import RegistrationForm, LoginForm, EditUserForm, AddGameForm, AddGroupForm
+from game_app.models import User, Role, Team, UserAdminView, RoleAdminView, UploadFile, Game, Tip, UserTournaments, GamesPlayed, BetGroup, UserBetGroup
 from game_app.database import db_session
 from game_app.config import Config
 
@@ -715,6 +715,36 @@ def lock_tip(tip_id):
     for tip in edit_tip:
         tip.tip_lock = 1
     db_session.commit()
+
+
+@app.route('/user/add_group', methods=('GET', 'POST'))
+def add_group():
+    form = AddGroupForm()
+    if form.validate_on_submit():
+        existing_group = BetGroup.query.filter_by(name=form.name.data).first()
+        if existing_group is None:
+            bet_group = BetGroup(
+                name=form.name.data,
+                tournament=form.tournament.data,
+            )
+            db_session.add(bet_group)
+            db_session.commit()
+            return redirect(url_for('user'))
+        flash('A group name already exist.')
+    return render_template('addgroup.html', form=form)
+
+
+@app.route('/user/group', methods=['GET', 'POST'])
+def group():
+    user_id = current_user.get_id()
+    bet_amount = UserBetGroup.query.filter_by(user_id=user_id).count()
+    user_groups = UserBetGroup.query.filter_by(user_id=user_id).all()
+
+    if bet_amount == 0:
+        flash("Please add bet group for your account to show any bets.")
+
+    return render_template('user/groups.html',
+                           user_groups=user_groups)
 
 
 @ app.route('/admin/db_update', methods=['GET', 'POST'])
