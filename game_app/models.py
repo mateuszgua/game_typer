@@ -44,6 +44,7 @@ class User(UserMixin, database.Base):
                          backref=backref('users', lazy='dynamic'))
     tip = relationship('Tip', backref='user')
     tournaments = relationship('UserTournaments', backref='user')
+    bet_group = relationship('UserBetGroup', backref='user')
     points = Column(Integer)
 
     def __repr__(self) -> str:
@@ -173,3 +174,19 @@ class Game(database.Base):
     result = Column(String(10))
     winner = Column(Integer)
     finished = Column(Integer)
+
+
+class UserBetGroup(database.Base):
+    __tablename__ = 'userbetgroup'
+    id = Column(Integer(), primary_key=True)
+    bet_group_id = Column(Integer, ForeignKey('betgroup.id'))
+    user_id = Column(Integer, ForeignKey('user.id'))
+
+
+class BetGroup(database.Base):
+    __tablename__ = 'betgroup'
+    id = Column(Integer, primary_key=True)
+    name = Column(String(20))
+    tournament = Column(String(20))
+    number_of_users = Column(Integer)
+    users = relationship('UserBetGroup', backref='betgroup')
