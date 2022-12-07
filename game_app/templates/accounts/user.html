@@ -34,42 +34,108 @@
 
 <br><br><br><br>
 
-<p>Add tournament for bet games:</p>
-<div class="input-group mb-3">
-    <label class="input-group-text" for="inputGroupSelect01">Tournament</label>
-    <select class="form-select" id="inputGroupSelect01">
-        <option selected>World Cup 2022</option>
-        {% for tournament in tournaments %}
-        {% if tournament.tournament == "World Cup 2022" %}
-        <option value="1" disabled>World Cup 2022</option>
-        {% else %}
-        <option value="1">World Cup 2022</option>
-        {% endif %}
-        <!-- <option value="2">Two</option> -->
-        <!-- <option value="3">Three</option> -->
-        {% endfor %}
-    </select>
-</div>
-
-<form method="POST" action="{{ url_for('load_tips') }}">
-    <input class="btn btn-primary" type="submit" name="load" value="Load tips">
-</form>
-
-<br><br><br>
-<h4 class="title text-center">Your tournaments</h4>
-{% for tournament in tournaments %}
-<div class="card" style="width: 20rem;">
-    {% for image in image_list %}
-    {% if image == "files/soccer_world_cup_2022.jpg" %}
-    <img src="{{ url_for('static', filename=image)}}" class="card-img-top" alt="Logo" height="160px" width="120px">
-    {% endif %}
-    {% endfor %}
-    <div class="card-body text-center">
-        <h5 class="card-title">{{ tournament.tournament }}</h5>
-        <p class="card-text">User points: {{ user_points }}</p>
-        <a href="{{ url_for('tips') }}" class="btn btn-primary">Go to bets</a>
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <div class="card border-info mb-3" style="max-width: 40rem; height: 15rem;">
+                <div class="card-header">Tournaments</div>
+                <div class="card-body">
+                    <h5 class="card-title">Add tournament for bet games:</h5>
+                    <p class="card-text">
+                    <div class="input-group mb-3">
+                        <label class="input-group-text" for="inputGroupSelect01">Tournament</label>
+                        <select class="form-select" id="inputGroupSelect01">
+                            <option selected>World Cup 2022</option>
+                            {% for tournament in tournaments %}
+                            {% if tournament.tournament == "World Cup 2022" %}
+                            <option value="1" disabled>World Cup 2022</option>
+                            {% else %}
+                            <option value="1">World Cup 2022</option>
+                            {% endif %}
+                            <!-- <option value="2">Two</option> -->
+                            <!-- <option value="3">Three</option> -->
+                            {% endfor %}
+                        </select>
+                    </div>
+                    </p>
+                    <form method="POST" action="{{ url_for('load_tips') }}">
+                        <input class="btn btn-primary" type="submit" name="load" value="Load tips">
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card border-info mb-3" style="max-width: 40rem; height: 15rem;">
+                <div class="card-header">Bet groups</div>
+                <div class="card-body">
+                    <h5 class="card-title">Add group for invite your friends:</h5>
+                    <p class="card-text">
+                    <div class="input-group mb-3">
+                        <a href="{{ url_for('add_group') }}">Add group</a>
+                    </div>
+                    </p>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
-{% endfor %}
+
+<br><br><br>
+
+<nav>
+    <div class="nav nav-tabs" id="nav-tab" role="tablist">
+        <button class="nav-link active" id="nav-home-tab" data-bs-toggle="tab" data-bs-target="#nav-home" type="button"
+            role="tab" aria-controls="nav-home" aria-selected="true">Tournaments</button>
+        <button class="nav-link" id="nav-profile-tab" data-bs-toggle="tab" data-bs-target="#nav-profile" type="button"
+            role="tab" aria-controls="nav-profile" aria-selected="false">Groups</button>
+    </div>
+</nav>
+<div class="tab-content" id="nav-tabContent">
+    <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
+        <br>
+        <h4 class="title text-center">Your tournaments</h4>
+        <br>
+        {% for tournament in tournaments %}
+        <div class="card" style="width: 20rem;">
+            {% for image in image_list %}
+            {% if image == "files/soccer_world_cup_2022.jpg" %}
+            <img src="{{ url_for('static', filename=image)}}" class="card-img-top" alt="Logo" height="160px"
+                width="120px">
+            {% endif %}
+            {% endfor %}
+            <div class="card-body text-center">
+                <h5 class="card-title">{{ tournament.tournament }}</h5>
+                <p class="card-text">User points: {{ user_points }}</p>
+                <a href="{{ url_for('tips') }}" class="btn btn-primary">Go to bets</a>
+            </div>
+        </div>
+        {% endfor %}
+
+    </div>
+    <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
+        <br>
+        <h4 class="title text-center">Your groups</h4>
+        <br>
+        <div class="container">
+            <div class="row">
+                {% for user_group in user_groups %}
+                <div class="col">
+                    <div class="card" style="width: 20rem;">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">{{ user_group.betgroup.name }}</h5>
+                            <a href="{{ url_for('group') }}" class="btn btn-primary">Go to group</a>
+                        </div>
+                    </div>
+
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+
 
 {% endblock %}

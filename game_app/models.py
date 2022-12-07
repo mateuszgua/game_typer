@@ -179,6 +179,8 @@ class Game(database.Base):
 class UserBetGroup(database.Base):
     __tablename__ = 'userbetgroup'
     id = Column(Integer(), primary_key=True)
+    points = Column(Integer)
+    place = Column(Integer)
     bet_group_id = Column(Integer, ForeignKey('betgroup.id'))
     user_id = Column(Integer, ForeignKey('user.id'))
 

@@ -10,7 +10,7 @@ from flask import render_template, url_for, redirect, request, flash, json
 from flask_login import login_user, current_user, logout_user, login_required
 
 from werkzeug.utils import secure_filename
-from datetime import datetime, timedelta, date
+from datetime import datetime, timedelta, date, time
 
 config = Config()
 
@@ -154,6 +154,7 @@ def user():
     tournaments = UserTournaments.query.filter_by(user_id=user_id).all()
     user_tips = Tip.query.filter_by(user_id=user_id).all()
     user_points = 0
+    user_groups = UserBetGroup.query.filter_by(user_id=user_id).all()
 
     for user_tip in user_tips:
         if user_tip.tip_points != None:
@@ -163,7 +164,8 @@ def user():
                            user=user,
                            image_list=images_list,
                            tournaments=tournaments,
-                           user_points=user_points)
+                           user_points=user_points,
+                           user_groups=user_groups)
 
 
 @app.route('/register', methods=('GET', 'POST'))
@@ -719,6 +721,7 @@ def lock_tip(tip_id):
 
 @app.route('/user/add_group', methods=('GET', 'POST'))
 def add_group():
+    user_id = current_user.get_id()
     form = AddGroupForm()
     if form.validate_on_submit():
         existing_group = BetGroup.query.filter_by(name=form.name.data).first()
@@ -726,9 +729,20 @@ def add_group():
             bet_group = BetGroup(
                 name=form.name.data,
                 tournament=form.tournament.data,
+                number_of_users=1,
             )
             db_session.add(bet_group)
             db_session.commit()
+
+            bet_group = BetGroup.query.filter_by(
+                name=form.name.data).first()
+            user_group = UserBetGroup(
+                bet_group_id=bet_group.id,
+                user_id=user_id,
+            )
+            db_session.add(user_group)
+            db_session.commit()
+            flash('Group add successfully.')
             return redirect(url_for('user'))
         flash('A group name already exist.')
     return render_template('addgroup.html', form=form)
@@ -736,15 +750,66 @@ def add_group():
 
 @app.route('/user/group', methods=['GET', 'POST'])
 def group():
+    #
+    group_id = 1
     user_id = current_user.get_id()
     bet_amount = UserBetGroup.query.filter_by(user_id=user_id).count()
-    user_groups = UserBetGroup.query.filter_by(user_id=user_id).all()
+    user_groups = UserBetGroup.query.filter_by(
+        bet_group_id=group_id).order_by(UserBetGroup.points.asc()).all()
+    bet_group = BetGroup.query.filter_by(id=group_id).first()
+
+    user_points = 1
+
+    sort_users_in_group(user_groups)
+    last_game = find_last_game()
+    users_bet = Tip.query.filter_by(game_id=last_game.id).all()
 
     if bet_amount == 0:
         flash("Please add bet group for your account to show any bets.")
 
-    return render_template('user/groups.html',
-                           user_groups=user_groups)
+    return render_template('accounts/betgroup.html',
+                           user_groups=user_groups,
+                           bet_group=bet_group,
+                           last_game=last_game,
+                           users_bet=users_bet)
+
+
+def sort_users_in_group(user_groups):
+    place = 1
+    for user_group in user_groups:
+        user_group.place = place
+        db_session.commit()
+        place += 1
+
+
+def find_last_game():
+    present_day = date.today()
+    present_time = time.today()
+    i = 1
+    game_day = present_day
+    game_time = present_time
+
+    while Game.query.filter_by(game_day=game_day).count() == 0:
+        game_day -= timedelta(days=i)
+
+    if game_day == present_day:
+        game = Game.query.filter_by(game_day=game_day).order_by(
+            Game.game_time.asc()).first()
+        if game.game_time >= present_time:
+            game_id = game.id - 1
+            game = Game.query.filter_by(id=game_id).first()
+
+    else:
+        game = Game.query.filter_by(game_day=game_day).order_by(
+            Game.game_time.desc()).first()
+
+    return game
+
+
+@app.post('/user/group/add_user_bet_group')
+def add_user_bet_group():
+
+    pass
 
 
 @ app.route('/admin/db_update', methods=['GET', 'POST'])
