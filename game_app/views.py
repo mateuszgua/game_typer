@@ -156,9 +156,7 @@ def user():
     user_points = 0
     user_groups = UserBetGroup.query.filter_by(user_id=user_id).all()
 
-    for user_tip in user_tips:
-        if user_tip.tip_points != None:
-            user_points += int(user_tip.tip_points)
+    user_points = count_user_points_from_bet(user_tips, user_points)
 
     return render_template('accounts/user.html',
                            user=user,
@@ -610,6 +608,8 @@ def tips():
     games = Game.query.all()
     tips_amount = Tip.query.filter_by(user_id=user_id).count()
     user_tips = Tip.query.filter_by(user_id=user_id).all()
+    user_points = 0
+    user_points = count_user_points_from_bet(user_tips, user_points)
 
     if tips_amount == 0:
         flash("Please add tournament for your account to show any bet")
@@ -618,9 +618,19 @@ def tips():
             is_date_locked(user_tip.game_id)
 
     return render_template('accounts/usertips.html',
+                           user_points=user_points,
                            user_tips=user_tips,
                            games=games,
                            tips_amount=tips_amount)
+
+
+def count_user_points_from_bet(user_tips, user_points):
+    for user_tip in user_tips:
+        if user_tip.tip_points == None:
+            user_points += 0
+        else:
+            user_points += int(user_tip.tip_points)
+    return user_points
 
 
 @app.post('/user/load_tips')
