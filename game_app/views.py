@@ -1,6 +1,6 @@
 from game_app import app, login_manager, admin
-from game_app.forms import RegistrationForm, LoginForm, EditUserForm, AddGameForm
-from game_app.models import User, Role, Team, UserAdminView, RoleAdminView, UploadFile, Game, Tip, UserTournaments, GamesPlayed
+from game_app.forms import RegistrationForm, LoginForm, EditUserForm, AddGameForm, AddGroupForm
+from game_app.models import User, Role, Team, UserAdminView, RoleAdminView, UploadFile, Game, Tip, UserTournaments, GamesPlayed, BetGroup, UserBetGroup
 from game_app.database import db_session
 from game_app.config import Config
 
@@ -10,7 +10,7 @@ from flask import render_template, url_for, redirect, request, flash, json
 from flask_login import login_user, current_user, logout_user, login_required
 
 from werkzeug.utils import secure_filename
-from datetime import datetime, timedelta, date
+from datetime import datetime, timedelta, date, time
 
 config = Config()
 
@@ -154,16 +154,16 @@ def user():
     tournaments = UserTournaments.query.filter_by(user_id=user_id).all()
     user_tips = Tip.query.filter_by(user_id=user_id).all()
     user_points = 0
+    user_groups = UserBetGroup.query.filter_by(user_id=user_id).all()
 
-    for user_tip in user_tips:
-        if user_tip.tip_points != None:
-            user_points += int(user_tip.tip_points)
+    user_points = count_user_points_from_bet(user_tips, user_points)
 
     return render_template('accounts/user.html',
                            user=user,
                            image_list=images_list,
                            tournaments=tournaments,
-                           user_points=user_points)
+                           user_points=user_points,
+                           user_groups=user_groups)
 
 
 @app.route('/register', methods=('GET', 'POST'))
@@ -608,6 +608,8 @@ def tips():
     games = Game.query.all()
     tips_amount = Tip.query.filter_by(user_id=user_id).count()
     user_tips = Tip.query.filter_by(user_id=user_id).all()
+    user_points = 0
+    user_points = count_user_points_from_bet(user_tips, user_points)
 
     if tips_amount == 0:
         flash("Please add tournament for your account to show any bet")
@@ -616,9 +618,19 @@ def tips():
             is_date_locked(user_tip.game_id)
 
     return render_template('accounts/usertips.html',
+                           user_points=user_points,
                            user_tips=user_tips,
                            games=games,
                            tips_amount=tips_amount)
+
+
+def count_user_points_from_bet(user_tips, user_points):
+    for user_tip in user_tips:
+        if user_tip.tip_points == None:
+            user_points += 0
+        else:
+            user_points += int(user_tip.tip_points)
+    return user_points
 
 
 @app.post('/user/load_tips')
@@ -715,6 +727,143 @@ def lock_tip(tip_id):
     for tip in edit_tip:
         tip.tip_lock = 1
     db_session.commit()
+
+
+@app.route('/user/add_group', methods=('GET', 'POST'))
+def add_group():
+    user_id = current_user.get_id()
+    form = AddGroupForm()
+    if form.validate_on_submit():
+        existing_group = BetGroup.query.filter_by(name=form.name.data).first()
+        if existing_group is None:
+            bet_group = BetGroup(
+                name=form.name.data,
+                tournament=form.tournament.data,
+                number_of_users=1,
+            )
+            db_session.add(bet_group)
+            db_session.commit()
+
+            bet_group = BetGroup.query.filter_by(
+                name=form.name.data).first()
+            user_group = UserBetGroup(
+                bet_group_id=bet_group.id,
+                user_id=user_id,
+            )
+            db_session.add(user_group)
+            db_session.commit()
+            flash('Group add successfully.')
+            return redirect(url_for('user'))
+        flash('A group name already exist.')
+    return render_template('addgroup.html', form=form)
+
+
+@app.route('/user/group/<int:group_id>', methods=['GET', 'POST'])
+def group(group_id):
+    user_id = current_user.get_id()
+    bet_amount = UserBetGroup.query.filter_by(user_id=user_id).count()
+    user_groups = UserBetGroup.query.filter_by(
+        bet_group_id=group_id).order_by(UserBetGroup.points.desc()).all()
+    bet_group = BetGroup.query.filter_by(id=group_id).first()
+
+    sort_users_in_group(user_groups)
+    last_game = find_last_game()
+    users_bets = Tip.query.filter_by(game_id=last_game.id).all()
+    update_user_points(user_groups)
+
+    if bet_amount == 0:
+        flash("Please add bet group for your account to show any bets.")
+
+    return render_template('accounts/betgroup.html',
+                           user_groups=user_groups,
+                           bet_group=bet_group,
+                           last_game=last_game,
+                           users_bets=users_bets)
+
+
+def sort_users_in_group(user_groups):
+    place = 1
+    for user_group in user_groups:
+        user_group.place = place
+        db_session.commit()
+        place += 1
+
+
+def find_last_game():
+    present_day = date.today()
+    present = datetime.now()
+    present_time = present.strftime("%H:%M:%S")
+    i = 1
+    game_day = present_day
+
+    while Game.query.filter_by(game_day=game_day).count() == 0:
+        game_day -= timedelta(days=i)
+
+    if game_day == present_day:
+        game = Game.query.filter_by(game_day=game_day).order_by(
+            Game.game_time.asc()).first()
+        if game.game_time >= present_time:
+            game_id = game.id - 1
+            game = Game.query.filter_by(id=game_id).first()
+
+    else:
+        game = Game.query.filter_by(game_day=game_day).order_by(
+            Game.game_time.desc()).first()
+
+    return game
+
+
+def update_user_points(user_groups):
+    for user in user_groups:
+        user.points = 0
+
+        user_tips = Tip.query.filter_by(user_id=user.user_id).all()
+        for user_tip in user_tips:
+            if user_tip.tip_points == None:
+                user.points += 0
+            else:
+                user.points += int(user_tip.tip_points)
+        db_session.commit()
+
+
+@app.post('/user/group/add_user_bet_group/<int:group_id>')
+def add_user_bet_group(group_id):
+
+    try:
+        user_email = request.form.get('user_email')
+        user_nick = request.form.get('nick_name')
+
+        if user_email != None:
+            user = User.query.filter_by(email=user_email).first()
+            if user != None:
+                add_user_to_group_if_not_exist(user, group_id)
+            else:
+                flash("User not exist! Please check email.")
+
+        elif user_nick != None:
+            user = User.query.filter_by(nick=user_nick).first()
+            if user != None:
+                add_user_to_group_if_not_exist(user, group_id)
+            else:
+                flash("User not exist! Please check nick.")
+
+        else:
+            flash("Please fill user email or nick!")
+    finally:
+        return redirect(url_for('group', group_id=group_id))
+
+
+def add_user_to_group_if_not_exist(user, group_id):
+    if UserBetGroup.query.filter_by(user_id=user.id).count() == 0:
+        user_group = UserBetGroup(
+            bet_group_id=group_id,
+            user_id=user.id,
+        )
+        db_session.add(user_group)
+        db_session.commit()
+        flash("User added successfully!")
+    else:
+        flash("User exist in group!")
 
 
 @ app.route('/admin/db_update', methods=['GET', 'POST'])

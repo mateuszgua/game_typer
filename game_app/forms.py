@@ -41,3 +41,9 @@ class AddGameForm(FlaskForm):
     game_day = DateField('Date')
     game_time = TimeField('Time')
     submit = SubmitField('Add')
+
+
+class AddGroupForm(FlaskForm):
+    name = StringField('Name')
+    tournament = StringField('Tournament name')
+    submit = SubmitField('Add group')
