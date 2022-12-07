@@ -21,17 +21,21 @@
 </div>
 {% endfor %}
 
-<span class="title">
-    <h2>{% block title %}Profile {{ user.firstname }} {% endblock %}</h2>
-</span>
+<div class="row d-flex justify-content-center">
+    <div class="col-8">
+        <span class="title">
+            <h2 class="text-capitalize text-center">{% block title %}Profile {{ user.firstname }} {% endblock %}</h2>
+        </span>
+    </div>
+</div>
 
+<br><br><br>
 <div class="content">
     <div class="user">
         <p>Nick: {{ user.nick }}</p>
     </div>
 </div>
-<a href="{{ url_for('user_info') }}">User Info</a>
-
+<a class="btn btn-secondary text-center" href="{{ url_for('user_info') }}" role="button">User Info</a>
 <br><br><br><br>
 
 <div class="container">
@@ -59,7 +63,7 @@
                     </div>
                     </p>
                     <form method="POST" action="{{ url_for('load_tips') }}">
-                        <input class="btn btn-primary" type="submit" name="load" value="Load tips">
+                        <input class="btn btn-success" type="submit" name="load" value="Load tips">
                     </form>
                 </div>
             </div>
@@ -71,7 +75,7 @@
                     <h5 class="card-title">Add group for invite your friends:</h5>
                     <p class="card-text">
                     <div class="input-group mb-3">
-                        <a href="{{ url_for('add_group') }}">Add group</a>
+                        <a class="btn btn-success" href="{{ url_for('add_group') }}" role="button">Add group</a>
                     </div>
                     </p>
                 </div>

@@ -763,7 +763,7 @@ def group(group_id):
     user_id = current_user.get_id()
     bet_amount = UserBetGroup.query.filter_by(user_id=user_id).count()
     user_groups = UserBetGroup.query.filter_by(
-        bet_group_id=group_id).order_by(UserBetGroup.points.asc()).all()
+        bet_group_id=group_id).order_by(UserBetGroup.points.desc()).all()
     bet_group = BetGroup.query.filter_by(id=group_id).first()
 
     sort_users_in_group(user_groups)

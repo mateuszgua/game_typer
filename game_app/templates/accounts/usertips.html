@@ -41,89 +41,99 @@
 <h4 class="title text-center">Your points: {{ user_points }}</h4>
 <br><br><br>
 
-<div class="container">
-    <div class="row">
-        <div class="col-md-auto">
-            <table id="data" class="table table-striped table-bordered">
-                <thead class="table-dark">
-                    <tr class="text-center">
-                        <th scope="col">Id.</th>
-                        <th scope="col">Game</th>
-                        <th scope="col">Date</th>
-                        <th scope="col">Time</th>
-                        <th scope="col">Result</th>
-                        <th scope="col">Tip</th>
-                        <th scope="col">Action</th>
-                        <th scope="col">User pts from game</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for user_tip in user_tips %}
-                    <tr class="text-center">
-                        <th scope="row">{{ user_tip.game_id }}</th>
-                        {% for game in games %}
-                        {% if user_tip.game_id == game.id %}
-                        <td>{{ game.team_1 }} - {{ game.team_2 }}</td>
-                        <td>{{ game.game_day }}</td>
-                        <td>{{ game.game_time }}</td>
-                        {% if game.goals_team_1 == None %}
-                        <td>-</td>
-                        {% else %}
-                        <td>{{ game.goals_team_1 }} : {{ game.goals_team_2 }}</td>
-                        {% endif %}
-                        {% endif %}
-                        {% endfor %}
-                        {% if user_tip.tip_lock == 1 %}
-                        <form method="POST" action="{{ url_for('edit_tip', tip_id=user_tip.game_id) }}" name="edit_tip">
-                            <td>
-                                {% if user_tip.tip_goals_team_1 == None or user_tip.tip_goals_team_2 == None %}
-                                <input class="text-center" type="text" id="team1" name="team1" size="1" value="-"
-                                    disabled> :
-                                <input class="text-center" type="text" id="team2" name="team2" size="1" value="-"
-                                    disabled>
+<div class="row d-flex justify-content-center">
+    <div class="col-10">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-auto">
+                    <table id="data" class="table table-striped table-bordered">
+                        <thead class="table-dark">
+                            <tr class="text-center">
+                                <th scope="col">Id.</th>
+                                <th scope="col">Game</th>
+                                <th scope="col">Date</th>
+                                <th scope="col">Time</th>
+                                <th scope="col">Result</th>
+                                <th scope="col">Tip</th>
+                                <th scope="col">Action</th>
+                                <th scope="col">User pts from game</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user_tip in user_tips %}
+                            <tr class="text-center">
+                                <th scope="row">{{ user_tip.game_id }}</th>
+                                {% for game in games %}
+                                {% if user_tip.game_id == game.id %}
+                                <td>{{ game.team_1 }} - {{ game.team_2 }}</td>
+                                <td>{{ game.game_day }}</td>
+                                <td>{{ game.game_time }}</td>
+                                {% if game.goals_team_1 == None %}
+                                <td>-</td>
                                 {% else %}
-                                <input class="text-center" type="text" id="team1" name="team1" size="1"
-                                    value={{user_tip.tip_goals_team_1}} disabled> :
-                                <input class="text-center" type="text" id="team2" name="team2" size="1"
-                                    value={{user_tip.tip_goals_team_2}} disabled>
+                                <td>{{ game.goals_team_1 }} : {{ game.goals_team_2 }}</td>
                                 {% endif %}
-                            </td>
-                            <td>
-                                <input class="btn btn-success" type="submit" value="Save tip" name="action" disabled>
-                            </td>
-                        </form>
-                        {% else %}
-                        <form method="POST" action="{{ url_for('edit_tip', tip_id=user_tip.game_id) }}" name="edit_tip">
-                            <td>
-                                {% if user_tip.tip_goals_team_1 == None or user_tip.tip_goals_team_2 == None %}
-                                <input class="text-center" type="text" id="team1" name="team1" size="1" value=" "> :
-                                <input class="text-center" type="text" id="team2" name="team2" size="1" value=" ">
+                                {% endif %}
+                                {% endfor %}
+                                {% if user_tip.tip_lock == 1 %}
+                                <form method="POST" action="{{ url_for('edit_tip', tip_id=user_tip.game_id) }}"
+                                    name="edit_tip">
+                                    <td>
+                                        {% if user_tip.tip_goals_team_1 == None or user_tip.tip_goals_team_2 == None %}
+                                        <input class="text-center" type="text" id="team1" name="team1" size="1"
+                                            value="-" disabled> :
+                                        <input class="text-center" type="text" id="team2" name="team2" size="1"
+                                            value="-" disabled>
+                                        {% else %}
+                                        <input class="text-center" type="text" id="team1" name="team1" size="1"
+                                            value={{user_tip.tip_goals_team_1}} disabled> :
+                                        <input class="text-center" type="text" id="team2" name="team2" size="1"
+                                            value={{user_tip.tip_goals_team_2}} disabled>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <input class="btn btn-success" type="submit" value="Save tip" name="action"
+                                            disabled>
+                                    </td>
+                                </form>
                                 {% else %}
-                                <input class="text-center" type="text" id="team1" name="team1" size="1"
-                                    value={{user_tip.tip_goals_team_1}}> :
-                                <input class="text-center" type="text" id="team2" name="team2" size="1"
-                                    value={{user_tip.tip_goals_team_2}}>
+                                <form method="POST" action="{{ url_for('edit_tip', tip_id=user_tip.game_id) }}"
+                                    name="edit_tip">
+                                    <td>
+                                        {% if user_tip.tip_goals_team_1 == None or user_tip.tip_goals_team_2 == None %}
+                                        <input class="text-center" type="text" id="team1" name="team1" size="1"
+                                            value=" "> :
+                                        <input class="text-center" type="text" id="team2" name="team2" size="1"
+                                            value=" ">
+                                        {% else %}
+                                        <input class="text-center" type="text" id="team1" name="team1" size="1"
+                                            value={{user_tip.tip_goals_team_1}}> :
+                                        <input class="text-center" type="text" id="team2" name="team2" size="1"
+                                            value={{user_tip.tip_goals_team_2}}>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <input class="btn btn-success" type="submit" value="Save tip" name="action">
+                                    </td>
+                                </form>
                                 {% endif %}
-                            </td>
-                            <td>
-                                <input class="btn btn-success" type="submit" value="Save tip" name="action">
-                            </td>
-                        </form>
-                        {% endif %}
-                        {% if user_tip.tip_points == None %}
-                        <td> - </td>
-                        {% else %}
-                        <td>{{ user_tip.tip_points }}</td>
-                        {% endif %}
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        <div class="col-md-auto">
-            <br>
+                                {% if user_tip.tip_points == None %}
+                                <td> - </td>
+                                {% else %}
+                                <td>{{ user_tip.tip_points }}</td>
+                                {% endif %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-md-auto">
+                    <br>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
 {% endif %}
 {% endblock %}
