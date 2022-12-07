@@ -758,11 +758,10 @@ def group():
         bet_group_id=group_id).order_by(UserBetGroup.points.asc()).all()
     bet_group = BetGroup.query.filter_by(id=group_id).first()
 
-    user_points = 1
-
     sort_users_in_group(user_groups)
     last_game = find_last_game()
     users_bet = Tip.query.filter_by(game_id=last_game.id).all()
+    update_user_points(user_groups)
 
     if bet_amount == 0:
         flash("Please add bet group for your account to show any bets.")
@@ -784,10 +783,10 @@ def sort_users_in_group(user_groups):
 
 def find_last_game():
     present_day = date.today()
-    present_time = time.today()
+    present = datetime.now()
+    present_time = present.strftime("%H:%M:%S")
     i = 1
     game_day = present_day
-    game_time = present_time
 
     while Game.query.filter_by(game_day=game_day).count() == 0:
         game_day -= timedelta(days=i)
@@ -804,6 +803,16 @@ def find_last_game():
             Game.game_time.desc()).first()
 
     return game
+
+
+def update_user_points(user_groups):
+    for user in user_groups:
+        user.points = 0
+
+        user_tips = Tip.query.filter_by(user_id=user.user_id).all()
+        for user_tip in user_tips:
+            user.points += user_tip.tip_points
+        db_session.commit()
 
 
 @app.post('/user/group/add_user_bet_group')
