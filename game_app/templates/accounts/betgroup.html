@@ -26,11 +26,23 @@
 
 <h2 class="title text-center">{% block title %} {{ bet_group.name }} {% endblock %}</h2>
 <br><br><br><br>
-<div class="login-signup">
-    <div>
-        <span>Add user for this group:</span>
-        <br>
-        <a href="{{ url_for('add_user_bet_group') }}">Add user!</a>
+
+<div class="card border-info mb-3" style="max-width: 40rem;">
+    <div class="card-header">Add user for this group by email or nick:</div>
+    <div class="card-body">
+        <p class="card-text">
+        <form method="POST" action="{{ url_for('add_user_bet_group', group_id=bet_group.id) }}">
+            <div class="mb-3">
+                <label for="user_email" class="form-label">Email address</label>
+                <input type="text" id="user_email" name="user_email" size="10" placeholder="name@example.com">
+            </div>
+            <div class="mb-3">
+                <label for="nick_name" class="form-label">Nick name</label>
+                <input type="text" id="nick_name" name="nick_name" size="10" placeholder="nick">
+            </div>
+            <input class="btn btn-success" type="submit" value="Add user" name="action">
+        </form>
+        </p>
     </div>
 </div>
 
@@ -60,7 +72,7 @@
                         <td>{{ user.user.nick }}</td>
                         <td>{{ last_game.team_1 }} - {{ last_game.team_2 }}</td>
                         <td>{{ last_game.goals_team_1 }} : {{ last_game.goals_team_2 }}</td>
-                        {% for user_bet in users_bet %}
+                        {% for user_bet in users_bets %}
                         {% if user_bet.user_id == user.user.id %}
                         <td>{{ user_bet.tip_goals_team_1 }} : {{ user_bet.tip_goals_team_2 }}</td>
                         <td>{{ user_bet.tip_points }}</td>

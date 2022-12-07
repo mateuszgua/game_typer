@@ -748,10 +748,8 @@ def add_group():
     return render_template('addgroup.html', form=form)
 
 
-@app.route('/user/group', methods=['GET', 'POST'])
-def group():
-    #
-    group_id = 1
+@app.route('/user/group/<int:group_id>', methods=['GET', 'POST'])
+def group(group_id):
     user_id = current_user.get_id()
     bet_amount = UserBetGroup.query.filter_by(user_id=user_id).count()
     user_groups = UserBetGroup.query.filter_by(
@@ -760,7 +758,7 @@ def group():
 
     sort_users_in_group(user_groups)
     last_game = find_last_game()
-    users_bet = Tip.query.filter_by(game_id=last_game.id).all()
+    users_bets = Tip.query.filter_by(game_id=last_game.id).all()
     update_user_points(user_groups)
 
     if bet_amount == 0:
@@ -770,7 +768,7 @@ def group():
                            user_groups=user_groups,
                            bet_group=bet_group,
                            last_game=last_game,
-                           users_bet=users_bet)
+                           users_bets=users_bets)
 
 
 def sort_users_in_group(user_groups):
@@ -811,14 +809,51 @@ def update_user_points(user_groups):
 
         user_tips = Tip.query.filter_by(user_id=user.user_id).all()
         for user_tip in user_tips:
-            user.points += user_tip.tip_points
+            if user_tip.tip_points == None:
+                user.points += 0
+            else:
+                user.points += int(user_tip.tip_points)
         db_session.commit()
 
 
-@app.post('/user/group/add_user_bet_group')
-def add_user_bet_group():
+@app.post('/user/group/add_user_bet_group/<int:group_id>')
+def add_user_bet_group(group_id):
 
-    pass
+    try:
+        user_email = request.form.get('user_email')
+        user_nick = request.form.get('nick_name')
+
+        if user_email != None:
+            user = User.query.filter_by(email=user_email).first()
+            if user != None:
+                add_user_to_group_if_not_exist(user, group_id)
+            else:
+                flash("User not exist! Please check email.")
+
+        elif user_nick != None:
+            user = User.query.filter_by(nick=user_nick).first()
+            if user != None:
+                add_user_to_group_if_not_exist(user, group_id)
+            else:
+                flash("User not exist! Please check nick.")
+
+        else:
+            flash("Please fill user email or nick!")
+    finally:
+        return redirect(url_for('group', group_id=group_id))
+
+
+def add_user_to_group_if_not_exist(user, group_id):
+    if UserBetGroup.query.filter_by(user_id=user.id).count() == 0:
+        user_group = UserBetGroup(
+            bet_group_id=group_id,
+            user_id=user.id,
+        )
+        db_session.add(user_group)
+        db_session.commit()
+        flash("User added successfully!")
+    else:
+        flash("User exist in group!")
 
 
 @ app.route('/admin/db_update', methods=['GET', 'POST'])
