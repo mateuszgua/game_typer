@@ -18,16 +18,16 @@ class Config:
     SECRET_KEY = os.getenv("SECRET_KEY", default=None)
     SECURITY_PASSWORD_SALT = os.getenv("SECURITY_PASSWORD_SALT")
     SECURITY_PASSWORD_HASH = 'sha512_crypt'
-    
+
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_DATABASE_URI = url
-    
+
     STATIC_FOLDER = 'static'
     UPLOAD_FOLDER = 'game_app/static/files'
     IMG_FOLDER = os.path.join('static', 'files')
     ALLOWED_EXTENSIONS = {'txt', 'png', 'jpg', 'json'}
     TEMPLATES_FOLDER = 'templates'
-    HOST = 'localhost'
+    HOST = '0.0.0.0'
     PORT = 9000
     DEBUG = True
     TESTING = True
