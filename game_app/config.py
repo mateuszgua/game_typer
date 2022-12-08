@@ -28,6 +28,6 @@ class Config:
     ALLOWED_EXTENSIONS = {'txt', 'png', 'jpg', 'json'}
     TEMPLATES_FOLDER = 'templates'
     HOST = '0.0.0.0'
-    PORT = 9000
+    PORT = 5000
     DEBUG = True
     TESTING = True
