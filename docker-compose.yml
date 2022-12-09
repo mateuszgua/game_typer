@@ -1,8 +1,13 @@
 services:
-  flask-app:
+  backend:
     build:
       context: .
-    restart: always
+    restart: unless-stopped
+    environment:
+      - DB_HOST=localhost
+      - DB_NAME=game
+      - DB_USER=user
+      - DB_PASSWORD=
     ports:
       - "5000:5000"
     volumes:
@@ -11,18 +16,15 @@ services:
       - backend
 
   mysql-db:
-    image: mysql:5.7
-    restart: always
+    image: mysql:8.0.31
+    restart: unless-stopped
     environment:
       - MYSQL_DATABASE=game
-      - MYSQL_USER=root
-      - MYSQL_PASSWORD=
       - MYSQL_ROOT_PASSWORD=
-      - MYSQL_ROOT_PASSWORD_FILE=/run/secrects/db-password
     ports:
-      - "3306:3306"
+      - "3308:3306"
     volumes:
-      - ./database:/var/lib/mysql
+      - database:/var/lib/mysql
     networks:
       - backend
     env_file:
