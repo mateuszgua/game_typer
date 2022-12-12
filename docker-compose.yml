@@ -7,33 +7,38 @@ services:
       - DB_HOST=localhost
       - DB_NAME=game
       - DB_USER=user
-      - DB_PASSWORD=
+      - DB_PASSWORD=Kokos1234!
     ports:
       - "5000:5000"
     volumes:
-      - ./app:/app
+      - game-app:/game_app
     networks:
-      - backend
+      - backend_network
+    links:
+      - mysql
+    depends_on:
+      - mysql
 
-  mysql-db:
+  mysql:
     image: mysql:8.0.31
     restart: unless-stopped
     environment:
       - MYSQL_DATABASE=game
-      - MYSQL_ROOT_PASSWORD=
+      - MYSQL_ROOT_PASSWORD=Admin1234!
     ports:
       - "3308:3306"
     volumes:
       - database:/var/lib/mysql
     networks:
-      - backend
+      - mysql_network
     env_file:
       - ./.env
 
 networks:
-  backend:
+  backend_network:
+  mysql_network:
 
 
 volumes:
-  app:
+  game-app:
   database:
