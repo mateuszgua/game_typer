@@ -11,7 +11,7 @@ PASSWORD = os.getenv('MYSQL_PASSWORD')
 HOST = os.getenv('MYSQL_HOST')
 DB_NAME = os.getenv('MYSQL_DB_NAME')
 TABLE_NAME = os.getenv('MYSQL_TABLE_NAME')
-url = f"mysql+mysqlconnector://{USERNAME}:{PASSWORD}@{HOST}:3306/{DB_NAME}"
+url = f"mysql+mysqlconnector://{USERNAME}:{PASSWORD}@{HOST}/{DB_NAME}"
 
 
 class Config:

@@ -4,10 +4,10 @@ services:
       context: .
     restart: unless-stopped
     environment:
-      - DB_HOST=localhost
-      - DB_NAME=game
-      - DB_USER=user
-      - DB_PASSWORD=Kokos1234!
+      - DB_HOST="${MYSQL_HOST}"
+      - DB_NAME="${MYSQL_DB_NAME}"
+      - DB_USER="${MYSQL_USERNAME}"
+      - DB_PASSWORD="${MYSQL_PASSWORD}"
     ports:
       - "5000:5000"
     volumes:
@@ -22,13 +22,17 @@ services:
   mysql:
     image: mysql:8.0.31
     restart: unless-stopped
+    command: --default-authentication-plugin=mysql_native_password
     environment:
-      - MYSQL_DATABASE=game
-      - MYSQL_ROOT_PASSWORD=Admin1234!
+      - MYSQL_DATABASE="${MYSQL_DB_NAME}"
+      - MYSQL_ROOT_PASSWORD="${MYSQL_PASSWORD}"
     ports:
       - "3308:3306"
+    expose:
+      - "3306"
     volumes:
       - database:/var/lib/mysql
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - mysql_network
     env_file:

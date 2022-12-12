@@ -1,4 +1,3 @@
-from game_app import views, forms
 from game_app import models, database, config
 
 import os
@@ -29,3 +28,5 @@ bootstrap = Bootstrap5(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
+
+from game_app import views, forms
