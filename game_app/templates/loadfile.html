@@ -32,6 +32,8 @@
 </div>
 {% endfor %}
 
+{% if current_user.get_id() == 1 %}
+
 <body>
 
 
@@ -49,6 +51,11 @@
     </div>
 
 </body>
+
+{% else %}
+<br><br><br>
+<h4 class="title text-center">Sorry... You don't have permission for this page!</h4>
+{% endif %}
 
 </html>
 

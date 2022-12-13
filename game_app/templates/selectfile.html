@@ -21,24 +21,30 @@
 </div>
 {% endfor %}
 
+{% if current_user.get_id() == 1 %}
 <h2 class="title">{% block title %} Select file {% endblock %}</h2>
 <br>
+
 <body>
     <form method="POST" action="/admin/select_file">
         <div class="list-group">
             {% for file in files %}
-                <label class="list-group-item">
-                    <input class="form-check-input me-1" type="checkbox" name="mycheckbox" value="{{ file.id }}">
-                    <p>Name: {{ file.filename }}</p>
-                    <p>Date added: {{ file.created_at }}</p>
-                </label>
+            <label class="list-group-item">
+                <input class="form-check-input me-1" type="checkbox" name="mycheckbox" value="{{ file.id }}">
+                <p>Name: {{ file.filename }}</p>
+                <p>Date added: {{ file.created_at }}</p>
+            </label>
             {% endfor %}
-          </div>
-          <br>
-          <input type="submit" class="btn btn-success" value="Load">
-        
+        </div>
+        <br>
+        <input type="submit" class="btn btn-success" value="Load">
+
     </form>
 </body>
+
+{% else %}
+<br><br><br>
+<h4 class="title text-center">Sorry... You don't have permission for this page!</h4>
+{% endif %}
+
 {% endblock %}
-
-

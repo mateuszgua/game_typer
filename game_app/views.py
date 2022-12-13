@@ -17,6 +17,13 @@ config = Config()
 admin.add_view(UserAdminView(User, db_session))
 admin.add_view(RoleAdminView(Role, db_session))
 admin.add_view(RoleAdminView(Game, db_session))
+admin.add_view(RoleAdminView(Team, db_session))
+admin.add_view(RoleAdminView(GamesPlayed, db_session))
+admin.add_view(RoleAdminView(UploadFile, db_session))
+admin.add_view(RoleAdminView(UserTournaments, db_session))
+admin.add_view(RoleAdminView(Tip, db_session))
+admin.add_view(RoleAdminView(UserBetGroup, db_session))
+admin.add_view(RoleAdminView(BetGroup, db_session))
 
 
 @login_manager.user_loader
@@ -355,6 +362,7 @@ def processjson(file_idx):
 
 
 @app.route('/admin/games', methods=['GET', 'POST'])
+@login_required
 def games():
     games = Game.query.all()
     teams = Team.query.all()
@@ -387,12 +395,14 @@ def games():
 
 
 @app.route('/admin/game_edit', methods=['GET', 'POST'])
+@login_required
 def game_edit():
     games = Game.query.all()
     return render_template('gamesedit.html', games=games)
 
 
 @app.post('/admin/edit_one_game/<int:game_id>')
+@login_required
 def edit_one_game(game_id):
 
     edit_game = Game.query.filter_by(id=game_id).first()
@@ -562,6 +572,7 @@ def fill_teams_table(edit_game, team_1, team_2):
 
 
 @app.post('/admin/edit_all_games')
+@login_required
 def edit_all_games():
     rows = Game.query.count()
     row = 1
@@ -587,6 +598,7 @@ def edit_all_games():
 
 
 @app.post('/admin/delete_game/<int:game_id>')
+@login_required
 def delete_game(game_id):
     game = Game.query.filter_by(id=game_id).first()
 
@@ -603,6 +615,7 @@ def delete_game(game_id):
 
 
 @app.route('/user/tips', methods=['GET', 'POST'])
+@login_required
 def tips():
     user_id = current_user.get_id()
     games = Game.query.all()
@@ -634,6 +647,7 @@ def count_user_points_from_bet(user_tips, user_points):
 
 
 @app.post('/user/load_tips')
+@login_required
 def load_tips():
     user_id = current_user.get_id()
     tournament_name = "World Cup 2022"
@@ -673,6 +687,7 @@ def is_tournament_exist(tournament_name, user):
 
 
 @app.post('/user/edit_tip/<int:tip_id>')
+@login_required
 def edit_tip(tip_id):
 
     edit_tip = Tip.query.filter_by(id=tip_id).first()
@@ -730,6 +745,7 @@ def lock_tip(tip_id):
 
 
 @app.route('/user/add_group', methods=('GET', 'POST'))
+@login_required
 def add_group():
     user_id = current_user.get_id()
     form = AddGroupForm()
@@ -759,6 +775,7 @@ def add_group():
 
 
 @app.route('/user/group/<int:group_id>', methods=['GET', 'POST'])
+@login_required
 def group(group_id):
     user_id = current_user.get_id()
     bet_amount = UserBetGroup.query.filter_by(user_id=user_id).count()
@@ -827,6 +844,7 @@ def update_user_points(user_groups):
 
 
 @app.post('/user/group/add_user_bet_group/<int:group_id>')
+@login_required
 def add_user_bet_group(group_id):
 
     try:
@@ -867,6 +885,7 @@ def add_user_to_group_if_not_exist(user, group_id):
 
 
 @ app.route('/admin/db_update', methods=['GET', 'POST'])
+@login_required
 def db_update():
 
     if request.method == 'POST':
