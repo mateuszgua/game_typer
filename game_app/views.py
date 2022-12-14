@@ -3,6 +3,7 @@ from game_app.forms import RegistrationForm, LoginForm, EditUserForm, AddGameFor
 from game_app.models import User, Role, Team, UserAdminView, RoleAdminView, UploadFile, Game, Tip, UserTournaments, GamesPlayed, BetGroup, UserBetGroup
 from game_app.database import db_session
 from game_app.config import Config
+from game_app.my_error import DatabaseProblem, UserNotExist
 
 import os
 import uuid
@@ -41,6 +42,9 @@ def unauthorized():
 def shutdown_session(exception=None):
     db_session.remove()
 
+@app.route('/')
+def index():
+    print(f"Flask ENV is set to: {app.config['ENV']}")
 
 @app.route('/home')
 def home():
@@ -909,10 +913,10 @@ def db_update():
 
 
 @ app.errorhandler(404)
-def page_not_found(error_description):
-    return render_template('404.html', error_description=error_description)
+def page_not_found(e):
+    return render_template('404.html', e=e)
 
 
 @ app.errorhandler(500)
-def internal_server_error(error_description):
-    return render_template('500.html', error_description=error_description)
+def internal_server_error(e):
+    return render_template('500.html', e=e)

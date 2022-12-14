@@ -27,21 +27,26 @@ class Config:
     IMG_FOLDER = os.path.join('static', 'files')
     ALLOWED_EXTENSIONS = {'txt', 'png', 'jpg', 'json'}
     TEMPLATES_FOLDER = 'templates'
+    
     HOST = '0.0.0.0'
     PORT = 5000
     DEBUG = False
-    DEVELOPMENT = False
+    TESTING = False
+
+    SESSION_COOKIE_SECURE = True
 
 
 class ProductionConfig(Config):
     pass
 
 
-class StagingConfig(Config):
+class TestingConfig(Config):
     DEBUG = True
+    TESTING = True
 
+    SESSION_COOKIE_SECURE = False
 
 class DevelopmentConfig(Config):
     DEBUG = True
-    TESTING = True
-    DEVELOPMENT = True
+
+    SESSION_COOKIE_SECURE = False

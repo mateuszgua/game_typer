@@ -12,7 +12,13 @@ from flask_bootstrap import Bootstrap5
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 app = Flask(__name__, instance_relative_config=False)
-app.config.from_object('game_app.config.Config')
+
+if app.config["ENV"] == "production":
+    app.config.from_object('game_app.config.ProductionConfig')
+elif app.config["ENV"] == "testing":
+    app.config.from_object('game_app.config.TestingConfig')
+else:
+    app.config.from_object('game_app.config.DevelopmentConfig')
 
 admin = Admin(app, 'FlaskApp', url='/home',
               index_view=models.HomeAdminView(name='Home'))
