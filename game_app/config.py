@@ -29,5 +29,19 @@ class Config:
     TEMPLATES_FOLDER = 'templates'
     HOST = '0.0.0.0'
     PORT = 5000
+    DEBUG = False
+    DEVELOPMENT = False
+
+
+class ProductionConfig(Config):
+    pass
+
+
+class StagingConfig(Config):
+    DEBUG = True
+
+
+class DevelopmentConfig(Config):
     DEBUG = True
     TESTING = True
+    DEVELOPMENT = True
