@@ -233,7 +233,7 @@ def logout():
 def user_info():
     user_id = current_user.get_id()
     user = User.query.filter_by(id=user_id).first()
-    return render_template('accounts/userinfo.html', user=user)
+    return render_template('accounts/user_info.html', user=user)
 
 
 @app.route('/edit/<int:user_id>', methods=('GET', 'POST'))
@@ -318,7 +318,7 @@ def upload_file():
             db_session.add(upload)
             db_session.commit()
             flash(f"Uploaded: {file.filename}")
-    return render_template('loadfile.html')
+    return render_template('load_file.html')
 
 
 @app.route('/admin/select_file', methods=['GET', 'POST'])
@@ -332,7 +332,7 @@ def select_file():
             flash(f"Load successfully!")
         else:
             flash(f"Please chose one.")
-    return render_template('selectfile.html', files=files)
+    return render_template('select_file.html', files=files)
 
 
 def processjson(file_idx):
@@ -387,7 +387,7 @@ def games():
             flash('Add game successfully.')
             return redirect(url_for('games'))
         flash('Whoops! There was a problem!')
-    return render_template('gameslist.html',
+    return render_template('games_list.html',
                            teams=teams,
                            games=games,
                            form=form,
@@ -398,7 +398,7 @@ def games():
 @login_required
 def game_edit():
     games = Game.query.all()
-    return render_template('gamesedit.html', games=games)
+    return render_template('games_edit.html', games=games)
 
 
 @app.post('/admin/edit_one_game/<int:game_id>')
@@ -607,7 +607,7 @@ def delete_game(game_id):
         db_session.commit()
         games = Game.query.all()
         flash("Game deleted successfully!")
-        return render_template('gamesedit.html', games=games)
+        return render_template('games_edit.html', games=games)
     except:
         flash("Whoops! There was a problem deleting game, try again...")
     finally:
@@ -630,7 +630,7 @@ def tips():
         for user_tip in user_tips:
             is_date_locked(user_tip.game_id)
 
-    return render_template('accounts/usertips.html',
+    return render_template('accounts/user_tips.html',
                            user_points=user_points,
                            user_tips=user_tips,
                            games=games,
@@ -771,7 +771,7 @@ def add_group():
             flash('Group add successfully.')
             return redirect(url_for('user'))
         flash('A group name already exist.')
-    return render_template('addgroup.html', form=form)
+    return render_template('add_group.html', form=form)
 
 
 @app.route('/user/group/<int:group_id>', methods=['GET', 'POST'])
@@ -791,7 +791,7 @@ def group(group_id):
     if bet_amount == 0:
         flash("Please add bet group for your account to show any bets.")
 
-    return render_template('accounts/betgroup.html',
+    return render_template('accounts/bet_group.html',
                            user_groups=user_groups,
                            bet_group=bet_group,
                            last_game=last_game,
@@ -905,11 +905,14 @@ def db_update():
             flash("Database update successfully!")
         except:
             flash("There was a problem edit database...!")
-    return render_template('dbupdate.html')
-
-# Errors
+    return render_template('db_update.html')
 
 
 @ app.errorhandler(404)
 def page_not_found(error_description):
     return render_template('404.html', error_description=error_description)
+
+
+@ app.errorhandler(500)
+def internal_server_error(error_description):
+    return render_template('500.html', error_description=error_description)

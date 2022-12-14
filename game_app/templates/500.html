@@ -1,11 +1,12 @@
 {% extends 'layouts/base.html' %}
 
-{% block content %}
+{% block title %}Page Not Found{% endblock %}
 
-<br />
+{% block body %}
 <centerr>
     <h1>500 Internal Server Error</h1>
-    <p>Someting Went Wrong! Try Again... </p>
+    <p>{{ error_description }}</p>
+    <p>Someting Went Wrong! Try Again...</p>
 </centerr>
 
 {% endblock %}
