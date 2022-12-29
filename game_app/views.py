@@ -42,9 +42,15 @@ def unauthorized():
 def shutdown_session(exception=None):
     db_session.remove()
 
+
 @app.route('/')
 def index():
-    print(f"Flask ENV is set to: {app.config['ENV']}")
+    try:
+        print(f"Flask ENV is set to: {Config.ENV}")
+    except:
+        print('There is a problem to load ENV')
+    return render_template('home.html')
+
 
 @app.route('/home')
 def home():
