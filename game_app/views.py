@@ -4,10 +4,15 @@ from game_app.models import User, Role, Team, UserAdminView, RoleAdminView, Uplo
 from game_app.database import db_session
 from game_app.config import Config
 from game_app.my_error import DatabaseProblem, UserNotExist
+from game_app.helpers import Helpers
+from game_app.database_reader import TeamReader, GameReader
+from game_app.my_error import DatabaseProblem, UserNotExist, TeamsDatabaseEmpty, ImagesNotExist, GameNotExist
+from game_app.database_writer import DatabaseWriter
 
 import os
 import uuid
 from flask import render_template, url_for, redirect, request, flash, json
+from flask import abort
 from flask_login import login_user, current_user, logout_user, login_required
 
 from werkzeug.utils import secure_filename
@@ -48,117 +53,54 @@ def index():
     try:
         print(f"Flask ENV is set to: {Config.ENV}")
     except:
-        print('There is a problem to load ENV')
-    return render_template('home.html')
+        error_description = 'There is a problem to load ENV'
+        abort(404, error_description)
+    else:
+        return render_template('home.html')
 
 
 @app.route('/home')
 def home():
-    teams = Team.query.all()
-
     try:
-        images_list = os.listdir('game_app/static/files')
-        images_list = ['files/' + image for image in images_list]
-    except:
-        flash('There is a problem to load all images of flags.')
+        teams = TeamReader.get_all_teams()
+        images_list = Helpers.get_images_list()
+        last_games = GameReader.list_last_games()
+        current_games = GameReader.list_current_games()
+        next_games = GameReader.list_next_games()
+        group_list = Helpers.create_sorted_list()
+        DatabaseWriter.sort_team_table(group_list)
 
-    last_games = list_last_games()
-    current_games = list_current_games()
-    next_games = list_next_games()
+        final_1_8 = GameReader.get_one_game('game_phase', "1/8")
+        final_1_4 = GameReader.get_one_game('game_phase', "1/4")
+        final_1_2 = GameReader.get_one_game('game_phase', "1/2")
+        final_3rd = GameReader.get_one_game('game_phase', "3rd")
+        final = GameReader.get_one_game('game_phase', "final")
 
-    group_list = create_sorted_list()
-    sort_team_table(group_list)
-
-    final_1_8 = Game.query.filter_by(game_phase="1/8").all()
-    final_1_4 = Game.query.filter_by(game_phase="1/4").all()
-    final_1_2 = Game.query.filter_by(game_phase="1/2").all()
-    final_3rd = Game.query.filter_by(game_phase="3rd").all()
-    final = Game.query.filter_by(game_phase="final").all()
-
-    return render_template('index.html',
-                           teams=teams,
-                           image_list=images_list,
-                           group_list=group_list,
-                           last_games=last_games,
-                           current_games=current_games,
-                           next_games=next_games,
-                           final_1_8=final_1_8,
-                           final_1_4=final_1_4,
-                           final_1_2=final_1_2,
-                           final_3rd=final_3rd,
-                           final=final)
-
-
-def create_sorted_list():
-    group_list = []
-    group_A = Team.query.filter_by(
-        group="A").order_by(Team.points.desc(), Team.goal_balance.desc()).all()
-    group_list.insert(0, group_A)
-    group_B = Team.query.filter_by(
-        group="B").order_by(Team.points.desc(), Team.goal_balance.desc()).all()
-    group_list.insert(1, group_B)
-    group_C = Team.query.filter_by(
-        group="C").order_by(Team.points.desc(), Team.goal_balance.desc()).all()
-    group_list.insert(2, group_C)
-    group_D = Team.query.filter_by(
-        group="D").order_by(Team.points.desc(), Team.goal_balance.desc()).all()
-    group_list.insert(3, group_D)
-    group_E = Team.query.filter_by(
-        group="E").order_by(Team.points.desc(), Team.goal_balance.desc()).all()
-    group_list.insert(4, group_E)
-    group_F = Team.query.filter_by(
-        group="F").order_by(Team.points.desc(), Team.goal_balance.desc()).all()
-    group_list.insert(5, group_F)
-    group_G = Team.query.filter_by(
-        group="G").order_by(Team.points.desc(), Team.goal_balance.desc()).all()
-    group_list.insert(6, group_G)
-    group_H = Team.query.filter_by(
-        group="H").order_by(Team.points.desc(), Team.goal_balance.desc()).all()
-    group_list.insert(7, group_H)
-    return group_list
-
-
-def sort_team_table(group_list):
-    for group in group_list:
-        i = 1
-        for team in group:
-            team.group_position = i
-            db_session.commit()
-            i += 1
-
-
-def list_last_games():
-    present = date.today()
-    i = 1
-    day_yesterday = present - timedelta(days=i)
-
-    last_games = Game.query.filter_by(
-        game_day=day_yesterday).order_by(Game.game_time.asc()).all()
-    return last_games
-
-
-def list_current_games():
-    present = date.today()
-
-    current_games = Game.query.filter_by(
-        game_day=present).order_by(Game.game_time.asc()).all()
-    return current_games
-
-
-def list_next_games():
-    present = date.today()
-    i = 1
-    number_of_games = 64
-    day_tommorow = present + timedelta(days=i)
-
-    while Game.query.filter_by(game_day=day_tommorow).count() == 0:
-        day_tommorow += timedelta(days=i)
-        if i > number_of_games:
-            break
-
-    next_games = Game.query.filter_by(
-        game_day=day_tommorow).order_by(Game.game_time.asc()).all()
-    return next_games
+    except TeamsDatabaseEmpty:
+        error_description = TeamsDatabaseEmpty()
+        page_not_found(error_description)
+        abort(500, error_description)
+    except ImagesNotExist:
+        error_description = ImagesNotExist()
+        page_not_found(error_description)
+        abort(404, error_description)
+    except GameNotExist:
+        error_description = GameNotExist()
+        page_not_found(error_description)
+        abort(500, error_description)
+    else:
+        return render_template('index.html',
+                               teams=teams,
+                               image_list=images_list,
+                               group_list=group_list,
+                               last_games=last_games,
+                               current_games=current_games,
+                               next_games=next_games,
+                               final_1_8=final_1_8,
+                               final_1_4=final_1_4,
+                               final_1_2=final_1_2,
+                               final_3rd=final_3rd,
+                               final=final)
 
 
 @app.route('/user')
