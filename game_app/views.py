@@ -3,10 +3,9 @@ from game_app.forms import RegistrationForm, LoginForm, EditUserForm, AddGameFor
 from game_app.models import User, Role, Team, UserAdminView, RoleAdminView, UploadFile, Game, Tip, UserTournaments, GamesPlayed, BetGroup, UserBetGroup
 from game_app.database import db_session
 from game_app.config import Config
-from game_app.my_error import DatabaseProblem, UserNotExist
 from game_app.helpers import Helpers
 from game_app.database_reader import TeamReader, GameReader
-from game_app.my_error import DatabaseProblem, UserNotExist, TeamsDatabaseEmpty, ImagesNotExist, GameNotExist
+from game_app.my_error import TeamsDatabaseEmpty, ImagesNotExist, GameNotExist, DatabaseReaderProblem, DatabaseWriterError
 from game_app.database_writer import DatabaseWriter
 
 import os
@@ -64,8 +63,8 @@ def home():
     try:
         teams = TeamReader.get_all_teams()
         images_list = Helpers.get_images_list()
-        last_games = GameReader.list_last_games()
-        current_games = GameReader.list_current_games()
+        last_games = Helpers.get_list_last_games()
+        current_games = Helpers.get_list_last_games()
         next_games = GameReader.list_next_games()
         group_list = Helpers.create_sorted_list()
         DatabaseWriter.sort_team_table(group_list)
@@ -88,6 +87,14 @@ def home():
         error_description = GameNotExist()
         page_not_found(error_description)
         abort(500, error_description)
+    except DatabaseReaderProblem:
+        error_description = DatabaseReaderProblem()
+        flash(error_description)
+        return render_template('index.html')
+    except DatabaseWriterError:
+        error_description = DatabaseWriterError()
+        flash(error_description)
+        return render_template('index.html')
     else:
         return render_template('index.html',
                                teams=teams,

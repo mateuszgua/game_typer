@@ -10,7 +10,7 @@ class UserNotExist(MyError):
         return "User not exist in database."
 
 
-class DatabaseProblem(MyError):
+class DatabaseReaderProblem(MyError):
     """Raised when is problem to load data from database """
 
     def __str__(self):
@@ -35,4 +35,11 @@ class GameNotExist(MyError):
     """Raised when any game in database not exist """
 
     def __str__(self):
-        return "There is a problem to load game grom database."
+        return "There is a problem to load game from database."
+
+
+class DatabaseWriterError(MyError):
+    """Raised when is problem to save data in database """
+
+    def __str__(self):
+        return "There is a problem to save data in database."
