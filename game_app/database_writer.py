@@ -48,3 +48,21 @@ class DatabaseWriter:
             db_session.commit()
         except:
             raise DatabaseWriterError()
+
+    def edit_user_data(user, firstname, lastname, password, email, nick):
+        try:
+            user.firstname = firstname
+            user.lastname = lastname
+            user.password = password
+            user.email = email
+            user.nick = nick
+            db_session.commit()
+        except:
+            raise DatabaseWriterError()
+
+    def delete_user(user):
+        try:
+            db_session.delete(user)
+            db_session.commit()
+        except:
+            raise DatabaseWriterError()

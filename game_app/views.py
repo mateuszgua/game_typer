@@ -226,7 +226,7 @@ def user_info():
 @login_required
 def edit(user_id):
     form = EditUserForm()
-    user = User.query.filter_by(id=user_id).first()
+    user = UserReader.get_user(id=user_id)
 
     if request.method == 'POST':
         firstname = request.form['firstname']
@@ -236,17 +236,19 @@ def edit(user_id):
         nick = request.form['nick']
 
         try:
-            user.firstname = firstname
-            user.lastname = lastname
-            user.password = password
-            user.email = email
-            user.nick = nick
-
-            db_session.commit()
-            flash("User updated successfully!")
-        except:
+            DatabaseWriter.edit_user_data(user,
+                                          firstname,
+                                          lastname,
+                                          password,
+                                          email,
+                                          nick)
+        except DatabaseWriterError:
+            error_description = DatabaseWriterError()
+            flash(error_description)
             flash("Error! There was a problem edit user... try again.")
-        finally:
+            return render_template('accounts/edit.html')
+        else:
+            flash("User updated successfully!")
             return render_template('accounts/edit.html',
                                    form=form,
                                    user=user,
@@ -263,17 +265,19 @@ def edit(user_id):
 def delete(user_id):
 
     if user_id == current_user.get_id():
-        user = User.query.filter_by(id=user_id).first()
         form = RegistrationForm()
+        user = UserReader.get_user(id=user_id)
 
         try:
-            db_session.delete(user)
-            db_session.commit()
+            DatabaseWriter.delete_user(user)
+        except DatabaseWriterError:
+            error_description = DatabaseWriterError()
+            flash(error_description)
+            flash("Whoops! There was a problem deleting user, try again...")
+            return redirect(url_for('edit'))
+        else:
             flash("User deleted successfully!")
             return render_template('accounts/register.html', form=form)
-
-        except:
-            flash("Whoops! There was a problem deleting user, try again...")
 
     else:
         flash("Sorry, you can't delete that user!")
