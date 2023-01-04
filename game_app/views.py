@@ -4,7 +4,7 @@ from game_app.models import User, Role, Team, UserAdminView, RoleAdminView, Uplo
 from game_app.database import db_session
 from game_app.config import Config
 from game_app.helpers import Helpers
-from game_app.database_reader import TeamReader, GameReader
+from game_app.database_reader import TeamReader, GameReader, UserReader, TournamentReader, TipReader, UserBetGroupReader
 from game_app.my_error import TeamsDatabaseEmpty, ImagesNotExist, GameNotExist, DatabaseReaderProblem, DatabaseWriterError
 from game_app.database_writer import DatabaseWriter
 
@@ -65,15 +65,15 @@ def home():
         images_list = Helpers.get_images_list()
         last_games = Helpers.get_list_last_games()
         current_games = Helpers.get_list_last_games()
-        next_games = GameReader.list_next_games()
+        next_games = Helpers.get_list_next_games()
         group_list = Helpers.create_sorted_list()
         DatabaseWriter.sort_team_table(group_list)
 
-        final_1_8 = GameReader.get_one_game('game_phase', "1/8")
-        final_1_4 = GameReader.get_one_game('game_phase', "1/4")
-        final_1_2 = GameReader.get_one_game('game_phase', "1/2")
-        final_3rd = GameReader.get_one_game('game_phase', "3rd")
-        final = GameReader.get_one_game('game_phase', "final")
+        final_1_8 = GameReader.get_one_game(game_phase="1/8")
+        final_1_4 = GameReader.get_one_game(game_phase="1/4")
+        final_1_2 = GameReader.get_one_game(game_phase="1/2")
+        final_3rd = GameReader.get_one_game(game_phase="3rd")
+        final = GameReader.get_one_game(game_phase="final")
 
     except TeamsDatabaseEmpty:
         error_description = TeamsDatabaseEmpty()
@@ -113,23 +113,30 @@ def home():
 @app.route('/user')
 @login_required
 def user():
-    user_id = current_user.get_id()
-    user = User.query.filter_by(id=user_id).first()
-    images_list = os.listdir('game_app/static/files')
-    images_list = ['files/' + image for image in images_list]
-    tournaments = UserTournaments.query.filter_by(user_id=user_id).all()
-    user_tips = Tip.query.filter_by(user_id=user_id).all()
-    user_points = 0
-    user_groups = UserBetGroup.query.filter_by(user_id=user_id).all()
+    try:
+        user_id = current_user.get_id()
+        user = UserReader.get_user(id=user_id)
+        images_list = Helpers.get_images_list()
+        tournaments = TournamentReader.get_all_tournaments_filter(
+            user_id=user_id)
+        user_tips = TipReader.get_all_tips_filter(user_id=user_id)
+        user_points = 0
+        user_groups = UserBetGroupReader.get_all_user_groups_filter(
+            user_id=user_id)
+        user_points = Helpers.count_user_points_from_bet(
+            user_tips, user_points)
 
-    user_points = count_user_points_from_bet(user_tips, user_points)
-
-    return render_template('accounts/user.html',
-                           user=user,
-                           image_list=images_list,
-                           tournaments=tournaments,
-                           user_points=user_points,
-                           user_groups=user_groups)
+    except DatabaseWriterError:
+        error_description = DatabaseWriterError()
+        flash(error_description)
+        return render_template('accounts/user.html')
+    else:
+        return render_template('accounts/user.html',
+                               user=user,
+                               image_list=images_list,
+                               tournaments=tournaments,
+                               user_points=user_points,
+                               user_groups=user_groups)
 
 
 @app.route('/register', methods=('GET', 'POST'))
@@ -594,15 +601,6 @@ def tips():
                            user_tips=user_tips,
                            games=games,
                            tips_amount=tips_amount)
-
-
-def count_user_points_from_bet(user_tips, user_points):
-    for user_tip in user_tips:
-        if user_tip.tip_points == None:
-            user_points += 0
-        else:
-            user_points += int(user_tip.tip_points)
-    return user_points
 
 
 @app.post('/user/load_tips')

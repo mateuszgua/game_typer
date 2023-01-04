@@ -65,3 +65,11 @@ class Helpers:
 
         next_games = GameReader.get_games_by_day_asc(day_tommorow)
         return next_games
+
+    def count_user_points_from_bet(user_tips, user_points):
+        for user_tip in user_tips:
+            if user_tip.tip_points == None:
+                user_points += 0
+            else:
+                user_points += int(user_tip.tip_points)
+        return user_points

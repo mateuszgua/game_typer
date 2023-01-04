@@ -31,8 +31,8 @@ class GameReader:
     def get_all_games():
         pass
 
-    def get_one_game(filter_value_name, filter_value):
-        game = Game.query.filter_by(filter_value_name=filter_value).all()
+    def get_one_game(filter):
+        game = Game.query.filter_by(filter).all()
         if game is None:
             raise GameNotExist()
         else:
@@ -52,3 +52,43 @@ class GameReader:
             raise DatabaseReaderProblem()
         else:
             return games
+
+
+class UserReader:
+
+    def get_user(filter):
+        user = User.query.filter_by(filter).first()
+        if user is None:
+            raise DatabaseReaderProblem()
+        else:
+            return user
+
+
+class TournamentReader:
+
+    def get_all_tournaments_filter(filter):
+        tournaments = UserTournaments.query.filter_by(filter).all()
+        if tournaments is None:
+            raise DatabaseReaderProblem()
+        else:
+            return tournaments
+
+
+class TipReader:
+
+    def get_all_tips_filter(filter):
+        tips = Tip.query.filter_by(filter).all()
+        if tips is None:
+            raise DatabaseReaderProblem()
+        else:
+            return tips
+
+
+class UserBetGroupReader:
+
+    def get_all_user_groups_filter(filter):
+        user_groups = UserBetGroup.query.filter_by(filter).all()
+        if user_groups is None:
+            raise DatabaseReaderProblem()
+        else:
+            return user_groups
