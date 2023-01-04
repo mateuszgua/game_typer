@@ -143,19 +143,22 @@ def user():
 def register():
     form = RegistrationForm()
     if form.validate_on_submit():
-        existing_user = User.query.filter_by(email=form.email.data).first()
+        existing_user = UserReader.get_user(email=form.email.data)
         if existing_user is None:
-            user = User(firstname=form.firstname.data,
-                        lastname=form.lastname.data,
-                        email=form.email.data,
-                        nick=form.nick.data,
-                        )
-            user.set_password(form.password1.data)
-            if user.fs_uniquifier is None:
-                user.fs_uniquifier = uuid.uuid4().hex
-            db_session.add(user)
-            db_session.commit()
-            return redirect(url_for('login'))
+            try:
+                DatabaseWriter.register_user(
+                    form.firstname.data,
+                    form.lastname.data,
+                    form.email.data,
+                    form.nick.data,
+                    form.password1.data,
+                )
+            except DatabaseWriterError:
+                error_description = DatabaseWriterError()
+                flash(error_description)
+                return redirect(url_for('login'))
+            else:
+                return redirect(url_for('login'))
         flash('A user already exist with that email address.')
     return render_template('accounts/register.html', form=form)
 

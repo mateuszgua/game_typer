@@ -51,7 +51,7 @@ class Helpers:
         current_games = GameReader.get_games_by_day_asc(current_day)
         return current_games
 
-    def list_next_games():
+    def get_list_next_games():
         present = date.today()
         i = 1
         number_of_games = 64
