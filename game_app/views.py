@@ -69,11 +69,11 @@ def home():
         group_list = Helpers.create_sorted_list()
         DatabaseWriter.sort_team_table(group_list)
 
-        final_1_8 = GameReader.get_one_game(game_phase="1/8")
-        final_1_4 = GameReader.get_one_game(game_phase="1/4")
-        final_1_2 = GameReader.get_one_game(game_phase="1/2")
-        final_3rd = GameReader.get_one_game(game_phase="3rd")
-        final = GameReader.get_one_game(game_phase="final")
+        final_1_8 = GameReader.get_one_game("game_phase", "1/8")
+        final_1_4 = GameReader.get_one_game("game_phase", "1/4")
+        final_1_2 = GameReader.get_one_game("game_phase", "1/2")
+        final_3rd = GameReader.get_one_game("game_phase", "3rd")
+        final = GameReader.get_one_game("game_phase", "final")
 
     except TeamsDatabaseEmpty:
         error_description = TeamsDatabaseEmpty()
@@ -115,14 +115,14 @@ def home():
 def user():
     try:
         user_id = current_user.get_id()
-        user = UserReader.get_user(id=user_id)
+        user = UserReader.get_user("id", user_id)
         images_list = Helpers.get_images_list()
         tournaments = TournamentReader.get_all_tournaments_filter(
-            user_id=user_id)
-        user_tips = TipReader.get_all_tips_filter(user_id=user_id)
+            "user_id", user_id)
+        user_tips = TipReader.get_all_tips_filter("user_id", user_id)
         user_points = 0
         user_groups = UserBetGroupReader.get_all_user_groups_filter(
-            user_id=user_id)
+            "user_id", user_id)
         user_points = Helpers.count_user_points_from_bet(
             user_tips, user_points)
     except DatabaseReaderProblem:
@@ -146,7 +146,7 @@ def user():
 def register():
     form = RegistrationForm()
     if form.validate_on_submit():
-        existing_user = UserReader.get_user(email=form.email.data)
+        existing_user = UserReader.get_user("email", form.email.data)
         if existing_user is None:
             try:
                 DatabaseWriter.register_user(
@@ -173,7 +173,7 @@ def login():
 
     form = LoginForm()
     if form.validate_on_submit():
-        user = UserReader.get_user(email=form.email.data)
+        user = UserReader.get_user("email", form.email.data)
         if user:
             if user.check_password(password=form.password1.data):
                 try:
@@ -213,7 +213,7 @@ def logout():
 def user_info():
     try:
         user_id = current_user.get_id()
-        user = UserReader.get_user(id=user_id)
+        user = UserReader.get_user("id", user_id)
     except DatabaseReaderProblem:
         error_description = DatabaseReaderProblem()
         flash(error_description)
@@ -226,7 +226,7 @@ def user_info():
 @login_required
 def edit(user_id):
     form = EditUserForm()
-    user = UserReader.get_user(id=user_id)
+    user = UserReader.get_user("id", user_id)
 
     if request.method == 'POST':
         firstname = request.form['firstname']
@@ -266,7 +266,7 @@ def delete(user_id):
 
     if user_id == current_user.get_id():
         form = RegistrationForm()
-        user = UserReader.get_user(id=user_id)
+        user = UserReader.get_user("id", user_id)
 
         try:
             DatabaseWriter.delete_user(user)

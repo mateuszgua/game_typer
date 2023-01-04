@@ -31,8 +31,12 @@ class GameReader:
     def get_all_games():
         pass
 
-    def get_one_game(filter):
-        game = Game.query.filter_by(filter).all()
+    def get_one_game(filter_name, filter):
+        match filter_name:
+            case "game_phase":
+                game = Game.query.filter_by(game_phase=filter).all()
+            case _:
+                game = None
         if game is None:
             raise GameNotExist()
         else:
@@ -56,8 +60,15 @@ class GameReader:
 
 class UserReader:
 
-    def get_user(filter):
-        user = User.query.filter_by(filter).first()
+    def get_user(filter_name, filter):
+        match filter_name:
+            case "id":
+                user = User.query.filter_by(id=filter).first()
+            case "email":
+                user = User.query.filter_by(email=filter).first()
+            case _:
+                user = None
+
         if user is None:
             raise DatabaseReaderProblem()
         else:
@@ -66,8 +77,13 @@ class UserReader:
 
 class TournamentReader:
 
-    def get_all_tournaments_filter(filter):
-        tournaments = UserTournaments.query.filter_by(filter).all()
+    def get_all_tournaments_filter(filter_name, filter):
+        match filter_name:
+            case "user_id":
+                tournaments = UserTournaments.query.filter_by(filter).all()
+            case _:
+                tournaments = None
+
         if tournaments is None:
             raise DatabaseReaderProblem()
         else:
@@ -76,8 +92,13 @@ class TournamentReader:
 
 class TipReader:
 
-    def get_all_tips_filter(filter):
-        tips = Tip.query.filter_by(filter).all()
+    def get_all_tips_filter(filter_name, filter):
+        match filter_name:
+            case "user_id":
+                tips = Tip.query.filter_by(filter).all()
+            case _:
+                tips = None
+
         if tips is None:
             raise DatabaseReaderProblem()
         else:
@@ -86,8 +107,13 @@ class TipReader:
 
 class UserBetGroupReader:
 
-    def get_all_user_groups_filter(filter):
-        user_groups = UserBetGroup.query.filter_by(filter).all()
+    def get_all_user_groups_filter(filter_name, filter):
+        match filter_name:
+            case "user_id":
+                user_groups = UserBetGroup.query.filter_by(filter).all()
+            case _:
+                user_groups = None
+
         if user_groups is None:
             raise DatabaseReaderProblem()
         else:
