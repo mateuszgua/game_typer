@@ -2,7 +2,7 @@ import uuid
 
 from game_app.database import db_session
 from game_app.my_error import DatabaseWriterError
-from game_app.models import User
+from game_app.models import User, UploadFile, Team
 
 
 class DatabaseWriter:
@@ -63,6 +63,35 @@ class DatabaseWriter:
     def delete_user(user):
         try:
             db_session.delete(user)
+            db_session.commit()
+        except:
+            raise DatabaseWriterError()
+
+    def save_file(file):
+        try:
+            upload = UploadFile(filename=file.filename,
+                                data=file.read())
+            db_session.add(upload)
+            db_session.commit()
+        except:
+            raise DatabaseWriterError()
+
+    def save_team_data(data, i):
+        try:
+            team = Team(name=data['team'][i]['name'],
+                        games_played=0,
+                        wins=0,
+                        draws=0,
+                        lost=0,
+                        goal_scored=0,
+                        goal_lost=0,
+                        goal_balance=0,
+                        points=0,
+                        group=data['team'][i]['group'],
+                        play_off=0,
+                        image_name=f"files/{data['team'][i]['name']}_48x48.png"
+                        )
+            db_session.add(team)
             db_session.commit()
         except:
             raise DatabaseWriterError()

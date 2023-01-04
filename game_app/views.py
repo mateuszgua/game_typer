@@ -4,7 +4,7 @@ from game_app.models import User, Role, Team, UserAdminView, RoleAdminView, Uplo
 from game_app.database import db_session
 from game_app.config import Config
 from game_app.helpers import Helpers
-from game_app.database_reader import TeamReader, GameReader, UserReader, TournamentReader, TipReader, UserBetGroupReader
+from game_app.database_reader import TeamReader, GameReader, UserReader, TournamentReader, TipReader, UserBetGroupReader, FilesReader
 from game_app.my_error import TeamsDatabaseEmpty, ImagesNotExist, GameNotExist, DatabaseReaderProblem, DatabaseWriterError
 from game_app.database_writer import DatabaseWriter
 
@@ -284,10 +284,6 @@ def delete(user_id):
         return redirect(url_for('home'))
 
 
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in config.ALLOWED_EXTENSIONS
-
-
 @app.route('/admin/upload_file', methods=['GET', 'POST'])
 @login_required
 def upload_file():
@@ -301,54 +297,41 @@ def upload_file():
             flash("No selected file")
             return redirect(request.url)
 
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            file.save(os.path.join(config.UPLOAD_FOLDER, filename))
-            upload = UploadFile(filename=file.filename, data=file.read())
-            db_session.add(upload)
-            db_session.commit()
-            flash(f"Uploaded: {file.filename}")
+        if file and Helpers.get_allowed_file(config, file.filename):
+            try:
+                filename = secure_filename(file.filename)
+                file.save(os.path.join(config.UPLOAD_FOLDER, filename))
+                DatabaseWriter.save_file(file)
+            except DatabaseWriterError:
+                error_description = DatabaseWriterError()
+                flash(error_description)
+                return redirect(url_for('upload_file'))
+            else:
+                flash(f"Uploaded: {file.filename}")
     return render_template('load_file.html')
 
 
 @app.route('/admin/select_file', methods=['GET', 'POST'])
 @login_required
 def select_file():
-    files = UploadFile.query.all()
-    if request.method == 'POST':
-        if request.form.get('mycheckbox') != None:
-            file_idx = request.form.get('mycheckbox')
-            processjson(file_idx)
-            flash(f"Load successfully!")
-        else:
-            flash(f"Please chose one.")
-    return render_template('select_file.html', files=files)
+    try:
+        files = FilesReader.get_all_files()
+        if request.method == 'POST':
+            if request.form.get('mycheckbox') != None:
+                file_idx = request.form.get('mycheckbox')
+                Helpers.get_process_json(file_idx)
+                flash(f"Load successfully!")
+            else:
+                flash(f"Please chose one.")
+    except DatabaseReaderProblem:
+        error_description = DatabaseReaderProblem()
+        flash(error_description)
+        return render_template('select_file.html')
+    else:
+        return render_template('select_file.html', files=files)
 
 
-def processjson(file_idx):
-    file = UploadFile.query.filter_by(id=file_idx).first()
-    SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
-    json_url = os.path.join(SITE_ROOT, "static/files", file.filename)
-    data = json.load(open(json_url))
-
-    i = 0
-    while i < 32:
-        team = Team(name=data['team'][i]['name'],
-                    games_played=0,
-                    wins=0,
-                    draws=0,
-                    lost=0,
-                    goal_scored=0,
-                    goal_lost=0,
-                    goal_balance=0,
-                    points=0,
-                    group=data['team'][i]['group'],
-                    play_off=0,
-                    image_name=f"files/{data['team'][i]['name']}_48x48.png"
-                    )
-        db_session.add(team)
-        db_session.commit()
-        i += 1
+# TODO tou skończone
 
 
 @app.route('/admin/games', methods=['GET', 'POST'])

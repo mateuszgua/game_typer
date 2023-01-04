@@ -118,3 +118,20 @@ class UserBetGroupReader:
             raise DatabaseReaderProblem()
         else:
             return user_groups
+
+
+class FilesReader:
+
+    def get_all_files():
+        files = UploadFile.query.all()
+        if files is None:
+            raise DatabaseReaderProblem()
+        else:
+            return files
+
+    def get_file_by_filter(file_idx):
+        file = UploadFile.query.filter_by(id=file_idx).first()
+        if file is None:
+            raise DatabaseReaderProblem()
+        else:
+            return file

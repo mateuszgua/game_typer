@@ -1,8 +1,10 @@
 import os
 from datetime import datetime, timedelta, date, time
+from flask import json
 
 from game_app.my_error import ImagesNotExist, TeamsDatabaseEmpty
-from game_app.database_reader import TeamReader, GameReader
+from game_app.database_reader import TeamReader, GameReader, FilesReader
+from game_app.database_writer import DatabaseWriter
 
 
 class Helpers:
@@ -73,3 +75,17 @@ class Helpers:
             else:
                 user_points += int(user_tip.tip_points)
         return user_points
+
+    def get_allowed_file(config, filename):
+        return '.' in filename and filename.rsplit('.', 1)[1].lower() in config.ALLOWED_EXTENSIONS
+
+    def get_process_json(file_idx):
+        file = FilesReader.get_file_by_filter(file_idx)
+        SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
+        json_url = os.path.join(SITE_ROOT, "static/files", file.filename)
+        data = json.load(open(json_url))
+
+        i = 0
+        while i < 32:
+            DatabaseWriter.save_team_data(data, i)
+            i += 1
