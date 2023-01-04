@@ -40,3 +40,11 @@ class DatabaseWriter:
             db_session.commit()
         except:
             raise DatabaseWriterError()
+
+    def logout_user_from_account(user):
+        try:
+            user.authenticated = False
+            db_session.add(user)
+            db_session.commit()
+        except:
+            raise DatabaseWriterError()

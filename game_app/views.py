@@ -125,7 +125,10 @@ def user():
             user_id=user_id)
         user_points = Helpers.count_user_points_from_bet(
             user_tips, user_points)
-
+    except DatabaseReaderProblem:
+        error_description = DatabaseReaderProblem()
+        flash(error_description)
+        return render_template('accounts/user.html')
     except DatabaseWriterError:
         error_description = DatabaseWriterError()
         flash(error_description)
@@ -192,21 +195,31 @@ def login():
 @app.route('/logout', methods=('GET', 'POST'))
 @login_required
 def logout():
-    user = current_user
-    user.authenticated = False
-    db_session.add(user)
-    db_session.commit()
-    logout_user()
-    flash("You have been logged out!")
-    return redirect(url_for('home'))
+    try:
+        user = current_user
+        DatabaseWriter.logout_user_from_account(user)
+        logout_user()
+        flash("You have been logged out!")
+    except DatabaseWriterError:
+        error_description = DatabaseWriterError()
+        flash(error_description)
+        abort(500, error_description)
+    else:
+        return redirect(url_for('home'))
 
 
 @app.route('/user_info')
 @login_required
 def user_info():
-    user_id = current_user.get_id()
-    user = User.query.filter_by(id=user_id).first()
-    return render_template('accounts/user_info.html', user=user)
+    try:
+        user_id = current_user.get_id()
+        user = UserReader.get_user(id=user_id)
+    except DatabaseReaderProblem:
+        error_description = DatabaseReaderProblem()
+        flash(error_description)
+        return render_template('accounts/user_info.html')
+    else:
+        return render_template('accounts/user_info.html', user=user)
 
 
 @app.route('/edit/<int:user_id>', methods=('GET', 'POST'))
