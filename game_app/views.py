@@ -156,7 +156,7 @@ def register():
             except DatabaseWriterError:
                 error_description = DatabaseWriterError()
                 flash(error_description)
-                return redirect(url_for('login'))
+                return redirect(url_for('register'))
             else:
                 return redirect(url_for('login'))
         flash('A user already exist with that email address.')
@@ -170,15 +170,19 @@ def login():
 
     form = LoginForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
+        user = UserReader.get_user(email=form.email.data)
         if user:
             if user.check_password(password=form.password1.data):
-                user.authenticated = True
-                db_session.add(user)
-                db_session.commit()
-                login_user(user, remember=form.remember.data)
-                next = request.args.get('next')
-                return redirect(next or (url_for('user', user_id=user.id)))
+                try:
+                    DatabaseWriter.login_user_in_account(user)
+                    login_user(user, remember=form.remember.data)
+                    next = request.args.get('next')
+                except DatabaseWriterError:
+                    error_description = DatabaseWriterError()
+                    flash(error_description)
+                    return redirect(url_for('login'))
+                else:
+                    return redirect(next or (url_for('user', user_id=user.id)))
             flash("Wrong Password - Try Again!")
         else:
             flash("That User Doesn't Exist! Try Again...")

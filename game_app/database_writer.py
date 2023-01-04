@@ -32,3 +32,11 @@ class DatabaseWriter:
             db_session.commit()
         except:
             raise DatabaseWriterError()
+
+    def login_user_in_account(user):
+        try:
+            user.authenticated = True
+            db_session.add(user)
+            db_session.commit()
+        except:
+            raise DatabaseWriterError()
