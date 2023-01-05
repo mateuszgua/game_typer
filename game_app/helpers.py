@@ -3,8 +3,8 @@ from datetime import datetime, timedelta, date
 from flask import json
 
 from game_app.my_error import ImagesNotExist, TeamsDatabaseEmpty
-from game_app.database_reader import TeamReader, GameReader, FilesReader, BetReader, GamesPlayedReader
-from game_app.database_writer import GameWriter, TeamWriter, BetWriter, GamePlayedWriter
+from game_app.database_reader import TeamReader, GameReader, FilesReader, BetReader, GamesPlayedReader, UserBetGroupReader
+from game_app.database_writer import GameWriter, TeamWriter, BetWriter, GamePlayedWriter, UserBetGroupWriter, UserWriter
 
 
 class Helpers:
@@ -44,13 +44,13 @@ class Helpers:
         i = 1
         day_yesterday = current_day - timedelta(days=i)
 
-        last_games = GameReader.get_games_by_day_asc(day_yesterday)
+        last_games = GameReader.get_all_games_by_day_order(day_yesterday)
         return last_games
 
     def get_list_current_games():
         current_day = date.today()
 
-        current_games = GameReader.get_games_by_day_asc(current_day)
+        current_games = GameReader.get_all_games_by_day_order(current_day)
         return current_games
 
     def get_list_next_games():
@@ -65,7 +65,7 @@ class Helpers:
             if number_of_games == 0:
                 break
 
-        next_games = GameReader.get_games_by_day_asc(day_tommorow)
+        next_games = GameReader.get_all_games_by_day_order(day_tommorow)
         return next_games
 
     def count_user_points_from_bet(user_bets, user_points):
@@ -168,6 +168,53 @@ class Helpers:
         else:
             winner = 0
         return winner
+
+    def sort_users_in_group(user_groups):
+        place = 1
+        for user_group in user_groups:
+            UserBetGroupWriter.save_user_place(user_group, place)
+            place += 1
+
+    def find_last_game():
+        present_day = date.today()
+        present = datetime.now()
+        present_time = present.strftime("%H:%M:%S")
+        i = 1
+        j = 1
+        game_day = present_day
+
+        while GameReader.get_games_by_day_count(game_day) == 0:
+            game_day -= timedelta(days=i)
+            j += 1
+            if j > 365:
+                break
+
+        if game_day == present_day:
+            game = GameReader.get_one_game_filter_order_asc(
+                "game_day", game_day)
+            if game.game_time >= present_time:
+                game_id = game.id - 1
+                game = GameReader.get_one_game_filter("id", game_id)
+        else:
+            game = GameReader.get_one_game_filter_order_desc(
+                "game_day", game_day)
+        return game
+
+    def update_user_points(user_groups):
+        for user in user_groups:
+            user.points = 0
+
+            user_bets = BetReader.get_all_bets_filter("user_id", user.user_id)
+            for user_bet in user_bets:
+                UserWriter.update_bet_points(user_bet, user)
+
+    def add_user_to_group_if_not_exist(user, group_id):
+        if UserBetGroupReader.get_count_user_group_filter("user_id", user.id) == 0:
+            UserBetGroupWriter.save_user_bet_group(group_id, user.id)
+            message = "User added successfully!"
+        else:
+            message = "User exist in group!"
+        return message
 
 
 def is_game_played_exist(edit_game, games_played):

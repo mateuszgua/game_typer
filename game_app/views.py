@@ -658,111 +658,71 @@ def add_group():
 @app.route('/user/group/<int:group_id>', methods=['GET', 'POST'])
 @login_required
 def group(group_id):
-    user_id = current_user.get_id()
-    bet_amount = UserBetGroup.query.filter_by(user_id=user_id).count()
-    user_groups = UserBetGroup.query.filter_by(
-        bet_group_id=group_id).order_by(UserBetGroup.points.desc()).all()
-    bet_group = BetGroup.query.filter_by(id=group_id).first()
+    try:
 
-    sort_users_in_group(user_groups)
-    last_game = find_last_game()
-    users_bets = Bet.query.filter_by(game_id=last_game.id).all()
-    update_user_points(user_groups)
-
-    if bet_amount == 0:
-        flash("Please add bet group for your account to show any bets.")
-
-    return render_template('accounts/bet_group.html',
-                           user_groups=user_groups,
-                           bet_group=bet_group,
-                           last_game=last_game,
-                           users_bets=users_bets)
-
-
-def sort_users_in_group(user_groups):
-    place = 1
-    for user_group in user_groups:
-        user_group.place = place
-        db_session.commit()
-        place += 1
-
-
-def find_last_game():
-    present_day = date.today()
-    present = datetime.now()
-    present_time = present.strftime("%H:%M:%S")
-    i = 1
-    game_day = present_day
-
-    while Game.query.filter_by(game_day=game_day).count() == 0:
-        game_day -= timedelta(days=i)
-
-    if game_day == present_day:
-        game = Game.query.filter_by(game_day=game_day).order_by(
-            Game.game_time.asc()).first()
-        if game.game_time >= present_time:
-            game_id = game.id - 1
-            game = Game.query.filter_by(id=game_id).first()
-
+        user_id = current_user.get_id()
+        bet_amount = UserBetGroupReader.get_count_user_group_filter(
+            "user_id", user_id)
+        user_groups = UserBetGroupReader.get_all_user_group_filter_order(
+            "bet_group_id", group_id)
+        bet_group = BetGroupReader.get_one_bet_group_filter("id", group_id)
+        Helpers.sort_users_in_group(user_groups)
+        last_game = Helpers.find_last_game()
+        users_bets = BetReader.get_all_bets_filter("game_id", last_game.id)
+        Helpers.update_user_points(user_groups)
+        if bet_amount == 0:
+            flash("Please add bet group for your account to show any bets.")
+    except DatabaseReaderProblem:
+        error_description = DatabaseReaderProblem()
+        flash(error_description)
+        return redirect(url_for('add_group'))
+    except DatabaseWriterError:
+        error_description = DatabaseWriterError()
+        page_not_found(error_description)
+        abort(500, error_description)
     else:
-        game = Game.query.filter_by(game_day=game_day).order_by(
-            Game.game_time.desc()).first()
-
-    return game
-
-
-def update_user_points(user_groups):
-    for user in user_groups:
-        user.points = 0
-
-        user_tips = Bet.query.filter_by(user_id=user.user_id).all()
-        for user_tip in user_tips:
-            if user_tip.tip_points == None:
-                user.points += 0
-            else:
-                user.points += int(user_tip.tip_points)
-        db_session.commit()
+        return render_template('accounts/bet_group.html',
+                               user_groups=user_groups,
+                               bet_group=bet_group,
+                               last_game=last_game,
+                               users_bets=users_bets)
 
 
 @app.post('/user/group/add_user_bet_group/<int:group_id>')
 @login_required
 def add_user_bet_group(group_id):
-
     try:
         user_email = request.form.get('user_email')
         user_nick = request.form.get('nick_name')
 
         if user_email != None:
-            user = User.query.filter_by(email=user_email).first()
+            user = UserReader.get_one_user_filter("email", user_email)
             if user != None:
-                add_user_to_group_if_not_exist(user, group_id)
+                message = Helpers.add_user_to_group_if_not_exist(
+                    user, group_id)
+                flash(message)
             else:
                 flash("User not exist! Please check email.")
 
         elif user_nick != None:
-            user = User.query.filter_by(nick=user_nick).first()
+            user = UserReader.get_one_user_filter("nick", user_nick)
             if user != None:
-                add_user_to_group_if_not_exist(user, group_id)
+                Helpers.add_user_to_group_if_not_exist(user, group_id)
             else:
                 flash("User not exist! Please check nick.")
 
         else:
             flash("Please fill user email or nick!")
-    finally:
-        return redirect(url_for('group', group_id=group_id))
-
-
-def add_user_to_group_if_not_exist(user, group_id):
-    if UserBetGroup.query.filter_by(user_id=user.id).count() == 0:
-        user_group = UserBetGroup(
-            bet_group_id=group_id,
-            user_id=user.id,
-        )
-        db_session.add(user_group)
-        db_session.commit()
-        flash("User added successfully!")
+    except DatabaseReaderProblem:
+        error_description = DatabaseReaderProblem()
+        flash(error_description)
+        return redirect(url_for('add_group'))
+    except DatabaseWriterError:
+        error_description = DatabaseWriterError()
+        page_not_found(error_description)
+        abort(500, error_description)
     else:
-        flash("User exist in group!")
+        return redirect(url_for('group', group_id=group_id))
 
 
 @ app.route('/admin/db_update', methods=['GET', 'POST'])

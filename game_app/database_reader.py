@@ -72,7 +72,7 @@ class GameReader:
         else:
             return game
 
-    def get_games_by_day_asc(day):
+    def get_all_games_by_day_order(day):
         games = Game.query.filter_by(
             game_day=day).order_by(Game.game_time.asc()).all()
         if games is None:
@@ -86,6 +86,30 @@ class GameReader:
             raise DatabaseReaderProblem()
         else:
             return games
+
+    def get_one_game_filter_order_asc(filter_name, filter):
+        match filter_name:
+            case "game_day":
+                game = Game.query.filter_by(game_day=filter).order_by(
+                    Game.game_time.asc()).first()
+            case _:
+                game = None
+        if game is None:
+            raise DatabaseReaderProblem()
+        else:
+            return game
+
+    def get_one_game_filter_order_desc(filter_name, filter):
+        match filter_name:
+            case "game_day":
+                game = Game.query.filter_by(game_day=filter).order_by(
+                    Game.game_time.desc()).first()
+            case _:
+                game = None
+        if game is None:
+            raise DatabaseReaderProblem()
+        else:
+            return game
 
 
 class UserReader:
@@ -110,7 +134,8 @@ class TournamentReader:
     def get_all_tournaments_filter(filter_name, filter):
         match filter_name:
             case "user_id":
-                tournaments = UserTournaments.query.filter_by(filter).all()
+                tournaments = UserTournaments.query.filter_by(
+                    user_id=filter).all()
             case _:
                 tournaments = None
 
@@ -132,9 +157,9 @@ class BetReader:
     def get_all_bets_filter(filter_name, filter):
         match filter_name:
             case "user_id":
-                bets = Bet.query.filter_by(filter).all()
+                bets = Bet.query.filter_by(user_id=filter).all()
             case "game_id":
-                bets = Bet.query.filter_by(filter).all()
+                bets = Bet.query.filter_by(game_id=filter).all()
             case _:
                 bets = None
 
@@ -146,7 +171,7 @@ class BetReader:
     def get_count_bets_filter(filter_name, filter):
         match filter_name:
             case "user_id":
-                bets = Bet.query.filter_by(filter).count()
+                bets = Bet.query.filter_by(user_id=filter).count()
             case _:
                 bets = None
 
@@ -175,6 +200,9 @@ class BetGroupReader:
             case "name":
                 existing_group = BetGroup.query.filter_by(
                     name=filter).first()
+            case "id":
+                existing_group = BetGroup.query.filter_by(
+                    id=filter).first()
             case _:
                 existing_group = None
 
@@ -189,7 +217,34 @@ class UserBetGroupReader:
     def get_all_user_groups_filter(filter_name, filter):
         match filter_name:
             case "user_id":
-                user_groups = UserBetGroup.query.filter_by(filter).all()
+                user_groups = UserBetGroup.query.filter_by(
+                    user_id=filter).all()
+            case _:
+                user_groups = None
+
+        if user_groups is None:
+            raise DatabaseReaderProblem()
+        else:
+            return user_groups
+
+    def get_count_user_group_filter(filter_name, filter):
+        match filter_name:
+            case "user_id":
+                user_bets = UserBetGroup.query.filter_by(
+                    user_id=filter).count()
+            case _:
+                user_bets = None
+
+        if user_bets is None:
+            raise DatabaseReaderProblem()
+        else:
+            return user_bets
+
+    def get_all_user_group_filter_order(filter_name, filter):
+        match filter_name:
+            case "bet_group_id":
+                user_groups = UserBetGroup.query.filter_by(
+                    bet_group_id=filter).order_by(UserBetGroup.points.desc()).all()
             case _:
                 user_groups = None
 

@@ -152,6 +152,16 @@ class UserWriter:
         except:
             raise DatabaseWriterError()
 
+    def update_bet_points(user_bet, user):
+        try:
+            if user_bet.bet_points == None:
+                user.points += 0
+            else:
+                user.points += int(user_bet.bet_points)
+            db_session.commit()
+        except:
+            raise DatabaseWriterError()
+
 
 class FileWriter:
 
@@ -283,6 +293,13 @@ class UserBetGroupWriter:
                 user_id=user_id,
             )
             db_session.add(user_group)
+            db_session.commit()
+        except:
+            raise DatabaseWriterError()
+
+    def save_user_place(user_group, place):
+        try:
+            user_group.place = place
             db_session.commit()
         except:
             raise DatabaseWriterError()
