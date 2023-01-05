@@ -1,21 +1,20 @@
 from game_app import app, login_manager, admin
 from game_app.forms import RegistrationForm, LoginForm, EditUserForm, AddGameForm, AddGroupForm
-from game_app.models import User, Role, Team, UserAdminView, RoleAdminView, UploadFile, Game, Tip, UserTournaments, GamesPlayed, BetGroup, UserBetGroup
+from game_app.models import User, Role, Team, UserAdminView, RoleAdminView, UploadFile, Game, Bet, UserTournaments, GamesPlayed, BetGroup, UserBetGroup
 from game_app.database import db_session
 from game_app.config import Config
 from game_app.helpers import Helpers
-from game_app.database_reader import TeamReader, GameReader, UserReader, TournamentReader, TipReader, UserBetGroupReader, FilesReader
-from game_app.my_error import TeamsDatabaseEmpty, ImagesNotExist, GameNotExist, DatabaseReaderProblem, DatabaseWriterError
-from game_app.database_writer import DatabaseWriter
+from game_app.database_reader import TeamReader, GameReader, UserReader, TournamentReader, BetReader, UserBetGroupReader, FilesReader
+from game_app.my_error import TeamsDatabaseEmpty, ImagesNotExist, GameNotExist, DatabaseReaderProblem, DatabaseWriterError, GamesDatabaseEmpty, BetsDatabaseEmpty
+from game_app.database_writer import GameWriter, TeamWriter, FileWriter, UserWriter, BetWriter
 
 import os
-import uuid
-from flask import render_template, url_for, redirect, request, flash, json
+from flask import render_template, url_for, redirect, request, flash
 from flask import abort
 from flask_login import login_user, current_user, logout_user, login_required
 
 from werkzeug.utils import secure_filename
-from datetime import datetime, timedelta, date, time
+from datetime import datetime, timedelta, date
 
 config = Config()
 
@@ -26,7 +25,7 @@ admin.add_view(RoleAdminView(Team, db_session))
 admin.add_view(RoleAdminView(GamesPlayed, db_session))
 admin.add_view(RoleAdminView(UploadFile, db_session))
 admin.add_view(RoleAdminView(UserTournaments, db_session))
-admin.add_view(RoleAdminView(Tip, db_session))
+admin.add_view(RoleAdminView(Bet, db_session))
 admin.add_view(RoleAdminView(UserBetGroup, db_session))
 admin.add_view(RoleAdminView(BetGroup, db_session))
 
@@ -67,13 +66,13 @@ def home():
         current_games = Helpers.get_list_last_games()
         next_games = Helpers.get_list_next_games()
         group_list = Helpers.create_sorted_list()
-        DatabaseWriter.sort_team_table(group_list)
+        TeamWriter.sort_team_table(group_list)
 
-        final_1_8 = GameReader.get_one_game("game_phase", "1/8")
-        final_1_4 = GameReader.get_one_game("game_phase", "1/4")
-        final_1_2 = GameReader.get_one_game("game_phase", "1/2")
-        final_3rd = GameReader.get_one_game("game_phase", "3rd")
-        final = GameReader.get_one_game("game_phase", "final")
+        final_1_8 = GameReader.get_games_by_filter("game_phase", "1/8")
+        final_1_4 = GameReader.get_games_by_filter("game_phase", "1/4")
+        final_1_2 = GameReader.get_games_by_filter("game_phase", "1/2")
+        final_3rd = GameReader.get_games_by_filter("game_phase", "3rd")
+        final = GameReader.get_games_by_filter("game_phase", "final")
 
     except TeamsDatabaseEmpty:
         error_description = TeamsDatabaseEmpty()
@@ -119,7 +118,7 @@ def user():
         images_list = Helpers.get_images_list()
         tournaments = TournamentReader.get_all_tournaments_filter(
             "user_id", user_id)
-        user_tips = TipReader.get_all_tips_filter("user_id", user_id)
+        user_tips = BetReader.get_all_bets_filter("user_id", user_id)
         user_points = 0
         user_groups = UserBetGroupReader.get_all_user_groups_filter(
             "user_id", user_id)
@@ -149,7 +148,7 @@ def register():
         existing_user = UserReader.get_user("email", form.email.data)
         if existing_user is None:
             try:
-                DatabaseWriter.register_user(
+                UserWriter.register_user(
                     form.firstname.data,
                     form.lastname.data,
                     form.email.data,
@@ -177,7 +176,7 @@ def login():
         if user:
             if user.check_password(password=form.password1.data):
                 try:
-                    DatabaseWriter.login_user_in_account(user)
+                    UserWriter.login_user_in_account(user)
                     login_user(user, remember=form.remember.data)
                     next = request.args.get('next')
                 except DatabaseWriterError:
@@ -197,7 +196,7 @@ def login():
 def logout():
     try:
         user = current_user
-        DatabaseWriter.logout_user_from_account(user)
+        UserWriter.logout_user_from_account(user)
         logout_user()
         flash("You have been logged out!")
     except DatabaseWriterError:
@@ -236,12 +235,12 @@ def edit(user_id):
         nick = request.form['nick']
 
         try:
-            DatabaseWriter.edit_user_data(user,
-                                          firstname,
-                                          lastname,
-                                          password,
-                                          email,
-                                          nick)
+            UserWriter.edit_user_data(user,
+                                      firstname,
+                                      lastname,
+                                      password,
+                                      email,
+                                      nick)
         except DatabaseWriterError:
             error_description = DatabaseWriterError()
             flash(error_description)
@@ -269,7 +268,7 @@ def delete(user_id):
         user = UserReader.get_user("id", user_id)
 
         try:
-            DatabaseWriter.delete_user(user)
+            UserWriter.delete_user(user)
         except DatabaseWriterError:
             error_description = DatabaseWriterError()
             flash(error_description)
@@ -301,7 +300,7 @@ def upload_file():
             try:
                 filename = secure_filename(file.filename)
                 file.save(os.path.join(config.UPLOAD_FOLDER, filename))
-                DatabaseWriter.save_file(file)
+                FileWriter.save_file(file)
             except DatabaseWriterError:
                 error_description = DatabaseWriterError()
                 flash(error_description)
@@ -331,85 +330,120 @@ def select_file():
         return render_template('select_file.html', files=files)
 
 
-# TODO tou skończone
-
-
 @app.route('/admin/games', methods=['GET', 'POST'])
 @login_required
 def games():
-    games = Game.query.all()
-    teams = Team.query.all()
-    form = AddGameForm()
+    try:
+        games = GameReader.get_all_games()
+        teams = TeamReader.get_all_teams()
+        form = AddGameForm()
+        user_id = current_user.get_id()
+        user = UserReader.get_user("id", user_id)
 
-    user_id = current_user.get_id()
-    user = User.query.filter_by(id=user_id).first()
-    if form.validate_on_submit():
-        existing_game = Game.query.filter_by(id=form.id.data).first()
-        if existing_game is None:
-            game = Game(id=form.id.data,
-                        discipline=form.discipline.data,
-                        game_name=form.tournament.data,
-                        game_phase=form.game_phase.data,
-                        team_1=form.team_1.data,
-                        team_2=form.team_2.data,
-                        game_day=form.game_day.data,
-                        game_time=form.game_time.data,
-                        )
-            db_session.add(game)
-            db_session.commit()
-            flash('Add game successfully.')
-            return redirect(url_for('games'))
-        flash('Whoops! There was a problem!')
-    return render_template('games_list.html',
-                           teams=teams,
-                           games=games,
-                           form=form,
-                           user=user)
+        if form.validate_on_submit():
+            existing_game = GameReader.get_one_game_by_filter(
+                "id", form.id.data)
+            if existing_game is None:
+                GameWriter.save_game_data(form.id.data,
+                                          form.discipline.data,
+                                          form.tournament.data,
+                                          form.game_phase.data,
+                                          form.team_1.data,
+                                          form.team_2.data,
+                                          form.game_day.data,
+                                          form.game_time.data)
+                flash('Add game successfully.')
+                return redirect(url_for('games'))
+            flash('Whoops! There was a problem!')
+    except GamesDatabaseEmpty:
+        error_description = GamesDatabaseEmpty()
+        page_not_found(error_description)
+        abort(500, error_description)
+    except TeamsDatabaseEmpty:
+        error_description = TeamsDatabaseEmpty()
+        page_not_found(error_description)
+        abort(500, error_description)
+    except DatabaseWriterError:
+        error_description = DatabaseWriterError()
+        flash(error_description)
+        abort(500, error_description)
+    except GameNotExist:
+        error_description = GameNotExist()
+        page_not_found(error_description)
+        abort(500, error_description)
+    else:
+        return render_template('games_list.html',
+                               teams=teams,
+                               games=games,
+                               form=form,
+                               user=user)
 
 
 @app.route('/admin/game_edit', methods=['GET', 'POST'])
 @login_required
 def game_edit():
-    games = Game.query.all()
-    return render_template('games_edit.html', games=games)
+    try:
+        games = GameReader.get_all_games()
+    except GamesDatabaseEmpty:
+        error_description = GamesDatabaseEmpty()
+        page_not_found(error_description)
+        abort(500, error_description)
+    else:
+        return render_template('games_edit.html', games=games)
 
 
 @app.post('/admin/edit_one_game/<int:game_id>')
 @login_required
 def edit_one_game(game_id):
-
-    edit_game = Game.query.filter_by(id=game_id).first()
-    discipline = request.form.get('discipline')
-    tournament = request.form.get('tournament')
-    phase = request.form.get('phase')
-    name_team_1 = request.form.get('name_team_1')
-    name_team_2 = request.form.get('name_team_2')
-    game_date = request.form.get('game_day')
-    game_time = request.form.get('game_time')
-    team1 = request.form.get('team1')
-    team2 = request.form.get('team2')
-    finished = request.form.get('game_completed') != None
-
     try:
-        edit_game.game_discipline = discipline
-        edit_game.tournament = tournament
-        edit_game.game_phase = phase
-        edit_game.team_1 = name_team_1
-        edit_game.team_2 = name_team_2
-        edit_game.game_day = game_date
-        edit_game.game_time = game_time
-        edit_game.finished = finished
-        db_session.commit()
+        edit_game = GameReader.get_one_game_by_filter("id", game_id)
+
+        discipline = request.form.get('discipline')
+        tournament = request.form.get('tournament')
+        phase = request.form.get('phase')
+        name_team_1 = request.form.get('name_team_1')
+        name_team_2 = request.form.get('name_team_2')
+        game_date = request.form.get('game_day')
+        game_time = request.form.get('game_time')
+        team1 = request.form.get('team1')
+        team2 = request.form.get('team2')
+        finished = request.form.get('game_completed') != None
+
+        GameWriter.edit_game_data(edit_game,
+                                  discipline,
+                                  tournament,
+                                  phase,
+                                  name_team_1,
+                                  name_team_2,
+                                  game_date,
+                                  game_time,
+                                  finished)
 
         if finished == True:
-            set_winner(edit_game)
-            update_tip_points(game_id)
-            update_team_points(edit_game)
+            Helpers.set_game_winner(edit_game)
+            Helpers.update_bet_points_from_game(game_id)
+            Helpers.update_team_points_from_game(edit_game)
 
-        flash("Game updated successfully!")
-        return redirect(url_for('game_edit'))
-    except:
+    except GameNotExist:
+        error_description = GameNotExist()
+        page_not_found(error_description)
         flash("Error! There was a problem edit game... try again.")
+        return redirect(url_for('game_edit'))
+    except DatabaseWriterError:
+        error_description = DatabaseWriterError()
+        flash(error_description)
+        flash("Error! There was a problem edit game... try again.")
+        return redirect(url_for('game_edit'))
+    except BetsDatabaseEmpty:
+        error_description = BetsDatabaseEmpty()
+        flash(error_description)
+        return redirect(url_for('game_edit'))
+    except DatabaseReaderProblem:
+        error_description = DatabaseReaderProblem()
+        flash(error_description)
+        return redirect(url_for('game_edit'))
+    else:
+        flash("Game updated successfully!")
     finally:
         if team1 != None and team2 != None:
             edit_game.goals_team_1 = team1
@@ -418,196 +452,85 @@ def edit_one_game(game_id):
         return redirect(url_for('game_edit'))
 
 
-def set_winner(edit_game):
-    if edit_game.goals_team_1 > edit_game.goals_team_2:
-        edit_game.winner = 1
-    elif edit_game.goals_team_1 < edit_game.goals_team_2:
-        edit_game.winner = 2
-    else:
-        edit_game.winner = 0
-    db_session.commit()
-
-
-def update_tip_points(game_id):
-    game = Game.query.filter_by(id=game_id).first()
-    tips = Tip.query.all()
-
-    for tip in tips:
-        if tip.game_id == game_id:
-            if tip.tip_goals_team_1 != None and tip.tip_goals_team_2 != None:
-                game_difference = game.goals_team_1 - game.goals_team_2
-                tip_difference = tip.tip_goals_team_1 - tip.tip_goals_team_2
-
-                if tip.tip_goals_team_1 == game.goals_team_1 and tip.tip_goals_team_2 == game.goals_team_2:
-                    tip.tip_points = 5
-                elif tip.winner == game.winner and game_difference == tip_difference:
-                    tip.tip_points = 3
-                elif tip.winner == game.winner:
-                    tip.tip_points = 2
-                else:
-                    tip.tip_points = 0
-            else:
-                tip.tip_points = 0
-            db_session.commit()
-
-
-def update_team_points(edit_game):
-    team_name_1 = edit_game.team_1
-    team_name_2 = edit_game.team_2
-
-    team_1 = Team.query.filter_by(name=team_name_1.lower()).first()
-    team_2 = Team.query.filter_by(name=team_name_2.lower()).first()
-
-    games_played = GamesPlayed.query.all()
-
-    if is_game_played_exist(edit_game, games_played):
-        pass
-    else:
-        if edit_game.game_phase != "group":
-            pass
-        else:
-            fill_teams_table(edit_game, team_1, team_2)
-        game_played_team_1 = GamesPlayed(
-            game_id=edit_game.id,
-            team_id=team_1.id)
-        db_session.add(game_played_team_1)
-        game_played_team_2 = GamesPlayed(
-            game_id=edit_game.id,
-            team_id=team_2.id)
-        db_session.add(game_played_team_2)
-        db_session.commit()
-
-
-def is_game_played_exist(edit_game, games_played):
-    for game_played in games_played:
-        if edit_game.id == game_played.game_id:
-            return True
-
-
-def fill_teams_table(edit_game, team_1, team_2):
-    if int(edit_game.winner) == 1:
-        team_1.games_played += 1
-        team_1.wins += 1
-        team_1.draws += 0
-        team_1.lost += 0
-        team_1.goal_scored += edit_game.goals_team_1
-        team_1.goal_lost += edit_game.goals_team_2
-        team_1.goal_balance = team_1.goal_scored - team_1.goal_lost
-        team_1.points += 3
-
-        team_2.games_played += 1
-        team_2.wins += 0
-        team_2.draws += 0
-        team_2.lost += 1
-        team_2.goal_scored += edit_game.goals_team_2
-        team_2.goal_lost += edit_game.goals_team_1
-        team_2.goal_balance = team_2.goal_scored - team_2.goal_lost
-        team_2.points += 0
-
-    elif int(edit_game.winner) == 2:
-        team_1.games_played += 1
-        team_1.wins += 0
-        team_1.draws += 0
-        team_1.lost += 1
-        team_1.goal_scored += edit_game.goals_team_1
-        team_1.goal_lost += edit_game.goals_team_2
-        team_1.goal_balance = team_1.goal_scored - team_1.goal_lost
-        team_1.points += 0
-
-        team_2.games_played += 1
-        team_2.wins += 1
-        team_2.draws += 0
-        team_2.lost += 0
-        team_2.goal_scored += edit_game.goals_team_2
-        team_2.goal_lost += edit_game.goals_team_1
-        team_2.goal_balance = team_2.goal_scored - team_2.goal_lost
-        team_2.points += 3
-
-    elif int(edit_game.winner) == 0:
-        team_1.games_played += 1
-        team_1.wins += 0
-        team_1.draws += 1
-        team_1.lost += 0
-        team_1.goal_scored += edit_game.goals_team_1
-        team_1.goal_lost += edit_game.goals_team_2
-        team_1.goal_balance = team_1.goal_scored - team_1.goal_lost
-        team_1.points += 1
-
-        team_2.games_played += 1
-        team_2.wins += 0
-        team_2.draws += 1
-        team_2.lost += 0
-        team_2.goal_scored += edit_game.goals_team_2
-        team_2.goal_lost += edit_game.goals_team_1
-        team_2.goal_balance = team_2.goal_scored - team_2.goal_lost
-        team_2.points += 1
-    db_session.commit()
-
-
 @app.post('/admin/edit_all_games')
 @login_required
 def edit_all_games():
-    rows = Game.query.count()
-    row = 1
-
     try:
+        rows = GameReader.get_count_games()
+        row = 1
         discipline = request.form.get('all_discipline')
         tournament = request.form.get('all_tournament')
         phase = request.form.get('all_phase')
 
         while row <= rows:
-            edit_game = Game.query.filter_by(id=row).first()
-            edit_game.game_discipline = discipline
-            edit_game.tournament = tournament
-            edit_game.game_phase = phase
+            edit_game = GameReader.get_one_game_by_filter("id", row)
+            GameWriter.save_edited_game(
+                edit_game, discipline, tournament, phase)
             row += 1
-        db_session.commit()
         flash("All games updated successfully!")
-        return redirect(url_for('game_edit'))
-    except:
+    except GamesDatabaseEmpty:
+        error_description = GamesDatabaseEmpty()
+        page_not_found(error_description)
+        abort(500, error_description)
+    except DatabaseWriterError:
+        error_description = DatabaseWriterError()
+        flash(error_description)
         flash("Error! There was a problem edit all games... try again.")
-    finally:
+        return redirect(url_for('game_edit'))
+    except GameNotExist:
+        error_description = GameNotExist()
+        page_not_found(error_description)
+        abort(500, error_description)
+    else:
         return redirect(url_for('game_edit'))
 
 
 @app.post('/admin/delete_game/<int:game_id>')
 @login_required
 def delete_game(game_id):
-    game = Game.query.filter_by(id=game_id).first()
-
     try:
-        db_session.delete(game)
-        db_session.commit()
-        games = Game.query.all()
+        game = GameReader.get_one_game_by_filter("id", game_id)
+        GameWriter.delete_game(game)
+        games = GameReader.get_all_games()
+    except GameNotExist:
+        error_description = GameNotExist()
+        page_not_found(error_description)
+        abort(500, error_description)
+    except DatabaseWriterError:
+        error_description = DatabaseWriterError()
+        flash(error_description)
+        flash("Whoops! There was a problem deleting game, try again...")
+        return redirect(url_for('game_edit'))
+    except GamesDatabaseEmpty:
+        error_description = GamesDatabaseEmpty()
+        page_not_found(error_description)
+        abort(500, error_description)
+    else:
         flash("Game deleted successfully!")
         return render_template('games_edit.html', games=games)
-    except:
-        flash("Whoops! There was a problem deleting game, try again...")
-    finally:
-        return redirect(url_for('game_edit'))
 
 
-@app.route('/user/tips', methods=['GET', 'POST'])
+@app.route('/user/bets', methods=['GET', 'POST'])
 @login_required
-def tips():
+def bets():
     user_id = current_user.get_id()
     games = Game.query.all()
-    tips_amount = Tip.query.filter_by(user_id=user_id).count()
-    user_tips = Tip.query.filter_by(user_id=user_id).all()
+    bets_amount = Bet.query.filter_by(user_id=user_id).count()
+    user_bets = Bet.query.filter_by(user_id=user_id).all()
     user_points = 0
-    user_points = count_user_points_from_bet(user_tips, user_points)
+    user_points = count_user_points_from_bet(user_bets, user_points)
 
-    if tips_amount == 0:
+    if bets_amount == 0:
         flash("Please add tournament for your account to show any bet")
     else:
-        for user_tip in user_tips:
-            is_date_locked(user_tip.game_id)
+        for user_bet in user_bets:
+            is_date_locked(user_bet.game_id)
 
     return render_template('accounts/user_tips.html',
                            user_points=user_points,
-                           user_tips=user_tips,
+                           user_tips=user_bets,
                            games=games,
-                           tips_amount=tips_amount)
+                           tips_amount=bets_amount)
 
 
 @app.post('/user/load_tips')
@@ -624,7 +547,7 @@ def load_tips():
     else:
         try:
             for game in games:
-                user_tip = Tip(
+                user_tip = Bet(
                     game_id=game.id,
                     tip_goals_team_1=None,
                     tip_goals_team_2=None,
@@ -654,7 +577,7 @@ def is_tournament_exist(tournament_name, user):
 @login_required
 def edit_tip(tip_id):
 
-    edit_tip = Tip.query.filter_by(id=tip_id).first()
+    edit_tip = Bet.query.filter_by(id=tip_id).first()
     team1 = request.form.get('team1')
     team2 = request.form.get('team2')
 
@@ -702,7 +625,7 @@ def is_date_locked(tip_id):
 
 
 def lock_tip(tip_id):
-    edit_tip = Tip.query.filter_by(game_id=tip_id).all()
+    edit_tip = Bet.query.filter_by(game_id=tip_id).all()
     for tip in edit_tip:
         tip.tip_lock = 1
     db_session.commit()
@@ -749,7 +672,7 @@ def group(group_id):
 
     sort_users_in_group(user_groups)
     last_game = find_last_game()
-    users_bets = Tip.query.filter_by(game_id=last_game.id).all()
+    users_bets = Bet.query.filter_by(game_id=last_game.id).all()
     update_user_points(user_groups)
 
     if bet_amount == 0:
@@ -798,7 +721,7 @@ def update_user_points(user_groups):
     for user in user_groups:
         user.points = 0
 
-        user_tips = Tip.query.filter_by(user_id=user.user_id).all()
+        user_tips = Bet.query.filter_by(user_id=user.user_id).all()
         for user_tip in user_tips:
             if user_tip.tip_points == None:
                 user.points += 0

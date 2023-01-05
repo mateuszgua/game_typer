@@ -1,10 +1,10 @@
 import os
-from datetime import datetime, timedelta, date, time
+from datetime import timedelta, date
 from flask import json
 
 from game_app.my_error import ImagesNotExist, TeamsDatabaseEmpty
-from game_app.database_reader import TeamReader, GameReader, FilesReader
-from game_app.database_writer import DatabaseWriter
+from game_app.database_reader import TeamReader, GameReader, FilesReader, BetReader, GamesPlayedReader
+from game_app.database_writer import GameWriter, TeamWriter, BetWriter, GamePlayedWriter
 
 
 class Helpers:
@@ -68,12 +68,12 @@ class Helpers:
         next_games = GameReader.get_games_by_day_asc(day_tommorow)
         return next_games
 
-    def count_user_points_from_bet(user_tips, user_points):
-        for user_tip in user_tips:
-            if user_tip.tip_points == None:
+    def count_user_points_from_bet(user_bets, user_points):
+        for user_bet in user_bets:
+            if user_bet.bet_points == None:
                 user_points += 0
             else:
-                user_points += int(user_tip.tip_points)
+                user_points += int(user_bet.bet_points)
         return user_points
 
     def get_allowed_file(config, filename):
@@ -87,5 +87,67 @@ class Helpers:
 
         i = 0
         while i < 32:
-            DatabaseWriter.save_team_data(data, i)
+            TeamWriter.save_team_data(data, i)
             i += 1
+
+    def set_game_winner(edit_game):
+        if edit_game.goals_team_1 > edit_game.goals_team_2:
+            winner = 1
+        elif edit_game.goals_team_1 < edit_game.goals_team_2:
+            winner = 2
+        else:
+            winner = 0
+        GameWriter.save_game_winner(edit_game, winner)
+
+    def update_bet_points_from_game(game_id):
+        game = GameReader.get_one_game_by_filter("id", game_id)
+        bets = BetReader.get_all_bets()
+
+        for bet in bets:
+            if bet.game_id == game_id:
+                if bet.bet_goals_team_1 != None and bet.bet_goals_team_2 != None:
+                    game_difference = game.goals_team_1 - game.goals_team_2
+                    bet_difference = bet.bet_goals_team_1 - bet.bet_goals_team_2
+
+                    if bet.bet_goals_team_1 == game.goals_team_1 and bet.bet_goals_team_2 == game.goals_team_2:
+                        points = 5
+                    elif bet.winner == game.winner and game_difference == bet_difference:
+                        points = 3
+                    elif bet.winner == game.winner:
+                        points = 2
+                    else:
+                        points = 0
+                else:
+                    points = 0
+                BetWriter.save_points_from_bet(bet, points)
+
+    def update_team_points_from_game(edit_game):
+        team_name_1 = edit_game.team_1
+        team_name_2 = edit_game.team_2
+
+        team_1 = TeamReader.get_one_team_by_filter(
+            "name", team_name_1.lower())
+        team_2 = TeamReader.get_one_team_by_filter(
+            "name", team_name_2.lower().lower())
+
+        games_played = GamesPlayedReader.get_all_games_played()
+
+        if is_game_played_exist(edit_game, games_played):
+            pass
+        else:
+            if edit_game.game_phase != "group":
+                pass
+            else:
+                fill_teams_table(edit_game, team_1, team_2)
+                GamePlayedWriter.save_game_played(edit_game.id, team_1.id)
+                GamePlayedWriter.save_game_played(edit_game.id, team_2.id)
+
+
+def is_game_played_exist(edit_game, games_played):
+    for game_played in games_played:
+        if edit_game.id == game_played.game_id:
+            return True
+
+
+def fill_teams_table(edit_game, team_1, team_2):
+    GameWriter.edit_game_data(edit_game, team_1, team_2)

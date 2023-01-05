@@ -1,8 +1,8 @@
 from datetime import datetime, timedelta, date, time
 
 from game_app.forms import RegistrationForm, LoginForm, EditUserForm, AddGameForm, AddGroupForm
-from game_app.models import User, Role, Team, UserAdminView, RoleAdminView, UploadFile, Game, Tip, UserTournaments, GamesPlayed, BetGroup, UserBetGroup
-from game_app.my_error import TeamsDatabaseEmpty, GameNotExist, DatabaseReaderProblem
+from game_app.models import User, Role, Team, UserAdminView, RoleAdminView, UploadFile, Game, Bet, UserTournaments, GamesPlayed, BetGroup, UserBetGroup
+from game_app.my_error import TeamsDatabaseEmpty, GameNotExist, DatabaseReaderProblem, GamesDatabaseEmpty, BetsDatabaseEmpty
 
 
 class TeamReader:
@@ -14,8 +14,16 @@ class TeamReader:
         else:
             return teams
 
-    def get_one_team():
-        pass
+    def get_one_team_by_filter(filter_name, filter):
+        match filter_name:
+            case "name":
+                team = Team.query.filter_by(name=filter).first()
+            case _:
+                team = None
+        if team is None:
+            raise DatabaseReaderProblem()
+        else:
+            return team
 
     def get_sort_group(group_name):
         sorted_group = Team.query.filter_by(
@@ -29,12 +37,34 @@ class TeamReader:
 class GameReader:
 
     def get_all_games():
-        pass
+        games = Game.query.all()
+        if games is None:
+            raise GamesDatabaseEmpty()
+        else:
+            return games
 
-    def get_one_game(filter_name, filter):
+    def get_count_games():
+        games = Game.query.count()
+        if games is None:
+            raise GamesDatabaseEmpty()
+        else:
+            return games
+
+    def get_games_by_filter(filter_name, filter):
         match filter_name:
             case "game_phase":
                 game = Game.query.filter_by(game_phase=filter).all()
+            case _:
+                game = None
+        if game is None:
+            raise GameNotExist()
+        else:
+            return game
+
+    def get_one_game_by_filter(filter_name, filter):
+        match filter_name:
+            case "id":
+                game = Game.query.filter_by(id=filter).first()
             case _:
                 game = None
         if game is None:
@@ -90,19 +120,26 @@ class TournamentReader:
             return tournaments
 
 
-class TipReader:
+class BetReader:
 
-    def get_all_tips_filter(filter_name, filter):
+    def get_all_bets():
+        bets = Bet.query.all()
+        if bets is None:
+            raise BetsDatabaseEmpty()
+        else:
+            return bets
+
+    def get_all_bets_filter(filter_name, filter):
         match filter_name:
             case "user_id":
-                tips = Tip.query.filter_by(filter).all()
+                bets = Bet.query.filter_by(filter).all()
             case _:
-                tips = None
+                bets = None
 
-        if tips is None:
+        if bets is None:
             raise DatabaseReaderProblem()
         else:
-            return tips
+            return bets
 
 
 class UserBetGroupReader:
@@ -135,3 +172,13 @@ class FilesReader:
             raise DatabaseReaderProblem()
         else:
             return file
+
+
+class GamesPlayedReader:
+
+    def get_all_games_played():
+        games_played = GamesPlayed.query.all()
+        if games_played is None:
+            raise GamesDatabaseEmpty()
+        else:
+            return games_played

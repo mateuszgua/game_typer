@@ -24,6 +24,20 @@ class TeamsDatabaseEmpty(MyError):
         return "Database with teams is empty."
 
 
+class GamesDatabaseEmpty(MyError):
+    """Raised when database with games is empty """
+
+    def __str__(self):
+        return "Database with games is empty."
+
+
+class BetsDatabaseEmpty(MyError):
+    """Raised when database with bets is empty """
+
+    def __str__(self):
+        return "Database with bets is empty."
+
+
 class ImagesNotExist(MyError):
     """Raised when any image not exist in static folder """
 
