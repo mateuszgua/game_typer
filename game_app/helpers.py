@@ -152,7 +152,7 @@ class Helpers:
         date_time = datetime.strptime(string_date_time, "%Y-%m-%d %H:%M:%S")
 
         if present >= date_time:
-            lock_tip(bet_id)
+            lock_bet(bet_id)
             return True
 
     def is_tournament_exist(tournament_name, user):
@@ -227,7 +227,7 @@ def fill_teams_table(edit_game, team_1, team_2):
     GameWriter.edit_game_data(edit_game, team_1, team_2)
 
 
-def lock_tip(bet_id):
+def lock_bet(bet_id):
     edit_bet = BetReader.get_all_bets_filter("game_id", bet_id)
     for bet in edit_bet:
         lock = 1

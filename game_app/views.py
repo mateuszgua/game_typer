@@ -118,12 +118,12 @@ def user():
         images_list = Helpers.get_images_list()
         tournaments = TournamentReader.get_all_tournaments_filter(
             "user_id", user_id)
-        user_tips = BetReader.get_all_bets_filter("user_id", user_id)
+        user_bets = BetReader.get_all_bets_filter("user_id", user_id)
         user_points = 0
         user_groups = UserBetGroupReader.get_all_user_groups_filter(
             "user_id", user_id)
         user_points = Helpers.count_user_points_from_bet(
-            user_tips, user_points)
+            user_bets, user_points)
     except DatabaseReaderProblem:
         error_description = DatabaseReaderProblem()
         flash(error_description)
@@ -541,11 +541,11 @@ def bets():
         flash(error_description)
         return redirect(url_for('bets'))
     else:
-        return render_template('accounts/user_tips.html',
+        return render_template('accounts/user_bets.html',
                                user_points=user_points,
-                               user_tips=user_bets,
+                               user_bets=user_bets,
                                games=games,
-                               tips_amount=bets_amount)
+                               bets_amount=bets_amount)
 
 
 @app.post('/user/load_bets')
@@ -585,9 +585,9 @@ def load_bets():
         return redirect(url_for('user'))
 
 
-@app.post('/user/edit_tip/<int:bet_id>')
+@app.post('/user/edit_bet/<int:bet_id>')
 @login_required
-def edit_tip(bet_id):
+def edit_bet(bet_id):
 
     try:
         edit_bet = BetReader.get_one_bet_filter("id", bet_id)
@@ -731,7 +731,7 @@ def db_update():
 
     if request.method == 'POST':
         try:
-            table_name1 = 'tip'
+            table_name1 = 'bet'
             table_name2 = 'games'
 
             column_name1 = 'tournament'

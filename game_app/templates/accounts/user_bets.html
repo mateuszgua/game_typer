@@ -24,7 +24,7 @@
 </div>
 {% endfor %}
 
-{% if tips_amount == 0 %}
+{% if bets_amount == 0 %}
 <div class="login-signup">
     <div>
         <span>Do you want to play?</span>
@@ -54,17 +54,17 @@
                                 <th scope="col">Date</th>
                                 <th scope="col">Time</th>
                                 <th scope="col">Result</th>
-                                <th scope="col">Tip</th>
+                                <th scope="col">Bet</th>
                                 <th scope="col">Action</th>
                                 <th scope="col">User pts from game</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {% for user_tip in user_tips %}
+                            {% for user_bet in user_bets %}
                             <tr class="text-center">
-                                <th scope="row">{{ user_tip.game_id }}</th>
+                                <th scope="row">{{ user_bet.game_id }}</th>
                                 {% for game in games %}
-                                {% if user_tip.game_id == game.id %}
+                                {% if user_bet.game_id == game.id %}
                                 <td>{{ game.team_1 }} - {{ game.team_2 }}</td>
                                 <td>{{ game.game_day }}</td>
                                 <td>{{ game.game_time }}</td>
@@ -75,52 +75,52 @@
                                 {% endif %}
                                 {% endif %}
                                 {% endfor %}
-                                {% if user_tip.tip_lock == 1 %}
-                                <form method="POST" action="{{ url_for('edit_tip', tip_id=user_tip.game_id) }}"
-                                    name="edit_tip">
+                                {% if user_bet.bet_lock == 1 %}
+                                <form method="POST" action="{{ url_for('edit_bet', bet_id=user_bet.game_id) }}"
+                                    name="edit_bet">
                                     <td>
-                                        {% if user_tip.tip_goals_team_1 == None or user_tip.tip_goals_team_2 == None %}
+                                        {% if user_bet.bet_goals_team_1 == None or user_bet.bet_goals_team_2 == None %}
                                         <input class="text-center" type="text" id="team1" name="team1" size="1"
                                             value="-" disabled> :
                                         <input class="text-center" type="text" id="team2" name="team2" size="1"
                                             value="-" disabled>
                                         {% else %}
                                         <input class="text-center" type="text" id="team1" name="team1" size="1"
-                                            value={{user_tip.tip_goals_team_1}} disabled> :
+                                            value={{user_bet.bet_goals_team_1}} disabled> :
                                         <input class="text-center" type="text" id="team2" name="team2" size="1"
-                                            value={{user_tip.tip_goals_team_2}} disabled>
+                                            value={{user_bet.bet_goals_team_2}} disabled>
                                         {% endif %}
                                     </td>
                                     <td>
-                                        <input class="btn btn-success" type="submit" value="Save tip" name="action"
+                                        <input class="btn btn-success" type="submit" value="Save bet" name="action"
                                             disabled>
                                     </td>
                                 </form>
                                 {% else %}
-                                <form method="POST" action="{{ url_for('edit_tip', tip_id=user_tip.game_id) }}"
-                                    name="edit_tip">
+                                <form method="POST" action="{{ url_for('edit_bet', bet_id=user_bet.game_id) }}"
+                                    name="edit_bet">
                                     <td>
-                                        {% if user_tip.tip_goals_team_1 == None or user_tip.tip_goals_team_2 == None %}
+                                        {% if user_bet.bet_goals_team_1 == None or user_bet.bet_goals_team_2 == None %}
                                         <input class="text-center" type="text" id="team1" name="team1" size="1"
                                             value=" "> :
                                         <input class="text-center" type="text" id="team2" name="team2" size="1"
                                             value=" ">
                                         {% else %}
                                         <input class="text-center" type="text" id="team1" name="team1" size="1"
-                                            value={{user_tip.tip_goals_team_1}}> :
+                                            value={{user_bet.bet_goals_team_1}}> :
                                         <input class="text-center" type="text" id="team2" name="team2" size="1"
-                                            value={{user_tip.tip_goals_team_2}}>
+                                            value={{user_bet.bet_goals_team_2}}>
                                         {% endif %}
                                     </td>
                                     <td>
-                                        <input class="btn btn-success" type="submit" value="Save tip" name="action">
+                                        <input class="btn btn-success" type="submit" value="Save bet" name="action">
                                     </td>
                                 </form>
                                 {% endif %}
-                                {% if user_tip.tip_points == None %}
+                                {% if user_bet.bet_points == None %}
                                 <td> - </td>
                                 {% else %}
-                                <td>{{ user_tip.tip_points }}</td>
+                                <td>{{ user_bet.bet_points }}</td>
                                 {% endif %}
                             </tr>
                             {% endfor %}

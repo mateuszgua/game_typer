@@ -120,6 +120,8 @@ class UserReader:
                 user = User.query.filter_by(id=filter).first()
             case "email":
                 user = User.query.filter_by(email=filter).first()
+            case "nick":
+                user = User.query.filter_by(nick=filter).first()
             case _:
                 user = None
 
