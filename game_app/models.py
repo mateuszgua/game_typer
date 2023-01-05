@@ -1,5 +1,3 @@
-from game_app import database
-
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy import Boolean, DateTime, Column, Integer, String, ForeignKey, UnicodeText, LargeBinary, Date, Time
@@ -10,6 +8,7 @@ from flask_login import current_user
 
 from flask_admin.contrib.sqla import ModelView
 from flask_admin import AdminIndexView
+from game_app import database
 
 
 class RolesUsers(database.Base):

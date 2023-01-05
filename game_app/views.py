@@ -1,3 +1,9 @@
+import os
+from flask import render_template, url_for, redirect, request, flash
+from flask import abort
+from flask_login import login_user, current_user, logout_user, login_required
+from werkzeug.utils import secure_filename
+
 from game_app import app, login_manager, admin
 from game_app.forms import RegistrationForm, LoginForm, EditUserForm, AddGameForm, AddGroupForm
 from game_app.models import User, Role, Team, UserAdminView, RoleAdminView, UploadFile, Game, Bet, UserTournaments, GamesPlayed, BetGroup, UserBetGroup
@@ -7,14 +13,6 @@ from game_app.helpers import Helpers
 from game_app.database_reader import TeamReader, GameReader, UserReader, TournamentReader, BetReader, UserBetGroupReader, FilesReader, BetGroupReader
 from game_app.my_error import TeamsDatabaseEmpty, ImagesNotExist, GameNotExist, DatabaseReaderProblem, DatabaseWriterError, GamesDatabaseEmpty, BetsDatabaseEmpty
 from game_app.database_writer import GameWriter, TeamWriter, FileWriter, UserWriter, BetWriter, TournamentWriter, BetGroupWriter, UserBetGroupWriter
-
-import os
-from flask import render_template, url_for, redirect, request, flash
-from flask import abort
-from flask_login import login_user, current_user, logout_user, login_required
-
-from werkzeug.utils import secure_filename
-from datetime import datetime, timedelta, date
 
 config = Config()
 
@@ -652,8 +650,6 @@ def add_group():
     else:
         return render_template('add_group.html', form=form)
 
-
-# TODO tu skończone
 
 @app.route('/user/group/<int:group_id>', methods=['GET', 'POST'])
 @login_required

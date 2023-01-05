@@ -1,7 +1,4 @@
-from datetime import datetime, timedelta, date, time
-
-from game_app.forms import RegistrationForm, LoginForm, EditUserForm, AddGameForm, AddGroupForm
-from game_app.models import User, Role, Team, UserAdminView, RoleAdminView, UploadFile, Game, Bet, UserTournaments, GamesPlayed, BetGroup, UserBetGroup
+from game_app.models import User, Team, UploadFile, Game, Bet, UserTournaments, GamesPlayed, BetGroup, UserBetGroup
 from game_app.my_error import TeamsDatabaseEmpty, GameNotExist, DatabaseReaderProblem, GamesDatabaseEmpty, BetsDatabaseEmpty
 
 
