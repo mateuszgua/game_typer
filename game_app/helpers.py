@@ -1,5 +1,5 @@
 import os
-from datetime import timedelta, date
+from datetime import datetime, timedelta, date
 from flask import json
 
 from game_app.my_error import ImagesNotExist, TeamsDatabaseEmpty
@@ -100,7 +100,7 @@ class Helpers:
         GameWriter.save_game_winner(edit_game, winner)
 
     def update_bet_points_from_game(game_id):
-        game = GameReader.get_one_game_by_filter("id", game_id)
+        game = GameReader.get_one_game_filter("id", game_id)
         bets = BetReader.get_all_bets()
 
         for bet in bets:
@@ -142,6 +142,33 @@ class Helpers:
                 GamePlayedWriter.save_game_played(edit_game.id, team_1.id)
                 GamePlayedWriter.save_game_played(edit_game.id, team_2.id)
 
+    def is_date_locked(bet_id):
+        game = GameReader.get_one_game_filter("id", bet_id)
+        game_day = game.game_day
+        game_time = game.game_time
+
+        present = datetime.now()
+        string_date_time = f"{game_day} {game_time}"
+        date_time = datetime.strptime(string_date_time, "%Y-%m-%d %H:%M:%S")
+
+        if present >= date_time:
+            lock_tip(bet_id)
+            return True
+
+    def is_tournament_exist(tournament_name, user):
+        for tournament in user.tournaments:
+            if tournament_name == tournament.tournament:
+                return True
+
+    def bet_winner(edit_bet):
+        if edit_bet.bet_goals_team_1 > edit_bet.bet_goals_team_2:
+            winner = 1
+        elif edit_bet.bet_goals_team_1 < edit_bet.bet_goals_team_2:
+            winner = 2
+        else:
+            winner = 0
+        return winner
+
 
 def is_game_played_exist(edit_game, games_played):
     for game_played in games_played:
@@ -151,3 +178,10 @@ def is_game_played_exist(edit_game, games_played):
 
 def fill_teams_table(edit_game, team_1, team_2):
     GameWriter.edit_game_data(edit_game, team_1, team_2)
+
+
+def lock_tip(bet_id):
+    edit_bet = BetReader.get_all_bets_filter("game_id", bet_id)
+    for bet in edit_bet:
+        lock = 1
+        BetWriter.edit_lock_bet(bet, lock)

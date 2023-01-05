@@ -2,7 +2,7 @@ import uuid
 
 from game_app.database import db_session
 from game_app.my_error import DatabaseWriterError
-from game_app.models import User, UploadFile, Team, Game, GamesPlayed
+from game_app.models import User, UploadFile, Team, Game, GamesPlayed, Bet, UserTournaments, BetGroup, UserBetGroup
 
 
 class TeamWriter:
@@ -230,6 +230,63 @@ class BetWriter:
         except:
             raise DatabaseWriterError()
 
+    def edit_lock_bet(bet, lock):
+        try:
+            bet.bet_lock = lock
+            db_session.commit()
+        except:
+            raise DatabaseWriterError()
+
+    def save_user_bet(game_id, user_id):
+        try:
+            user_bet = Bet(game_id=game_id,
+                           bet_goals_team_1=None,
+                           bet_goals_team_2=None,
+                           bet_points=None,
+                           user_id=user_id)
+            db_session.add(user_bet)
+            db_session.commit()
+        except:
+            raise DatabaseWriterError()
+
+    def edit_user_bet(edit_bet, team1, team2, winner):
+        try:
+            edit_bet.bet_goals_team_1 = team1
+            edit_bet.bet_goals_team_2 = team2
+            edit_bet.winner = winner
+            db_session.commit()
+        except:
+            raise DatabaseWriterError()
+
+
+class BetGroupWriter:
+
+    def save_bet_group(form_name, form_tournament):
+        try:
+            bet_group = BetGroup(
+                name=form_name,
+                tournament=form_tournament,
+                number_of_users=1,
+            )
+            db_session.add(bet_group)
+            db_session.commit()
+        except:
+            raise DatabaseWriterError()
+
+
+class UserBetGroupWriter:
+
+    def save_user_bet_group(bet_group_id, user_id):
+        try:
+            user_group = UserBetGroup(
+                bet_group_id=bet_group_id,
+                user_id=user_id,
+            )
+            db_session.add(user_group)
+            db_session.commit()
+        except:
+            raise DatabaseWriterError()
+
 
 class GamePlayedWriter:
 
@@ -239,6 +296,19 @@ class GamePlayedWriter:
                 game_id=game_id,
                 team_id=team_id)
             db_session.add(game_played_team)
+            db_session.commit()
+        except:
+            raise DatabaseWriterError()
+
+
+class TournamentWriter:
+
+    def save_user_tournament(tournament, user_id):
+        try:
+            user_tournament = UserTournaments(
+                tournament=tournament,
+                user_id=user_id)
+            db_session.add(user_tournament)
             db_session.commit()
         except:
             raise DatabaseWriterError()

@@ -4,9 +4,9 @@ from game_app.models import User, Role, Team, UserAdminView, RoleAdminView, Uplo
 from game_app.database import db_session
 from game_app.config import Config
 from game_app.helpers import Helpers
-from game_app.database_reader import TeamReader, GameReader, UserReader, TournamentReader, BetReader, UserBetGroupReader, FilesReader
+from game_app.database_reader import TeamReader, GameReader, UserReader, TournamentReader, BetReader, UserBetGroupReader, FilesReader, BetGroupReader
 from game_app.my_error import TeamsDatabaseEmpty, ImagesNotExist, GameNotExist, DatabaseReaderProblem, DatabaseWriterError, GamesDatabaseEmpty, BetsDatabaseEmpty
-from game_app.database_writer import GameWriter, TeamWriter, FileWriter, UserWriter, BetWriter
+from game_app.database_writer import GameWriter, TeamWriter, FileWriter, UserWriter, BetWriter, TournamentWriter, BetGroupWriter, UserBetGroupWriter
 
 import os
 from flask import render_template, url_for, redirect, request, flash
@@ -68,11 +68,11 @@ def home():
         group_list = Helpers.create_sorted_list()
         TeamWriter.sort_team_table(group_list)
 
-        final_1_8 = GameReader.get_games_by_filter("game_phase", "1/8")
-        final_1_4 = GameReader.get_games_by_filter("game_phase", "1/4")
-        final_1_2 = GameReader.get_games_by_filter("game_phase", "1/2")
-        final_3rd = GameReader.get_games_by_filter("game_phase", "3rd")
-        final = GameReader.get_games_by_filter("game_phase", "final")
+        final_1_8 = GameReader.get_all_games_filter("game_phase", "1/8")
+        final_1_4 = GameReader.get_all_games_filter("game_phase", "1/4")
+        final_1_2 = GameReader.get_all_games_filter("game_phase", "1/2")
+        final_3rd = GameReader.get_all_games_filter("game_phase", "3rd")
+        final = GameReader.get_all_games_filter("game_phase", "final")
 
     except TeamsDatabaseEmpty:
         error_description = TeamsDatabaseEmpty()
@@ -114,7 +114,7 @@ def home():
 def user():
     try:
         user_id = current_user.get_id()
-        user = UserReader.get_user("id", user_id)
+        user = UserReader.get_one_user_filter("id", user_id)
         images_list = Helpers.get_images_list()
         tournaments = TournamentReader.get_all_tournaments_filter(
             "user_id", user_id)
@@ -145,7 +145,8 @@ def user():
 def register():
     form = RegistrationForm()
     if form.validate_on_submit():
-        existing_user = UserReader.get_user("email", form.email.data)
+        existing_user = UserReader.get_one_user_filter(
+            "email", form.email.data)
         if existing_user is None:
             try:
                 UserWriter.register_user(
@@ -172,7 +173,7 @@ def login():
 
     form = LoginForm()
     if form.validate_on_submit():
-        user = UserReader.get_user("email", form.email.data)
+        user = UserReader.get_one_user_filter("email", form.email.data)
         if user:
             if user.check_password(password=form.password1.data):
                 try:
@@ -212,7 +213,7 @@ def logout():
 def user_info():
     try:
         user_id = current_user.get_id()
-        user = UserReader.get_user("id", user_id)
+        user = UserReader.get_one_user_filter("id", user_id)
     except DatabaseReaderProblem:
         error_description = DatabaseReaderProblem()
         flash(error_description)
@@ -225,7 +226,7 @@ def user_info():
 @login_required
 def edit(user_id):
     form = EditUserForm()
-    user = UserReader.get_user("id", user_id)
+    user = UserReader.get_one_user_filter("id", user_id)
 
     if request.method == 'POST':
         firstname = request.form['firstname']
@@ -265,7 +266,7 @@ def delete(user_id):
 
     if user_id == current_user.get_id():
         form = RegistrationForm()
-        user = UserReader.get_user("id", user_id)
+        user = UserReader.get_one_user_filter("id", user_id)
 
         try:
             UserWriter.delete_user(user)
@@ -338,10 +339,10 @@ def games():
         teams = TeamReader.get_all_teams()
         form = AddGameForm()
         user_id = current_user.get_id()
-        user = UserReader.get_user("id", user_id)
+        user = UserReader.get_one_user_filter("id", user_id)
 
         if form.validate_on_submit():
-            existing_game = GameReader.get_one_game_by_filter(
+            existing_game = GameReader.get_one_game_filter(
                 "id", form.id.data)
             if existing_game is None:
                 GameWriter.save_game_data(form.id.data,
@@ -396,7 +397,7 @@ def game_edit():
 @login_required
 def edit_one_game(game_id):
     try:
-        edit_game = GameReader.get_one_game_by_filter("id", game_id)
+        edit_game = GameReader.get_one_game_filter("id", game_id)
 
         discipline = request.form.get('discipline')
         tournament = request.form.get('tournament')
@@ -463,7 +464,7 @@ def edit_all_games():
         phase = request.form.get('all_phase')
 
         while row <= rows:
-            edit_game = GameReader.get_one_game_by_filter("id", row)
+            edit_game = GameReader.get_one_game_filter("id", row)
             GameWriter.save_edited_game(
                 edit_game, discipline, tournament, phase)
             row += 1
@@ -489,7 +490,7 @@ def edit_all_games():
 @login_required
 def delete_game(game_id):
     try:
-        game = GameReader.get_one_game_by_filter("id", game_id)
+        game = GameReader.get_one_game_filter("id", game_id)
         GameWriter.delete_game(game)
         games = GameReader.get_all_games()
     except GameNotExist:
@@ -513,153 +514,146 @@ def delete_game(game_id):
 @app.route('/user/bets', methods=['GET', 'POST'])
 @login_required
 def bets():
-    user_id = current_user.get_id()
-    games = Game.query.all()
-    bets_amount = Bet.query.filter_by(user_id=user_id).count()
-    user_bets = Bet.query.filter_by(user_id=user_id).all()
-    user_points = 0
-    user_points = count_user_points_from_bet(user_bets, user_points)
+    try:
+        user_id = current_user.get_id()
+        games = GameReader.get_all_games()
+        bets_amount = BetReader.get_count_bets_filter("user_id", user_id)
+        user_bets = BetReader.get_all_bets_filter("user_id", user_id)
+        user_points = 0
+        user_points = Helpers.count_user_points_from_bet(
+            user_bets, user_points)
 
-    if bets_amount == 0:
-        flash("Please add tournament for your account to show any bet")
+        if bets_amount == 0:
+            flash("Please add tournament for your account to show any bet")
+        else:
+            for user_bet in user_bets:
+                Helpers.is_date_locked(user_bet.game_id)
+    except GamesDatabaseEmpty:
+        error_description = GamesDatabaseEmpty()
+        page_not_found(error_description)
+        abort(500, error_description)
+    except DatabaseReaderProblem:
+        error_description = DatabaseReaderProblem()
+        flash(error_description)
+        return redirect(url_for('bets'))
+    except DatabaseWriterError:
+        error_description = DatabaseWriterError()
+        flash(error_description)
+        return redirect(url_for('bets'))
     else:
-        for user_bet in user_bets:
-            is_date_locked(user_bet.game_id)
-
-    return render_template('accounts/user_tips.html',
-                           user_points=user_points,
-                           user_tips=user_bets,
-                           games=games,
-                           tips_amount=bets_amount)
+        return render_template('accounts/user_tips.html',
+                               user_points=user_points,
+                               user_tips=user_bets,
+                               games=games,
+                               tips_amount=bets_amount)
 
 
-@app.post('/user/load_tips')
+@app.post('/user/load_bets')
 @login_required
-def load_tips():
-    user_id = current_user.get_id()
-    tournament_name = "World Cup 2022"
-    user = User.query.filter_by(id=user_id).first()
-    games = Game.query.all()
+def load_bets():
+    try:
+        user_id = current_user.get_id()
+        tournament_name = "World Cup 2022"
+        user = UserReader.get_one_user_filter("id", user_id)
+        games = GameReader.get_all_games()
 
-    if is_tournament_exist(tournament_name, user):
-        flash("Tournament exist!")
-        return redirect(url_for('user'))
-    else:
-        try:
-            for game in games:
-                user_tip = Bet(
-                    game_id=game.id,
-                    tip_goals_team_1=None,
-                    tip_goals_team_2=None,
-                    tip_points=None,
-                    user_id=user_id)
-                db_session.add(user_tip)
-
-            user_tournament = UserTournaments(
-                tournament=game.tournament,
-                user_id=user_id)
-            db_session.add(user_tournament)
-            db_session.commit()
-            flash("Tips addes successfully!")
-        except:
-            flash('Whoops! There was a problem to add games for tips!')
-        finally:
+        if Helpers.is_tournament_exist(tournament_name, user):
+            flash("Tournament exist!")
             return redirect(url_for('user'))
-
-
-def is_tournament_exist(tournament_name, user):
-    for tournament in user.tournaments:
-        if tournament_name == tournament.tournament:
-            return True
-
-
-@app.post('/user/edit_tip/<int:tip_id>')
-@login_required
-def edit_tip(tip_id):
-
-    edit_tip = Bet.query.filter_by(id=tip_id).first()
-    team1 = request.form.get('team1')
-    team2 = request.form.get('team2')
-
-    if edit_tip.tip_lock == 0 or edit_tip.tip_lock == None:
-
-        if is_date_locked(edit_tip.game_id):
-            flash("Sorry, it's to late for tip this game!")
         else:
             try:
-                edit_tip.tip_goals_team_1 = team1
-                edit_tip.tip_goals_team_2 = team2
-                tip_winner(edit_tip)
-                db_session.commit()
-                flash("Tip updated successfully!")
+                for game in games:
+                    BetWriter.save_user_bet(game.id, user_id)
+                    TournamentWriter.save_user_tournament(
+                        game.tournament, user_id)
+                flash("Bets addes successfully!")
             except:
-                flash("Error! There was a problem edit tip... try again.")
-            finally:
-                return redirect(url_for('tips'))
+                flash('Whoops! There was a problem to add games for bets!')
+    except DatabaseReaderProblem:
+        error_description = DatabaseReaderProblem()
+        flash(error_description)
+        return redirect(url_for('user'))
+    except GamesDatabaseEmpty:
+        error_description = GamesDatabaseEmpty()
+        page_not_found(error_description)
+        abort(500, error_description)
+    except DatabaseWriterError:
+        error_description = DatabaseWriterError()
+        page_not_found(error_description)
+        abort(500, error_description)
     else:
-        flash("Sorry, it's to late for tip this game!")
-    return redirect(url_for('tips'))
+        return redirect(url_for('user'))
 
 
-def tip_winner(edit_tip):
-    if edit_tip.tip_goals_team_1 > edit_tip.tip_goals_team_2:
-        edit_tip.winner = 1
-    elif edit_tip.tip_goals_team_1 < edit_tip.tip_goals_team_2:
-        edit_tip.winner = 2
+@app.post('/user/edit_tip/<int:bet_id>')
+@login_required
+def edit_tip(bet_id):
+
+    try:
+        edit_bet = BetReader.get_one_bet_filter("id", bet_id)
+        team1 = request.form.get('team1')
+        team2 = request.form.get('team2')
+
+        if edit_bet.bet_lock == 0 or edit_bet.bet_lock == None:
+
+            if Helpers.is_date_locked(edit_bet.game_id):
+                flash("Sorry, it's to late for bet this game!")
+            else:
+                try:
+                    winner = Helpers.bet_winner(edit_bet)
+                    BetWriter.edit_user_bet(edit_bet, team1, team2, winner)
+                except DatabaseWriterError:
+                    error_description = DatabaseWriterError()
+                    flash(error_description)
+                    flash("Error! There was a problem edit bet... try again.")
+                    return redirect(url_for('bets'))
+                else:
+                    flash("Bet updated successfully!")
+                finally:
+                    return redirect(url_for('bets'))
+        else:
+            flash("Sorry, it's to late for bet this game!")
+    except DatabaseReaderProblem:
+        error_description = DatabaseReaderProblem()
+        flash(error_description)
+        return redirect(url_for('bets'))
     else:
-        edit_tip.winner = 0
-
-
-def is_date_locked(tip_id):
-    game = Game.query.filter_by(id=tip_id).first()
-    game_day = game.game_day
-    game_time = game.game_time
-
-    present = datetime.now()
-    string_date_time = f"{game_day} {game_time}"
-    date_time = datetime.strptime(string_date_time, "%Y-%m-%d %H:%M:%S")
-
-    if present >= date_time:
-        lock_tip(tip_id)
-        return True
-
-
-def lock_tip(tip_id):
-    edit_tip = Bet.query.filter_by(game_id=tip_id).all()
-    for tip in edit_tip:
-        tip.tip_lock = 1
-    db_session.commit()
+        return redirect(url_for('bets'))
 
 
 @app.route('/user/add_group', methods=('GET', 'POST'))
 @login_required
 def add_group():
-    user_id = current_user.get_id()
-    form = AddGroupForm()
-    if form.validate_on_submit():
-        existing_group = BetGroup.query.filter_by(name=form.name.data).first()
-        if existing_group is None:
-            bet_group = BetGroup(
-                name=form.name.data,
-                tournament=form.tournament.data,
-                number_of_users=1,
-            )
-            db_session.add(bet_group)
-            db_session.commit()
+    try:
+        user_id = current_user.get_id()
+        form = AddGroupForm()
 
-            bet_group = BetGroup.query.filter_by(
-                name=form.name.data).first()
-            user_group = UserBetGroup(
-                bet_group_id=bet_group.id,
-                user_id=user_id,
-            )
-            db_session.add(user_group)
-            db_session.commit()
-            flash('Group add successfully.')
-            return redirect(url_for('user'))
-        flash('A group name already exist.')
-    return render_template('add_group.html', form=form)
+        if form.validate_on_submit():
+            existing_group = BetGroupReader.get_one_bet_group_filter(
+                "name", form.name.data)
 
+            if existing_group is None:
+                BetGroupWriter.save_bet_group(
+                    form.name.data, form.tournament.data)
+                bet_group = BetGroupReader.get_one_bet_group_filter(
+                    "name", form.name.data)
+                UserBetGroupWriter.save_user_bet_group(bet_group.id, user_id)
+                flash('Group add successfully.')
+                return redirect(url_for('user'))
+            flash('A group name already exist.')
+    except DatabaseReaderProblem:
+        error_description = DatabaseReaderProblem()
+        flash(error_description)
+        return redirect(url_for('add_group'))
+    except DatabaseWriterError:
+        error_description = DatabaseWriterError()
+        page_not_found(error_description)
+        abort(500, error_description)
+    else:
+        return render_template('add_group.html', form=form)
+
+
+# TODO tu skończone
 
 @app.route('/user/group/<int:group_id>', methods=['GET', 'POST'])
 @login_required

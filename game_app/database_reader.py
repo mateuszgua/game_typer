@@ -50,7 +50,7 @@ class GameReader:
         else:
             return games
 
-    def get_games_by_filter(filter_name, filter):
+    def get_all_games_filter(filter_name, filter):
         match filter_name:
             case "game_phase":
                 game = Game.query.filter_by(game_phase=filter).all()
@@ -61,7 +61,7 @@ class GameReader:
         else:
             return game
 
-    def get_one_game_by_filter(filter_name, filter):
+    def get_one_game_filter(filter_name, filter):
         match filter_name:
             case "id":
                 game = Game.query.filter_by(id=filter).first()
@@ -90,7 +90,7 @@ class GameReader:
 
 class UserReader:
 
-    def get_user(filter_name, filter):
+    def get_one_user_filter(filter_name, filter):
         match filter_name:
             case "id":
                 user = User.query.filter_by(id=filter).first()
@@ -133,6 +133,8 @@ class BetReader:
         match filter_name:
             case "user_id":
                 bets = Bet.query.filter_by(filter).all()
+            case "game_id":
+                bets = Bet.query.filter_by(filter).all()
             case _:
                 bets = None
 
@@ -140,6 +142,46 @@ class BetReader:
             raise DatabaseReaderProblem()
         else:
             return bets
+
+    def get_count_bets_filter(filter_name, filter):
+        match filter_name:
+            case "user_id":
+                bets = Bet.query.filter_by(filter).count()
+            case _:
+                bets = None
+
+        if bets is None:
+            raise DatabaseReaderProblem()
+        else:
+            return bets
+
+    def get_one_bet_filter(filter_name, filter):
+        match filter_name:
+            case "id":
+                bet = Bet.query.filter_by(id=filter).first()
+            case _:
+                bet = None
+
+        if bet is None:
+            raise DatabaseReaderProblem()
+        else:
+            return bet
+
+
+class BetGroupReader:
+
+    def get_one_bet_group_filter(filter_name, filter):
+        match filter_name:
+            case "name":
+                existing_group = BetGroup.query.filter_by(
+                    name=filter).first()
+            case _:
+                existing_group = None
+
+        if existing_group is None:
+            raise DatabaseReaderProblem()
+        else:
+            return existing_group
 
 
 class UserBetGroupReader:
