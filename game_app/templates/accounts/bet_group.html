@@ -85,8 +85,8 @@
                                 <td>{{ last_game.goals_team_1 }} : {{ last_game.goals_team_2 }}</td>
                                 {% for user_bet in users_bets %}
                                 {% if user_bet.user_id == user.user.id %}
-                                <td>{{ user_bet.tip_goals_team_1 }} : {{ user_bet.tip_goals_team_2 }}</td>
-                                <td>{{ user_bet.tip_points }}</td>
+                                <td>{{ user_bet.bet_goals_team_1 }} : {{ user_bet.bet_goals_team_2 }}</td>
+                                <td>{{ user_bet.bet_points }}</td>
                                 {% endif %}
                                 {% endfor %}
                                 <td>{{ user.points }}</td>
