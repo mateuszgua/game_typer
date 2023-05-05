@@ -1,0 +1,147 @@
+{% extends 'layouts/base.html' %}
+
+{% block content %}
+
+{% for message in get_flashed_messages() %}
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+    <symbol id="exclamation-triangle-fill" fill="currentColor" viewBox="0 0 16 16">
+        <path
+            d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
+    </symbol>
+</svg>
+
+<div class="alert alert-warning d-flex align-items-center" role="alert">
+    <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Warning:">
+        <use xlink:href="#exclamation-triangle-fill" />
+    </svg>
+    <div>
+        {{ message }}
+    </div>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{% endfor %}
+
+<div class="row d-flex justify-content-center">
+    <div class="col-8">
+        <span class="title">
+            <h2 class="text-capitalize text-center">{% block title %}Profile {{ user.firstname }} {% endblock %}</h2>
+        </span>
+    </div>
+</div>
+
+<br><br><br>
+<div class="content">
+    <div class="user">
+        <p>Nick: {{ user.nick }}</p>
+    </div>
+</div>
+<a class="btn btn-secondary text-center" href="{{ url_for('user_info') }}" role="button">User Info</a>
+<br><br><br><br>
+
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <div class="card border-info mb-3" style="max-width: 40rem; height: 15rem;">
+                <div class="card-header">Tournaments</div>
+                <div class="card-body">
+                    <h5 class="card-title">Add tournament for bet games:</h5>
+                    <p class="card-text">
+                    <div class="input-group mb-3">
+                        <label class="input-group-text" for="inputGroupSelect01">Tournament</label>
+                        <select class="form-select" id="inputGroupSelect01">
+                            <option selected>World Cup 2022</option>
+                            {% for tournament in tournaments %}
+                            {% if tournament.tournament == "World Cup 2022" %}
+                            <option value="1" disabled>World Cup 2022</option>
+                            {% else %}
+                            <option value="1">World Cup 2022</option>
+                            {% endif %}
+                            <!-- <option value="2">Two</option> -->
+                            <!-- <option value="3">Three</option> -->
+                            {% endfor %}
+                        </select>
+                    </div>
+                    </p>
+                    <form method="POST" action="{{ url_for('load_bets') }}">
+                        <input class="btn btn-success" type="submit" name="load" value="Load bets">
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card border-info mb-3" style="max-width: 40rem; height: 15rem;">
+                <div class="card-header">Bet groups</div>
+                <div class="card-body">
+                    <h5 class="card-title">Add group for invite your friends:</h5>
+                    <p class="card-text">
+                    <div class="input-group mb-3">
+                        <a class="btn btn-success" href="{{ url_for('add_group') }}" role="button">Add group</a>
+                    </div>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<br><br><br>
+
+<nav>
+    <div class="nav nav-tabs" id="nav-tab" role="tablist">
+        <button class="nav-link active" id="nav-home-tab" data-bs-toggle="tab" data-bs-target="#nav-home" type="button"
+            role="tab" aria-controls="nav-home" aria-selected="true">Tournaments</button>
+        <button class="nav-link" id="nav-profile-tab" data-bs-toggle="tab" data-bs-target="#nav-profile" type="button"
+            role="tab" aria-controls="nav-profile" aria-selected="false">Groups</button>
+    </div>
+</nav>
+<div class="tab-content" id="nav-tabContent">
+    <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
+        <br>
+        <h4 class="title text-center">Your tournaments</h4>
+        <br>
+        {% for tournament in tournaments %}
+        <div class="card" style="width: 20rem;">
+            {% for image in image_list %}
+            {% if image == "files/soccer_world_cup_2022.jpg" %}
+            <img src="{{ url_for('static', filename=image)}}" class="card-img-top" alt="Logo" height="160px"
+                width="120px">
+            {% endif %}
+            {% endfor %}
+            <div class="card-body text-center">
+                <h5 class="card-title">{{ tournament.tournament }}</h5>
+                <p class="card-text">User points: {{ user_points }}</p>
+                <a href="{{ url_for('bets') }}" class="btn btn-primary">Go to bets</a>
+            </div>
+        </div>
+        {% endfor %}
+
+    </div>
+    <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
+        <br>
+        <h4 class="title text-center">Your groups</h4>
+        <br>
+        <div class="container">
+            <div class="row">
+                {% for user_group in user_groups %}
+                <div class="col">
+                    <div class="card" style="width: 20rem;">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">{{ user_group.betgroup.name }}</h5>
+                            <a href="{{ url_for('group', group_id=user_group.betgroup.id) }}" class="btn btn-primary">Go
+                                to
+                                group</a>
+                        </div>
+                    </div>
+
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+
+
+{% endblock %}
