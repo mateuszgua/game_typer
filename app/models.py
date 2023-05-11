@@ -1,5 +1,3 @@
-from game_app import database
-
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy import Boolean, DateTime, Column, Integer, String, ForeignKey, UnicodeText, LargeBinary, Date, Time
@@ -10,6 +8,7 @@ from flask_login import current_user
 
 from flask_admin.contrib.sqla import ModelView
 from flask_admin import AdminIndexView
+from app import database
 
 
 class RolesUsers(database.Base):
@@ -42,7 +41,7 @@ class User(UserMixin, database.Base):
                         server_default=func.now(), nullable=False)
     roles = relationship('Role', secondary='roles_users',
                          backref=backref('users', lazy='dynamic'))
-    tip = relationship('Tip', backref='user')
+    bet = relationship('Bet', backref='user')
     tournaments = relationship('UserTournaments', backref='user')
     bet_group = relationship('UserBetGroup', backref='user')
     points = Column(Integer)
@@ -146,15 +145,15 @@ class UserTournaments(database.Base):
     user_id = Column(Integer, ForeignKey('user.id'))
 
 
-class Tip(database.Base):
-    __tablename__ = 'tip'
+class Bet(database.Base):
+    __tablename__ = 'bet'
     id = Column(Integer, primary_key=True)
     game_id = Column(Integer)
     tournament = Column(String(20))
-    tip_goals_team_1 = Column(Integer)
-    tip_goals_team_2 = Column(Integer)
-    tip_points = Column(Integer)
-    tip_lock = Column(Integer)
+    bet_goals_team_1 = Column(Integer)
+    bet_goals_team_2 = Column(Integer)
+    bet_points = Column(Integer)
+    bet_lock = Column(Integer)
     winner = Column(Integer)
     user_id = Column(Integer, ForeignKey('user.id'))
 

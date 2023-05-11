@@ -6,6 +6,7 @@
 
 <br>
 
+{% if last_games is not none %}
 <div class="container">
     <div class="row">
         <div class="col">
@@ -48,7 +49,7 @@
                         <div class="col">
                             <h5 class="card-title text-center">{{ current_game.team_1 }}</h5>
                         </div>
-                        {% if current_game.goals_team_1 == None or current_game.goals_team_2 == None %}
+                        {% if current_game.goals_team_1 == none or current_game.goals_team_2 == none %}
                         <div class="col">
                             <h5 class="card-title text-center"> - : - </h5>
                         </div>
@@ -95,6 +96,9 @@
         </div>
     </div>
 </div>
+{% else %}
+<p>Not exist any tournament</p>
+{% endif %}
 
 <br>
 
@@ -108,6 +112,7 @@
     </div>
 </nav>
 
+{% if group_list[0] is not none %}
 <div class="tab-content" id="nav-tabContent">
     <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
         <div class="container">
@@ -1580,6 +1585,8 @@
     </div>
 
 </div>
-
+{% else %}
+<p>Not any tournament in database.</p>
+{% endif %}
 
 {% endblock %}

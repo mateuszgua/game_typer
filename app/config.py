@@ -13,6 +13,7 @@ DB_NAME = os.getenv('MYSQL_DB_NAME')
 TABLE_NAME = os.getenv('MYSQL_TABLE_NAME')
 url = f"mysql+mysqlconnector://{USERNAME}:{PASSWORD}@{HOST}/{DB_NAME}"
 
+print(url)
 
 class Config:
     SECRET_KEY = os.getenv("SECRET_KEY", default=None)
@@ -23,11 +24,32 @@ class Config:
     SQLALCHEMY_DATABASE_URI = url
 
     STATIC_FOLDER = 'static'
-    UPLOAD_FOLDER = 'game_app/static/files'
+    UPLOAD_FOLDER = 'app/static/files'
     IMG_FOLDER = os.path.join('static', 'files')
     ALLOWED_EXTENSIONS = {'txt', 'png', 'jpg', 'json'}
     TEMPLATES_FOLDER = 'templates'
+
+    ENV = os.getenv('ENV')
     HOST = '0.0.0.0'
     PORT = 5000
+    DEBUG = False
+    TESTING = False
+
+    SESSION_COOKIE_SECURE = True
+
+
+class ProductionConfig(Config):
+    pass
+
+
+class TestingConfig(Config):
     DEBUG = True
     TESTING = True
+
+    SESSION_COOKIE_SECURE = False
+
+
+class DevelopmentConfig(Config):
+    DEBUG = True
+
+    SESSION_COOKIE_SECURE = False

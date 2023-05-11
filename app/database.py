@@ -1,13 +1,9 @@
-from game_app.config import url
-
-import os
-
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import scoped_session, sessionmaker
-
 from sqlalchemy_utils import database_exists, create_database
 
+from app.config import url
 
 engine = create_engine(url, pool_pre_ping=True, echo=True,
                        pool_size=40, max_overflow=0)
@@ -23,5 +19,5 @@ def init_db():
     if not database_exists(engine.url):
         create_database(engine.url)
 
-    import game_app.models
+    import app.models
     Base.metadata.create_all(engine)

@@ -62,8 +62,8 @@
                         </select>
                     </div>
                     </p>
-                    <form method="POST" action="{{ url_for('load_tips') }}">
-                        <input class="btn btn-success" type="submit" name="load" value="Load tips">
+                    <form method="POST" action="{{ url_for('load_bets') }}">
+                        <input class="btn btn-success" type="submit" name="load" value="Load bets">
                     </form>
                 </div>
             </div>
@@ -110,7 +110,7 @@
             <div class="card-body text-center">
                 <h5 class="card-title">{{ tournament.tournament }}</h5>
                 <p class="card-text">User points: {{ user_points }}</p>
-                <a href="{{ url_for('tips') }}" class="btn btn-primary">Go to bets</a>
+                <a href="{{ url_for('bets') }}" class="btn btn-primary">Go to bets</a>
             </div>
         </div>
         {% endfor %}
